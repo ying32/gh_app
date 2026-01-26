@@ -1,10 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fui;
 import 'package:flutter/material.dart';
+import 'package:gh_app/fonts/remix_icon.dart';
+import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/helpers.dart';
+import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
 import 'package:go_router/go_router.dart';
-import 'package:remixicon/remixicon.dart';
 import 'package:url_launcher/link.dart';
 
 class UserHeadNameWidget extends StatelessWidget {
@@ -28,25 +30,29 @@ class UserHeadNameWidget extends StatelessWidget {
     return Row(
       children: [
         if (avatarUrl != null)
-          ClipOval(
-            child: CachedNetworkImage(
-              imageUrl: avatarUrl!,
-              fit: BoxFit.cover,
-              width: imageSize,
-              errorWidget: (_, __, ___) =>
-                  Icon(Remix.github_fill, size: imageSize),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
+            child: ClipOval(
+              child: CachedNetworkImage(
+                imageUrl: avatarUrl!,
+                fit: BoxFit.cover,
+                width: imageSize,
+                errorWidget: (_, __, ___) =>
+                    Icon(Remix.github_fill, size: imageSize),
+              ),
             ),
           ),
-        const SizedBox(width: 5.0),
         Link(
           uri: Uri.parse(htmlUrl ?? ''),
           builder: (context, open) => Semantics(
             link: true,
-            child: TextButton(
-                onPressed: open,
-                child: Text(
+            child: LinkStyleButton(
+                onPressed: () => open?.call(),
+                text: Text(
                   "$login${name != null && name!.isNotEmpty ? "($name)" : ''}",
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: appTheme.color.lightest),
                 )),
           ),
         )
@@ -104,14 +110,30 @@ class UserLineInfo extends StatelessWidget {
     super.key,
     required this.icon,
     required this.value,
+    this.isLink = false,
+    this.isEmail = false,
   });
 
   final IconData? icon;
   final dynamic value;
+  final bool isLink;
+  final bool isEmail;
 
   Widget _build(Widget child) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: child,
+        child: isLink && value is String
+            ? Link(
+                uri: Uri.parse(isEmail ? "mailto:$value" : value),
+                builder: (context, open) => Semantics(
+                  link: true,
+                  child: LinkStyleButton(
+                    onPressed: () => open?.call(),
+                    text: child,
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+              )
+            : child,
       );
 
   @override
@@ -119,19 +141,11 @@ class UserLineInfo extends StatelessWidget {
     if (value == null) return const SizedBox.shrink();
     if (value is Widget) {
       if (icon == null) return _build(value);
-      return _build(Row(children: [
-        Icon(icon!, size: 16),
-        const SizedBox(width: 8.0),
-        value
-      ]));
+      return _build(IconText(icon: icon!, text: value));
     } else {
       Widget child = Text("$value");
       if (icon == null) return child;
-      return _build(Row(children: [
-        Icon(icon!, size: 16),
-        const SizedBox(width: 8.0),
-        child
-      ]));
+      return _build(IconText(icon: icon!, text: child));
     }
   }
 }
@@ -234,9 +248,15 @@ class UserInfoPanel extends StatelessWidget {
             ],
           ),
         ),
+        UserLineInfo(icon: Remix.organization_chart, value: user?.company),
+        UserLineInfo(icon: Remix.twitter_line, value: user?.twitterUsername),
         UserLineInfo(icon: Remix.map_pin_line, value: user?.location),
-        UserLineInfo(icon: Remix.mail_line, value: user?.email),
-        UserLineInfo(icon: Remix.links_line, value: user?.blog),
+        UserLineInfo(
+            icon: Remix.mail_line,
+            value: user?.email,
+            isLink: true,
+            isEmail: true),
+        UserLineInfo(icon: Remix.links_line, value: user?.blog, isLink: true),
         // if (user?.blog != null && user!.blog!.isNotEmpty)
         //   UserLineInfo(
         //       icon: Remix.links_line,
@@ -251,7 +271,7 @@ class UserInfoPanel extends StatelessWidget {
         //               )),
         //         ),
         //       )),
-        // UserLineDiskUseInfo(value: user?.diskUsage),
+        UserLineDiskUseInfo(value: user?.diskUsage),
         const SizedBox(height: 8.0),
       ],
     );

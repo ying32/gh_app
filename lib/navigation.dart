@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/pages/login.dart';
 import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
@@ -7,10 +8,8 @@ import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/window_buttons.dart';
-import 'package:github/github.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:remixicon/remixicon.dart';
 import 'package:url_launcher/link.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -28,6 +27,15 @@ class NavigationPage extends StatefulWidget {
   State<NavigationPage> createState() => _NavigationPageState();
 }
 
+class _PaneItemIcon extends StatelessWidget {
+  const _PaneItemIcon(this.icon);
+  final IconData icon;
+  @override
+  Widget build(BuildContext context) {
+    return Icon(icon, size: 18);
+  }
+}
+
 class _NavigationPageState extends State<NavigationPage> with WindowListener {
   bool value = false;
 
@@ -39,25 +47,25 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
   late final List<NavigationPaneItem> originalItems = [
     PaneItem(
       key: const ValueKey('/'),
-      icon: const Icon(FluentIcons.home),
+      icon: const _PaneItemIcon(Remix.home_line),
       title: const Text('主页'),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/issues'),
-      icon: const Icon(FluentIcons.issue_tracking),
+      icon: const _PaneItemIcon(Remix.issues_line),
       title: const Text('问题'),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/pulls'),
-      icon: const Icon(FluentIcons.branch_pull_request),
+      icon: const _PaneItemIcon(Remix.git_pull_request_line),
       title: const Text('合并请求'),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
       key: const ValueKey('/repos'),
-      icon: const Icon(FluentIcons.repo),
+      icon: const _PaneItemIcon(Remix.git_repository_line),
       title: const Text('仓库'),
       body: const SizedBox.shrink(),
     ),
@@ -78,13 +86,13 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
     PaneItemSeparator(),
     PaneItem(
       key: const ValueKey('/settings'),
-      icon: const Icon(FluentIcons.settings),
+      icon: const _PaneItemIcon(Remix.settings_line),
       title: const Text('设置'),
       body: const SizedBox.shrink(),
       onTap: () => pushRoute(context, '/settings'),
     ),
     _LinkPaneItemAction(
-      icon: const Icon(FluentIcons.open_source),
+      icon: const _PaneItemIcon(FluentIcons.open_source),
       title: const Text('源代码'),
       link: 'https://github.com/ying32/gh_app',
       body: const SizedBox.shrink(),
@@ -196,15 +204,33 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
           );
         }(),
         actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          // 这里弄一个用户信息的
           FutureBuilder(
             future: GithubCache.instance.currentUser,
-            builder: (_, AsyncSnapshot<CurrentUser?> snapshot) {
+            builder: (_, snapshot) {
               if (!snapshotIsOk(snapshot)) {
                 return const SizedBox.shrink();
                 //return const Center(child: ProgressRing());
               }
               return CurrentUserHeadName(user: snapshot.data, imageSize: 48);
             },
+          ),
+          Align(
+            alignment: AlignmentDirectional.centerEnd,
+            child: Padding(
+              padding: const EdgeInsetsDirectional.only(end: 8.0),
+              child: ToggleSwitch(
+                content: const Text('深色模式'),
+                checked: FluentTheme.of(context).brightness.isDark,
+                onChanged: (v) {
+                  if (v) {
+                    appTheme.mode = ThemeMode.dark;
+                  } else {
+                    appTheme.mode = ThemeMode.light;
+                  }
+                },
+              ),
+            ),
           ),
           const WindowButtons(),
         ]),

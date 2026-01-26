@@ -47,8 +47,12 @@ String timeToLabel(DateTime? dateTime) {
   };
 }
 
-bool snapshotIsOk<T>(fui.AsyncSnapshot<T> snapshot, [bool checkData = true]) {
+bool snapshotIsOk<T>(
+  fui.AsyncSnapshot<T> snapshot, [
+  bool checkData = true,
+  bool checkError = true,
+]) {
   return snapshot.connectionState == fui.ConnectionState.done &&
       (checkData ? snapshot.hasData : true) &&
-      !snapshot.hasError;
+      (checkError ? !snapshot.hasError : true);
 }

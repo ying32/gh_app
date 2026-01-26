@@ -6,13 +6,11 @@ class WindowButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final FluentThemeData theme = FluentTheme.of(context);
-
     return SizedBox(
       width: 138,
       height: 50,
       child: WindowCaption(
-        brightness: theme.brightness,
+        brightness: FluentTheme.of(context).brightness,
         backgroundColor: Colors.transparent,
       ),
     );

@@ -1,15 +1,18 @@
+import 'package:file_icon/file_icon.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/highlight_plus.dart';
+import 'package:gh_app/widgets/markdown.dart';
+import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
-import 'package:remixicon/remixicon.dart';
 
 /// 仓库目录列表
 class _RepoContents extends StatelessWidget {
-  const _RepoContents({
+  const _RepoContents(
+    this.repo, {
     super.key,
-    required this.repo,
     this.path = "/",
     required this.onPathChange,
   });
@@ -21,9 +24,14 @@ class _RepoContents extends StatelessWidget {
   String get _checkedPath => path.isEmpty ? "/" : path;
 
   Widget _buildItem(GitHubFile file) {
+    final isFile = file.type == "file";
     return ListTile(
-      leading: Icon(file.type == "file" ? Remix.file_4_line : Remix.folder_fill,
-          size: 16),
+      leading: SizedBox(
+        width: 24,
+        child: isFile
+            ? FileIcon(file.name ?? '', size: 24)
+            : Icon(Remix.folder_fill, color: Colors.blue.lighter),
+      ),
       title: Text(file.name ?? ''),
       // trailing: Text(timeToLabel(e.)),
       // trailing: Text(file.sha ?? ''),
@@ -35,97 +43,161 @@ class _RepoContents extends StatelessWidget {
       ),
       onPressed: () {
         onPathChange.call("/${file.path}");
-        print("path=$_checkedPath, file.path=${file.path}");
+        // print("path=$_checkedPath, file.path=${file.path}");
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: GithubCache.instance.repoContents(repo, _checkedPath),
-      builder: (_, snapshot) {
-        if (!snapshotIsOk(snapshot, false)) {
-          return const Center(child: ProgressRing());
-        }
-        final contents = snapshot.data;
-        if (contents == null) {
-          return const SizedBox.shrink();
-        }
-        // 如果数据是文件，则显示内容
-        if (contents.isFile) {
-          print(
-              "file encoding=${contents.file?.encoding}, type=${contents.file?.type}");
-
-          try {
-            return Text(contents.file?.text ?? '');
-          } catch (e) {
-            return Text("Error: $e");
+    return SizedBox(
+      width: double.infinity,
+      child: FutureBuilder(
+        future: GithubCache.instance.repoContents(repo, _checkedPath),
+        builder: (_, snapshot) {
+          if (!snapshotIsOk(snapshot, false)) {
+            return const Center(child: ProgressRing());
           }
-        }
-        //
-        if (!contents.isDirectory || contents.tree == null) {
-          return const SizedBox.shrink();
-        }
-        // 返回目录结构
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...contents.tree!
-                .where((e) => e.type == "dir")
-                .map((e) => _buildItem(e)),
-            ...contents.tree!
-                .where((e) => e.type == "file")
-                .map((e) => _buildItem(e)),
-          ],
-        );
-      },
+          final contents = snapshot.data;
+          if (contents == null) {
+            return const SizedBox.shrink();
+          }
+          // 如果数据是文件，则显示内容
+          if (contents.isFile) {
+            print(
+                "file encoding=${contents.file?.encoding}, type=${contents.file?.type}");
+
+            try {
+              return HighlightViewPlus(
+                contents.file?.text ?? '',
+                fileName: contents.file?.name ?? '',
+              );
+              // return Text(contents.file?.text ?? '');
+            } catch (e) {
+              return Text("Error: $e");
+            }
+          }
+          //
+          if (!contents.isDirectory || contents.tree == null) {
+            return const SizedBox.shrink();
+          }
+          // 返回目录结构
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...contents.tree!
+                  .where((e) => e.type == "dir")
+                  .map((e) => _buildItem(e)),
+              ...contents.tree!
+                  .where((e) => e.type == "file")
+                  .map((e) => _buildItem(e)),
+            ],
+          );
+        },
+      ),
     );
   }
 }
 
 /// README文件
 class _RepoReadMe extends StatelessWidget {
-  const _RepoReadMe({
+  const _RepoReadMe(
+    this.repo, {
     super.key,
-    required this.repo,
   });
 
   final Repository repo;
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<GitHubFile?>(
+    return FutureBuilder(
       future: GithubCache.instance.repoReadMe(repo),
       builder: (_, snapshot) {
-        if (!snapshotIsOk(snapshot)) {
+        if (!snapshotIsOk(snapshot, false, false)) {
           return const SizedBox.shrink();
         }
-        return Card(child: MarkdownBody(data: snapshot.data?.text ?? ''));
+        final body = snapshot.data ?? '';
+        return Card(
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const IconText(
+                      icon: Remix.book_open_line, text: Text('README')),
+                  const SizedBox(width: 12.0),
+                  IconText(
+                      icon: Remix.scales_line,
+                      text: Text(repo.license?.name ?? '')),
+                ],
+              ),
+              if (body.isNotEmpty) MarkdownBlockPlus(data: body),
+            ],
+          ),
+        );
       },
     );
   }
 }
 
+/// 关于
 class _RepoAbout extends StatelessWidget {
-  const _RepoAbout({super.key, required this.repo});
+  const _RepoAbout(this.repo, {super.key});
 
   final Repository repo;
 
   @override
   Widget build(BuildContext context) {
+    const padding = EdgeInsets.symmetric(horizontal: 2, vertical: 8);
     return Column(
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('关于'),
-        Text(repo.description),
-        const Text('Readme'),
-        Text('${repo.stargazersCount}点赞'),
-        Text('${repo.watchersCount}关注'),
-        Text('${repo.forksCount}分叉'),
+        const Padding(
+          padding: padding,
+          child: Text(
+            '关于',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Padding(
+          padding: padding,
+          child: Text(repo.description),
+        ),
+
+        // blog
+        if (repo.homepage.isNotEmpty)
+          IconText(
+              icon: Remix.links_line,
+              padding: padding,
+              text: Text(repo.homepage)),
+
+        // tags
+
+        const IconText(
+            icon: Remix.book_open_line, padding: padding, text: Text('Readme')),
+        if (repo.license?.name != null)
+          IconText(
+              icon: Remix.scales_line,
+              padding: padding,
+              text: Text(
+                repo.license!.name!,
+                overflow: TextOverflow.ellipsis,
+              )),
+        // Activity
+        IconText(
+            icon: Remix.star_line,
+            padding: padding,
+            text: Text('${repo.stargazersCount}个点赞')),
+        IconText(
+            icon: Remix.eye_line,
+            padding: padding,
+            text: Text('${repo.watchersCount}个关注')),
+        IconText(
+            icon: Remix.git_fork_line,
+            padding: padding,
+            text: Text('${repo.forksCount}个分叉')),
       ],
     );
   }
@@ -166,7 +238,7 @@ class _RepoPageState extends State<RepoPage> {
   }
 
   List<String> get _segmentedPaths {
-    if (_currentPath.isEmpty || _currentPath == "/") return [];
+    if (_currentPath.isEmpty || _currentPath == "/") return [""];
     final arr = _currentPath.split("/");
     return arr;
   }
@@ -178,117 +250,201 @@ class _RepoPageState extends State<RepoPage> {
 
     return ScaffoldPage(
       header: PageHeader(
-        title: Text(widget.repo.fullName),
-        commandBar:
-            const Row(mainAxisAlignment: MainAxisAlignment.end, children: []),
+        title: Row(
+          children: [
+            Text(widget.repo.fullName),
+            if (_repo.isPrivate)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: Icon(Remix.git_repository_private_line),
+              ),
+            if (_repo.archived)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: TagLabel(
+                    color: Colors.orange,
+                    text: Text(
+                      '已归档 ',
+                      style: TextStyle(fontSize: 11, color: Colors.orange),
+                    )),
+              ),
+          ],
+        ),
       ),
-      content: ListView(
+      content: Padding(
         padding: EdgeInsetsDirectional.only(
           bottom: kPageDefaultVerticalPadding,
           start: PageHeader.horizontalPadding(context),
           end: PageHeader.horizontalPadding(context),
         ),
-        children: [
-          Card(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-              decoration: BoxDecoration(
-                color: Colors.grey.withAlpha(28),
-                border: Border.all(color: Colors.grey.withAlpha(28)),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Text(
-                '${_repo.isPrivate ? '私有' : '公开'}${_repo.archived ? " 已归档" : ""}',
-                style: const TextStyle(
-                  fontSize: 11,
+        child: Column(
+          children: [
+            // const SizedBox(height: 8.0),
+            const Divider(size: 1),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Card(
+                child: Row(
+                  children: [
+                    // Title(
+                    //     color: appTheme.color.lightest, child: Text(_repo.name)),
+                    const Spacer(),
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(horizontal: 4),
+                    //   child: Button(
+                    //     child: const IconText(
+                    //       icon: Remix.layout_top_fill,
+                    //       text:  Text('Pin/UnPin'),
+                    //     ),
+                    //     onPressed: () => debugPrint('pressed button'),
+                    //   ),
+                    // ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Button(
+                        child: const IconText(
+                          icon: Remix.eye_line,
+                          text: Text('关注/取消关注'),
+                        ),
+                        onPressed: () => debugPrint('pressed button'),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Button(
+                        onPressed: _repo.isFork
+                            ? null
+                            : () => debugPrint('pressed button'),
+                        child: const IconText(
+                          icon: Remix.git_fork_line,
+                          text: Text('分叉'),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Button(
+                        child: const IconText(
+                          icon: Remix.star_line,
+                          text: Text('点赞'),
+                        ),
+                        onPressed: () => debugPrint('pressed button'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8.0),
-          const Divider(size: 1),
-          const SizedBox(height: 8.0),
-          Row(
-            children: [
-              DropDownButton(
-                title: Row(
-                  children: [
-                    const Icon(Remix.git_branch_line, size: 16),
-                    const SizedBox(width: 8.0),
-                    Text(_repo.defaultBranch)
-                  ],
-                ),
-                items: [
-                  MenuFlyoutItem(text: const Text('Send'), onPressed: () {}),
-                  const MenuFlyoutSeparator(),
-                  MenuFlyoutItem(text: const Text('Reply'), onPressed: () {}),
-                  MenuFlyoutItem(
-                      text: const Text('Reply all'), onPressed: () {}),
+            Card(
+              child: Row(
+                children: [
+                  DropDownButton(
+                    title: IconText(
+                        icon: Remix.git_branch_line,
+                        text: Text(_repo.defaultBranch)),
+                    items: [
+                      MenuFlyoutItem(
+                          text: const Text('Send'), onPressed: () {}),
+                      const MenuFlyoutSeparator(),
+                      MenuFlyoutItem(
+                          text: const Text('Reply'), onPressed: () {}),
+                      MenuFlyoutItem(
+                          text: const Text('Reply all'), onPressed: () {}),
+                    ],
+                  ),
+                  const SizedBox(width: 10.0),
+                  HyperlinkButton(
+                    onPressed: () {},
+                    child: const IconText(
+                        icon: Remix.git_branch_line, text: Text("1")),
+                  ),
+                  const SizedBox(width: 10.0),
+                  HyperlinkButton(
+                    onPressed: () {},
+                    child: const IconText(
+                        icon: Remix.price_tag_line, text: Text("0")),
+                  ),
+                  const Spacer(),
+                  FilledButton(
+                    style: ButtonStyle(
+                      backgroundColor: ButtonState.all(Colors.green),
+                      // foregroundColor: ButtonState.all(Colors.white),
+                      textStyle: ButtonState.all(
+                          const TextStyle(color: Colors.white)), //????
+                    ),
+                    child: const IconText(
+                        icon: Remix.code_line,
+                        text: Text('代码'),
+                        trailing: Icon(Remix.arrow_drop_down_fill, size: 16)),
+                    onPressed: () {},
+                  )
                 ],
               ),
-              const SizedBox(width: 10.0),
-              const Icon(Remix.git_branch_line, size: 16),
-              const Text("1"), // 分支数，待写
-              const SizedBox(width: 10.0),
-              const Icon(Remix.price_tag_line, size: 16),
-              const Text("0"), // 分支数，待写
-              const Spacer(),
-              FilledButton(
-                child: const Row(
-                  children: [
-                    Icon(Remix.code_line, size: 16),
-                    SizedBox(width: 5),
-                    Text('代码'),
-                    SizedBox(width: 5),
-                    Icon(Remix.arrow_drop_down_fill, size: 16),
-                  ],
-                ),
-                onPressed: () {},
-              )
-            ],
-          ),
-          const SizedBox(height: 8.0),
-          BreadcrumbBar(
-            items: _segmentedPaths
-                .map((e) => BreadcrumbItem(
-                    label: Text(e.isEmpty ? _repo.name : e), value: e))
-                .toList(),
-            onItemPressed: (item) {
-              final key = "/${item.value}";
-              final pos = _currentPath.indexOf(key);
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Card(
+                child: BreadcrumbBar(
+                  items: _segmentedPaths
+                      .map((e) => BreadcrumbItem(
+                          label: Text(e.isEmpty ? _repo.name : e), value: e))
+                      .toList(),
+                  onItemPressed: (item) {
+                    final key = "/${item.value}";
+                    final pos = _currentPath.indexOf(key);
 
-              if (pos != -1) {
-                _setCurrentPath(_currentPath.substring(0, pos + key.length));
-              }
-            },
-          ),
-          const SizedBox(height: 8.0),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    if (pos != -1) {
+                      _setCurrentPath(
+                          _currentPath.substring(0, pos + key.length));
+                    }
+                  },
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView(
+                // padding: EdgeInsetsDirectional.only(
+                //   bottom: kPageDefaultVerticalPadding,
+                //   start: PageHeader.horizontalPadding(context),
+                //   end: PageHeader.horizontalPadding(context),
+                // ),
+                children: [
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Card(
-                          child: _RepoContents(
-                        repo: _repo,
-                        path: _currentPath,
-                        onPathChange: _onContentPathChange,
-                      )),
-                      const SizedBox(height: 8.0),
-                      // readme，只有根目录下才显示README？或者文件中有就显示？
-                      if (_currentPath == "/") _RepoReadMe(repo: _repo),
-                    ]),
+                      Expanded(
+                        // flex: 4,
+                        child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Card(
+                                  child: _RepoContents(
+                                _repo,
+                                path: _currentPath,
+                                onPathChange: _onContentPathChange,
+                              )),
+                              const SizedBox(height: 8.0),
+                              // readme，只有根目录下才显示README？或者文件中有就显示？
+                              if (_currentPath == "/") _RepoReadMe(_repo),
+                            ]),
+                      ),
+                      // Expanded(child: )),
+                      const SizedBox(width: 8.0),
+                      // 右边
+
+                      SizedBox(
+                        width: 300,
+                        child: Card(child: _RepoAbout(_repo)),
+                      )
+                      //  Expanded(flex: 1, child: Card(child: _RepoAbout(_repo))),
+                    ],
+                  ),
+                ],
               ),
-              // Expanded(child: )),
-              const SizedBox(width: 8.0),
-              // 右边
-              Card(child: _RepoAbout(repo: _repo)),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

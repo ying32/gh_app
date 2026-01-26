@@ -24,6 +24,8 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool get isDark => _mode == ThemeMode.dark;
+
   String? _fontFamily = Platform.isWindows ? '微软雅黑' : null;
   String? get fontFamily => _fontFamily;
   set fontFamily(String? value) {

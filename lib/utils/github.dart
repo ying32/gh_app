@@ -1,5 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:gh_app/utils/utils.dart';
 import 'package:github/github.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
 /// 全局的github实例
 GitHub? github;
@@ -61,7 +66,7 @@ class GithubCache {
   final Map<String, List<Repository>> _repos = {};
 
   /// README缓存 key=owner/name
-  final Map<String, GitHubFile> _readmes = {};
+  final Map<String, String> _readmes = {};
 
   /// 目录结构缓存 key=owner/name/path
   final Map<String, RepositoryContents> _contents = {};
@@ -69,6 +74,10 @@ class GithubCache {
   /// 当前user信息
   Future<CurrentUser?> get currentUser async =>
       _currentUser ??= await github?.users.getCurrentUser();
+
+  /// 缓存根目录
+  Future<String> get cacheRoot async =>
+      p.join((await getApplicationSupportDirectory()).path, "RepoCaches");
 
   /// 获取仓库列表信息
   Future<List<Repository>?> userRepos(String owner) async {
@@ -87,15 +96,19 @@ class GithubCache {
   }
 
   /// README缓存
-  Future<GitHubFile?> repoReadMe(Repository repo) async {
+  Future<String?> repoReadMe(Repository repo) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
     if (_readmes.containsKey(slug.fullName)) {
       return _readmes[slug.fullName];
     }
-    final file = await github?.repositories.getReadme(slug);
-    if (file != null) {
-      _readmes[slug.fullName] = file;
-      return file;
+    try {
+      final file = await github?.repositories.getReadme(slug);
+      if (file != null) {
+        _readmes[slug.fullName] = file.text;
+        return file.text;
+      }
+    } catch (e) {
+      _readmes[slug.fullName] = '';
     }
     return null;
   }
@@ -103,16 +116,34 @@ class GithubCache {
   /// 目录内容缓存
   Future<RepositoryContents?> repoContents(Repository repo, String path) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
+
     final key = "${slug.fullName}$path";
     if (_contents.containsKey(key)) {
       return _contents[key];
     }
     final content = await github?.repositories.getContents(slug, path);
     if (content != null) {
+      // 如果是文件，则不保存在内存缓存中，直接写入磁盘
+      if (content.isFile) {
+        // 先放这吧
+        // _writeCacheFile(slug, content.file);
+      }
       _contents[key] = content;
       return content;
     }
     return null;
+  }
+
+  Future _writeCacheFile(RepositorySlug slug, GitHubFile? file) async {
+    if (file == null || file.path == null) return;
+    final cacheFile = File(p.join(await cacheRoot, slug.owner, slug.name,
+        file.path?.replaceAll('/', Platform.pathSeparator)));
+    if (await cacheFile.exists()) return;
+    await cacheFile.create(recursive: true);
+    // file.encoding 要判断编码，目前只知道base64
+    return cacheFile.writeAsBytesSync(
+        base64Decode(file.content!.replaceAll("\n", "")),
+        flush: true);
   }
 }
 

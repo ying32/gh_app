@@ -1,10 +1,138 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/router.dart';
+import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/page.dart';
+import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
-import 'package:remixicon/remixicon.dart';
+
+class _RepoListItem extends StatelessWidget {
+  const _RepoListItem(this.repo);
+
+  final Repository repo;
+
+  @override
+  Widget build(BuildContext context) {
+    const padding = EdgeInsets.symmetric(horizontal: 6);
+    //final theme = FluentTheme.of(context);
+    return Card(
+      // child: DefaultTextStyle(
+      //   style: TextStyle(color: appTheme.color.lightest),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // Text("${item.owner?.login ?? ''}/${item.name}"),
+              // 仓库所有者和仓库名
+              // HyperlinkButton(
+              //   onPressed: () {
+              //     pushRoute(context, '/repo', extra: repo);
+              //   },
+              //   child: Text("${repo.owner?.login ?? ''}/${repo.name}"),
+              // ),
+
+              LinkStyleButton(
+                onPressed: () {
+                  pushRoute(context, '/repo', extra: repo);
+                },
+                text: Text(
+                  "${repo.owner?.login ?? ''}/${repo.name}",
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 8.0),
+              // 公开或者私有
+              repo.isPrivate
+                  ? const TagLabel.private()
+                  : const TagLabel.public(),
+              // 是否归档
+              if (repo.archived)
+                const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: TagLabel.archived()),
+            ],
+          ),
+
+          // 描述
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              repo.description,
+              style: TextStyle(color: appTheme.color.lightest),
+            ),
+          ),
+
+          //Text('${item.tagsUrl}'),
+
+          Row(
+            children: [
+              // 语言的一个圆，颜色还要待弄下哈
+              ClipOval(
+                child:
+                    Container(width: 10.0, height: 10.0, color: Colors.green),
+              ),
+              // 语言
+              Padding(
+                  padding: padding,
+                  child: Text(repo.language,
+                      style: TextStyle(color: appTheme.color.lightest))),
+              // 授权协议
+              if (repo.license?.name != null) ...[
+                IconText(
+                    icon: Remix.scales_line,
+                    padding: padding,
+                    iconColor: appTheme.color.lightest,
+                    text: Text(repo.license!.name!,
+                        style: TextStyle(color: appTheme.color.lightest))),
+              ],
+              // fork数
+              HyperlinkButton(
+                onPressed: () {},
+                child: IconText(
+                    icon: Remix.git_fork_line,
+                    // padding: padding,
+                    text: Text('${repo.forks ?? 0}')),
+              ),
+              // 关注数
+              HyperlinkButton(
+                onPressed: () {},
+                child: IconText(
+                    icon: Remix.star_line,
+                    // padding: padding,
+                    text: Text('${repo.stargazersCount}')),
+              ),
+              // 当前打开的issue数
+              HyperlinkButton(
+                onPressed: () {},
+                child: IconText(
+                    icon: Remix.issues_line,
+                    // padding: padding,
+                    text: Text('${repo.openIssuesCount}')),
+              ),
+              // 最后更新时间
+              Padding(
+                padding: padding,
+                child: Text(timeToLabel(repo.updatedAt),
+                    style: TextStyle(color: appTheme.color.lightest)),
+              ),
+            ],
+          ),
+        ],
+        // ),
+      ),
+    );
+  }
+}
 
 class _RepoListView extends StatelessWidget {
   const _RepoListView({
@@ -16,6 +144,8 @@ class _RepoListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const padding = EdgeInsets.symmetric(horizontal: 6);
+
     return ListView.separated(
       itemCount: repos.length,
       // controller: scrollController,
@@ -26,75 +156,7 @@ class _RepoListView extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final repo = repos[index];
-        return Card(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Text("${item.owner?.login ?? ''}/${item.name}"),
-                  HyperlinkButton(
-                    onPressed: () {
-                      //  context.go('/navigation_view');
-                      pushRoute(context, '/repo', extra: repo);
-                    },
-                    child: Text("${repo.owner?.login ?? ''}/${repo.name}"),
-                  ),
-
-                  const SizedBox(width: 8.0),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withAlpha(28),
-                      border: Border.all(color: Colors.grey.withAlpha(28)),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      '${repo.isPrivate ? '私有' : '公开'}${repo.archived ? " 已归档" : ""}',
-                      style: const TextStyle(
-                        fontSize: 11,
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(height: 8.0),
-              Text(repo.description),
-              const SizedBox(height: 8.0),
-              //Text('${item.tagsUrl}'),
-
-              Row(
-                children: [
-                  ClipOval(
-                    child: Container(
-                        width: 10.0, height: 10.0, color: Colors.green),
-                  ),
-                  const SizedBox(width: 8.0),
-                  Text(repo.language),
-                  const SizedBox(width: 8.0),
-                  if (repo.license?.name != null) ...[
-                    // const Icon(FluentIcons.lic, size: 16.0),
-                    Text(repo.license!.name!),
-                  ],
-                  const SizedBox(width: 8.0),
-                  const Icon(Remix.git_fork_line, size: 16.0),
-                  Text('${repo.forks ?? 0}'),
-                  const SizedBox(width: 8.0),
-                  const Icon(Remix.star_line, size: 16.0),
-                  Text('${repo.stargazersCount ?? 0}'),
-                  const SizedBox(width: 8.0),
-                  const Icon(Remix.info_i, size: 16.0),
-                  Text('${repo.openIssuesCount}'),
-                  const SizedBox(width: 8.0),
-                  Text(timeToLabel(repo.updatedAt)),
-                ],
-              ),
-            ],
-          ),
-        );
+        return _RepoListItem(repo);
       },
       separatorBuilder: (BuildContext context, int index) => const SizedBox(
           height: 2), // Divider(size: 1, direction: Axis.horizontal),
