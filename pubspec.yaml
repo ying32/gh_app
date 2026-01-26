@@ -61,6 +61,9 @@ dependencies:
   shared_preferences: ^2.3.3
   remixicon: ^1.2.0
   cached_network_image: any
+  #flutter_markdown: ^0.7.3+2
+  markdown_widget: ^2.3.2+6
+
 
 dev_dependencies:
   flutter_test:

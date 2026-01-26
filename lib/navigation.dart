@@ -1,10 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gh_app/pages/login.dart';
 import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/window_buttons.dart';
 import 'package:github/github.dart';
 import 'package:go_router/go_router.dart';
@@ -90,21 +91,10 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
     ),
   ];
 
-  CurrentUser? _currentUser;
-
   @override
   void initState() {
     windowManager.addListener(this);
     super.initState();
-    _init();
-  }
-
-  Future<void> _init() async {
-    _currentUser = await github?.users.getCurrentUser();
-    if (mounted) {
-      setState(() {});
-    }
-    print(_currentUser?.toJson());
   }
 
   @override
@@ -195,46 +185,28 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
           );
         }(),
         title: () {
-          if (kIsWeb) {
-            return const Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(appTitle),
-            );
-          }
           return const DragToMoveArea(
             child: Align(
               alignment: AlignmentDirectional.centerStart,
-              child: Text(appTitle),
+              child: Text(
+                appTitle,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              ),
             ),
           );
-          // return const DragToMoveArea(
-          //   child: Align(
-          //       alignment: AlignmentDirectional.centerStart,
-          //       child: Row(
-          //         children: [
-          //           Icon(RemixIcons.github_fill, size: 28),
-          //           SizedBox(width: 10),
-          //           Text(appTitle),
-          //         ],
-          //       )),
-          // );
         }(),
-        actions: const Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          // Align(
-          //   alignment: AlignmentDirectional.centerEnd,
-          //   child: Padding(
-          //     padding: const EdgeInsetsDirectional.only(end: 8.0),
-          //     child: ComboBox(
-          //       value: appTheme.mode,
-          //       items: ThemeMode.values
-          //           .map((e) => ComboBoxItem(
-          //               value: e, child: Text(themeModeStrings[e.index])))
-          //           .toList(),
-          //       onChanged: (mode) => setState(() => appTheme.mode = mode!),
-          //     ),
-          //   ),
-          // ),
-          if (!kIsWeb) WindowButtons(),
+        actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+          FutureBuilder(
+            future: GithubCache.instance.currentUser,
+            builder: (_, AsyncSnapshot<CurrentUser?> snapshot) {
+              if (!snapshotIsOk(snapshot)) {
+                return const SizedBox.shrink();
+                //return const Center(child: ProgressRing());
+              }
+              return CurrentUserHeadName(user: snapshot.data, imageSize: 48);
+            },
+          ),
+          const WindowButtons(),
         ]),
       ),
       paneBodyBuilder: (item, child) {

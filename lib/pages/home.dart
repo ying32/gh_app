@@ -1,4 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/widgets/user_widgets.dart';
+import 'package:github/github.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,15 +22,24 @@ class _HomePageState extends State<HomePage> {
     final theme = FluentTheme.of(context);
 
     return ScaffoldPage.scrollable(
-      header: const PageHeader(
-        title: Text('仪表盘（Dashboard）'),
-        commandBar: Row(mainAxisAlignment: MainAxisAlignment.end, children: []),
-      ),
-      children: const [
+      // header: const PageHeader(
+      //   title: Text('仪表盘（Dashboard）'),
+      //   commandBar: Row(mainAxisAlignment: MainAxisAlignment.end, children: []),
+      // ),
+      children: [
+        // const Card(child: Text('hello')),
         Card(
-          child: Text('hello'),
+          child: FutureBuilder(
+            future: GithubCache.instance.currentUser,
+            builder: (_, AsyncSnapshot<CurrentUser?> snapshot) {
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const Center(child: ProgressRing());
+              }
+              return UserInfoPanel(user: snapshot.data);
+            },
+          ),
         ),
-        SizedBox(height: 22.0),
+        const SizedBox(height: 22.0),
       ],
     );
   }

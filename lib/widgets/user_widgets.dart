@@ -28,17 +28,16 @@ class UserHeadNameWidget extends StatelessWidget {
     return Row(
       children: [
         if (avatarUrl != null)
-          CachedNetworkImage(
-            imageUrl: avatarUrl!,
-            fit: BoxFit.cover,
-            width: imageSize,
-          )
-        else
-          const Icon(
-            Remix.github_fill,
-            size: 32,
+          ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: avatarUrl!,
+              fit: BoxFit.cover,
+              width: imageSize,
+              errorWidget: (_, __, ___) =>
+                  Icon(Remix.github_fill, size: imageSize),
+            ),
           ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 5.0),
         Link(
           uri: Uri.parse(htmlUrl ?? ''),
           builder: (context, open) => Semantics(
@@ -46,9 +45,8 @@ class UserHeadNameWidget extends StatelessWidget {
             child: TextButton(
                 onPressed: open,
                 child: Text(
-                  "$login${name != null && name!.isNotEmpty ? "${(name)}" : ''}",
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w600),
+                  "$login${name != null && name!.isNotEmpty ? "($name)" : ''}",
+                  style: const TextStyle(fontWeight: FontWeight.w500),
                 )),
           ),
         )
