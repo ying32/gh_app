@@ -58,14 +58,14 @@ class _GoRepoDialogState extends State<GoRepoDialog> {
       showInfoDialog('请输入一个URL',
           context: context, severity: InfoBarSeverity.error);
     }
+    // 这解析不靠谱？？？
     final u = Uri.tryParse(text);
     if (u == null) {
       showInfoDialog('请输入一个合法的github仓库链接',
           context: context, severity: InfoBarSeverity.error);
       return;
     }
-    if (u.host != "github.com" &&
-        u.host != "www.github.com" &&
+    if ((u.host != "github.com" && u.host != "www.github.com") ||
         u.pathSegments.length < 2) {
       showInfoDialog('请输入一个github仓库链接',
           context: context, severity: InfoBarSeverity.error);
@@ -79,6 +79,7 @@ class _GoRepoDialogState extends State<GoRepoDialog> {
       //print("e=${e.toJson()}");
       closeDialog(context);
       pushShellRoute(RouterTable.repo, extra: repo);
+      // github.repositories.listTags(slug)
     }).onError((e, s) {
       print(e);
       print(s);

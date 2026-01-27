@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/fonts/remix_icon.dart';
+import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
-import 'package:go_router/go_router.dart';
 import 'package:url_launcher/link.dart';
 
 class UserHeadNameWidget extends StatelessWidget {
@@ -177,8 +177,8 @@ class UserInfoPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
+      // mainAxisAlignment: MainAxisAlignment.start,
+      // mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CurrentUserHeadName(user: user),
@@ -189,20 +189,14 @@ class UserInfoPanel extends StatelessWidget {
             children: [
               HyperlinkButton(
                 onPressed: () {
-                  if (GoRouterState.of(context).uri.toString() !=
-                      '/followers') {
-                    context.go('/followers');
-                  }
+                  pushRoute(context, RouterTable.followers);
                 },
                 child: Text("${user?.followersCount ?? 0}个关注者"),
               ),
               const Text('·'),
               HyperlinkButton(
                 onPressed: () {
-                  if (GoRouterState.of(context).uri.toString() !=
-                      '/following') {
-                    context.go('/following');
-                  }
+                  pushRoute(context, RouterTable.following);
                 },
                 child: Text("${user?.followingCount ?? 0}个关注"),
               ),

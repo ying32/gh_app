@@ -73,6 +73,7 @@ class GithubCache {
 
   /// 目录结构缓存 key=owner/name
   final Map<String, List<Branch>> _branches = {};
+  final Map<String, List<Release>> _release = {};
 
   /// 当前user信息
   Future<CurrentUser?> get currentUser async =>
@@ -107,6 +108,23 @@ class GithubCache {
       final list = await github?.repositories.listBranches(slug).toList();
       if (list != null) {
         _branches[slug.fullName] = list;
+        return list;
+      }
+    } catch (e) {
+      //
+    }
+    return null;
+  }
+
+  Future<List<Release>?> repoReleases(Repository repo) async {
+    final slug = RepositorySlug(repo.owner!.login, repo.name);
+    if (_release.containsKey(slug.fullName)) {
+      return _release[slug.fullName];
+    }
+    try {
+      final list = await github?.repositories.listReleases(slug).toList();
+      if (list != null) {
+        _release[slug.fullName] = list;
         return list;
       }
     } catch (e) {

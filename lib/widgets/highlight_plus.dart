@@ -19,50 +19,65 @@ class HighlightViewPlus extends StatelessWidget {
   final bool isDiff;
 
   // 因为有些不能根据扩展名识别，所以这里维护一个
-  static final _otherHighlights = {
-    "txt": {"CMakeLists.txt": "cmake"},
+  static final _extHighlights = {
     "iml": "xml",
     "manifest": "xml",
+    "dproj": "xml",
     "rc": "c",
     "arb": "json",
     "firebaserc": "json",
-    "fmx": "delphi",
-    "lfm": "delphi",
-    "dfm": "delphi",
-    "dpr": "delphi",
-    "lpr": "delphi",
-    "": {"Podfile": "ruby"}
+    "fmx": "pascal",
+    "lfm": "pascal",
+    "dfm": "pascal",
+    "dpr": "pascal",
+    "lpr": "pascal",
+    "inc": "pascal",
+    "dpk": "pascal",
+    "lpk": "pascal",
+    "pas": "pascal",
+    "pp": "pascal",
+    "bat": "batch",
+    "cmd": "batch",
+    "dof": "ini",
+    "desktop": "ini",
+    "h": "cpp",
   };
 
+  /// 这个是查询纯文件名的
+  static final _fileHighlights = {
+    "CMakeLists.txt": "cmake",
+    "Podfile": "ruby",
+  };
+
+  /// 这个正则还要重新弄下，这个识别不太好
   static final _xmlStartPattern = RegExp(r'\<\?xml|\<.+?xmlns\=\"');
 
+  /// 查询语法高亮
   String _getLang(String data) {
-    var ext = path_lib.extension(fileName).toLowerCase();
-    if (ext.startsWith(".")) ext = ext.substring(1);
+    // 根据文件名查询语法
+    final shortName = path_lib.basename(fileName);
 
-    // 这个只是临时的，想要好的，还得做内容识别
-    final highlight = _otherHighlights[ext];
-
+    var highlight = _fileHighlights[shortName];
     if (highlight != null) {
-      // 先查文件名
-      final language = (highlight is Map)
-          ? highlight[fileName] ?? highlight[ext]
-          : highlight;
-      if (language != null && language.isNotEmpty) {
-        ext = language;
-      }
+      return highlight;
     }
-    if (highlight == null) {
-      if (data.startsWith(_xmlStartPattern)) {
-        ext = "xml";
-      }
+    // 根据扩展名查询
+    var ext = path_lib.extension(shortName).toLowerCase();
+    // 如果没有提取到扩展，但是shortName不为空，则说明是纯扩展名的文件
+    if (ext.isEmpty && shortName.startsWith(".")) {
+      ext = shortName;
     }
-    ext = switch (ext) {
-      "delphi" || "inc" => "pascal",
-      "bat" || "cmd" => "batch",
-      _ => ext,
-    };
-
+    if (ext.startsWith(".")) ext = ext.substring(1);
+    // 这个只是临时的，想要好的，还得做内容识别
+    highlight = _extHighlights[ext];
+    if (highlight != null) {
+      return highlight;
+    }
+    // 根据文件内容判断，这里判断为xml格式的
+    if (data.startsWith(_xmlStartPattern)) {
+      return "xml";
+    }
+    // 没有找到自定义的
     return ext;
   }
 
@@ -74,15 +89,18 @@ class HighlightViewPlus extends StatelessWidget {
         fontSize: 16.0,
         height: 1.5);
     // 这里要优化下，先要查找语言有没有支持，有的话才继续，没有就不继续了
+    final lang = _getLang(source);
+    print("lang=$lang");
+    if (lang.isEmpty) {
+      return SelectableText(source, style: style);
+    }
     final prism = Prism(
         style: context.isDark ? const PrismStyle.dark() : const PrismStyle());
     try {
-      final textSpans = prism.render(source, _getLang(source));
-      return SelectableText.rich(TextSpan(
-        style: style,
-        children: textSpans,
-      ));
+      final textSpans = prism.render(source, lang);
+      return SelectableText.rich(TextSpan(style: style, children: textSpans));
     } catch (e) {
+      // 如果没有查找到语法他会报一个错误，所以这里直接使用默认的
       return SelectableText(source, style: style);
     }
   }

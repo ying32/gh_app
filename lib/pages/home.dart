@@ -29,9 +29,9 @@ class _HomePageState extends State<HomePage> {
         child: FutureBuilder(
           future: GithubCache.instance.currentUser,
           builder: (_, AsyncSnapshot<CurrentUser?> snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: ProgressRing());
-            }
+            // if (snapshot.connectionState != ConnectionState.done) {
+            //   return const Center(child: ProgressRing());
+            // }
             return UserInfoPanel(user: snapshot.data);
           },
         ),

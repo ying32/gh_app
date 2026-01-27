@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:gh_app/fonts/remix_icon.dart';
+import 'package:url_launcher/link.dart';
 
 /// 带icon前缀的文本
 class IconText extends StatelessWidget {
@@ -135,4 +136,33 @@ class GitHubIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Icon(Remix.github_fill, size: size, color: color);
+}
+
+/// 一个icon样式的带跳转本地open的
+class LinkAction extends StatelessWidget {
+  const LinkAction({
+    super.key,
+    required this.icon,
+    required this.link,
+  });
+
+  final Icon icon;
+  final String link;
+
+  @override
+  Widget build(BuildContext context) {
+    return Link(
+      uri: Uri.parse(link),
+      builder: (context, followLink) => Semantics(
+        link: true,
+        child: Tooltip(
+          message: link,
+          child: IconButton(
+            icon: icon,
+            onPressed: () => followLink?.call(),
+          ),
+        ),
+      ),
+    );
+  }
 }

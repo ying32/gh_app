@@ -55,8 +55,8 @@ void main() async {
         windowButtonVisibility: false,
       );
       await windowManager.setTitle(appTitle);
-      await windowManager.setMinimumSize(const Size(500, 600));
-      await windowManager.setSize(const Size(1200, 720));
+      await windowManager.setMinimumSize(const Size(1280, 720));
+      await windowManager.setSize(const Size(1280, 720));
       await windowManager.center();
       await windowManager.show();
       await windowManager.setPreventClose(true);

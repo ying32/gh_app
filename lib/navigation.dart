@@ -5,7 +5,6 @@ import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github.dart';
-import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
@@ -214,13 +213,15 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
           FutureBuilder(
             future: GithubCache.instance.currentUser,
             builder: (_, snapshot) {
-              if (!snapshotIsOk(snapshot)) {
-                return const SizedBox.shrink();
-                //return const Center(child: ProgressRing());
-              }
               return CurrentUserHeadName(user: snapshot.data, imageSize: 48);
             },
           ),
+
+          // ChangeNotifierProvider.value(value: null,
+          //   child: CurrentUserHeadName(user: snapshot.data, imageSize: 48),
+          //
+          // ),
+
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: Padding(
@@ -271,7 +272,8 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
               ),
               // header: UserInfoPanel(user: _currentUser),
               displayMode: PaneDisplayMode.compact, // appTheme.displayMode,
-              indicator: const StickyNavigationIndicator(),
+              //indicator: const StickyNavigationIndicator(),
+
               items: originalItems,
               // autoSuggestBox: Builder(builder: (context) {
               //   return AutoSuggestBox(

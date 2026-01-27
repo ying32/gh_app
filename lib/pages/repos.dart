@@ -59,6 +59,12 @@ class _RepoListItem extends StatelessWidget {
                 const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
                     child: TagLabel.archived()),
+
+              const Spacer(),
+              LinkAction(
+                icon: const Icon(FluentIcons.open_source, size: 18),
+                link: repo.htmlUrl,
+              ),
             ],
           ),
 
@@ -70,6 +76,22 @@ class _RepoListItem extends StatelessWidget {
               style: TextStyle(color: appTheme.color.lightest),
             ),
           ),
+
+          // 关键词
+          if (repo.topics?.isNotEmpty ?? false)
+            // tags
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Wrap(
+                  runSpacing: 10.0,
+                  spacing: 8.0,
+                  children: repo.topics!
+                      .map((e) => TagLabel.other(
+                            e,
+                            color: Colors.blue,
+                          ))
+                      .toList()),
+            ),
 
           //Text('${item.tagsUrl}'),
 
@@ -110,7 +132,7 @@ class _RepoListItem extends StatelessWidget {
                     // padding: padding,
                     text: Text('${repo.stargazersCount}')),
               ),
-              // 当前打开的issue数
+              // 当前打开的issue数，这里貌似包含pull requests的数量
               HyperlinkButton(
                 onPressed: () {},
                 child: IconText(

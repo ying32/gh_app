@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as m;
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:markdown_widget/config/configs.dart';
 import 'package:markdown_widget/widget/blocks/leaf/link.dart';
@@ -34,16 +35,19 @@ class MarkdownBlockPlus extends StatelessWidget {
     final config = (context.isDark
         ? MarkdownConfig.darkConfig
         : MarkdownConfig.defaultConfig);
-    return MarkdownBlock(
-      data: data,
-      selectable: selectable,
-      config: onTap != null
-          ? config.copy(configs: [
-              LinkConfig(
-                  onTap: onTap,
-                  style: const TextStyle(color: Color(0xff0969da)))
-            ])
-          : config,
+    return m.Material(
+      type: m.MaterialType.transparency,
+      child: MarkdownBlock(
+        data: data,
+        selectable: selectable,
+        config: onTap != null
+            ? config.copy(configs: [
+                LinkConfig(
+                    onTap: onTap,
+                    style: const TextStyle(color: Color(0xff0969da)))
+              ])
+            : config,
+      ),
     );
   }
 }
