@@ -1,10 +1,11 @@
 import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -26,13 +27,10 @@ class _HomePageState extends State<HomePage> {
       icon: const GitHubIcon(size: 20),
       closeIcon: null,
       body: Card(
-        child: FutureBuilder(
-          future: GithubCache.instance.currentUser,
-          builder: (_, AsyncSnapshot<CurrentUser?> snapshot) {
-            // if (snapshot.connectionState != ConnectionState.done) {
-            //   return const Center(child: ProgressRing());
-            // }
-            return UserInfoPanel(user: snapshot.data);
+        child: Selector<CurrentUserModel, CurrentUser?>(
+          selector: (_, model) => model.user,
+          builder: (context, user, __) {
+            return UserInfoPanel(user);
           },
         ),
       ),
@@ -52,8 +50,7 @@ class _HomePageState extends State<HomePage> {
       ),
       onClosed: () {
         setState(() {
-          tabs!.remove(tab);
-
+          tabs.remove(tab);
           if (currentIndex > 0) currentIndex--;
         });
       },

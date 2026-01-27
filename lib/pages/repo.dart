@@ -12,6 +12,7 @@ import 'package:gh_app/widgets/markdown.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// 内容视图
 class _ContentView extends StatelessWidget {
@@ -187,7 +188,25 @@ class _RepoReadMe extends StatelessWidget {
                             )),
                       ],
                     ),
-                    if (body.isNotEmpty) MarkdownBlockPlus(data: body),
+                    if (body.isNotEmpty)
+                      MarkdownBlockPlus(
+                        data: body,
+                        onTap: (link) {
+                          final url = Uri.tryParse(link);
+                          if (url != null) {
+                            // 没有host当对目录的
+                            if (url.host.isEmpty && url.path.isNotEmpty) {
+                              context.read<PathModel>().path =
+                                  url.path.startsWith("/")
+                                      ? url.path
+                                      : "/${url.path}";
+                            } else {
+                              //
+                              launchUrl(url);
+                            }
+                          }
+                        },
+                      ),
                   ],
                 ),
               );

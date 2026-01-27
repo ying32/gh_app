@@ -83,9 +83,9 @@ class UserHeadName extends StatelessWidget {
 }
 
 class CurrentUserHeadName extends StatelessWidget {
-  const CurrentUserHeadName({
+  const CurrentUserHeadName(
+    this.user, {
     super.key,
-    required this.user,
     this.imageSize = 64.0,
   });
 
@@ -94,6 +94,7 @@ class CurrentUserHeadName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (user == null) return const SizedBox.shrink();
     return UserHeadNameWidget(
       login: user?.login,
       name: user?.name,
@@ -167,9 +168,9 @@ class UserLineDiskUseInfo extends StatelessWidget {
 }
 
 class UserInfoPanel extends StatelessWidget {
-  const UserInfoPanel({
+  const UserInfoPanel(
+    this.user, {
     super.key,
-    required this.user,
   });
 
   final CurrentUser? user;
@@ -181,7 +182,7 @@ class UserInfoPanel extends StatelessWidget {
       // mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CurrentUserHeadName(user: user),
+        CurrentUserHeadName(user),
         UserLineInfo(icon: null, value: user?.bio),
         UserLineInfo(
           icon: Remix.group_line,

@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/fonts/remix_icon.dart';
+import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/login.dart';
 import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
@@ -9,6 +10,7 @@ import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:gh_app/widgets/window_buttons.dart';
+import 'package:github/github.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/link.dart';
@@ -104,6 +106,11 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
   void initState() {
     windowManager.addListener(this);
     super.initState();
+    // 获取当前user
+    GithubCache.instance.currentUser.then((e) {
+      context.read<CurrentUserModel>().user = e;
+      if (mounted) {}
+    });
   }
 
   @override
@@ -210,10 +217,17 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
         }(),
         actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
           // 这里弄一个用户信息的
-          FutureBuilder(
-            future: GithubCache.instance.currentUser,
-            builder: (_, snapshot) {
-              return CurrentUserHeadName(user: snapshot.data, imageSize: 48);
+          // FutureBuilder(
+          //   future: GithubCache.instance.currentUser,
+          //   builder: (_, snapshot) {
+          //     return CurrentUserHeadName(user: snapshot.data, imageSize: 48);
+          //   },
+          // ),
+
+          Selector<CurrentUserModel, CurrentUser?>(
+            selector: (_, model) => model.user,
+            builder: (context, user, __) {
+              return CurrentUserHeadName(user, imageSize: 48);
             },
           ),
 
