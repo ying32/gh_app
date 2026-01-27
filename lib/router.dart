@@ -6,7 +6,7 @@ import 'package:gh_app/pages/home.dart';
 import 'package:gh_app/pages/issues.dart';
 import 'package:gh_app/pages/login.dart';
 import 'package:gh_app/pages/pulls.dart';
-import 'package:gh_app/pages/repo.dart';
+import 'package:gh_app/pages/repo/repo.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/settings.dart';
 import 'package:github/github.dart';

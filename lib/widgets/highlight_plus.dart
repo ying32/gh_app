@@ -40,6 +40,7 @@ class HighlightViewPlus extends StatelessWidget {
     "cmd": "batch",
     "dof": "ini",
     "desktop": "ini",
+    "rs": "rust",
     "h": "cpp",
   };
 

@@ -1,0 +1,75 @@
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/fonts/remix_icon.dart';
+import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/markdown.dart';
+import 'package:gh_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+/// README文件
+class RepoReadMe extends StatelessWidget {
+  const RepoReadMe({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<PathModel, String>(
+        selector: (_, model) => model.path,
+        builder: (_, p, __) {
+          if (p != "/") return const SizedBox.shrink();
+          final repo = context.read<RepoModel>().repo;
+          return FutureBuilder(
+            future: GithubCache.instance.repoReadMe(repo),
+            builder: (_, snapshot) {
+              if (!snapshotIsOk(snapshot, false, false)) {
+                return const SizedBox.shrink();
+              }
+              final body = snapshot.data ?? '';
+              return Card(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const IconText(
+                            icon: Remix.book_open_line,
+                            text: Text(
+                              'README',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
+                        const SizedBox(width: 12.0),
+                        IconText(
+                            icon: Remix.scales_line,
+                            text: Text(
+                              repo.license?.name ?? '',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            )),
+                      ],
+                    ),
+                    if (body.isNotEmpty)
+                      MarkdownBlockPlus(
+                        data: body,
+                        onTap: (link) {
+                          final url = Uri.tryParse(link);
+                          if (url != null) {
+                            // 没有host当对目录的
+                            if (url.host.isEmpty && url.path.isNotEmpty) {
+                              context.read<PathModel>().path =
+                                  url.path.startsWith("/")
+                                      ? url.path
+                                      : "/${url.path}";
+                            } else {
+                              launchUrl(url);
+                            }
+                          }
+                        },
+                      ),
+                  ],
+                ),
+              );
+            },
+          );
+        });
+  }
+}
