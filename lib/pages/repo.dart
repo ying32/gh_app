@@ -172,11 +172,19 @@ class _RepoReadMe extends StatelessWidget {
                     Row(
                       children: [
                         const IconText(
-                            icon: Remix.book_open_line, text: Text('README')),
+                            icon: Remix.book_open_line,
+                            text: Text(
+                              'README',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
                         const SizedBox(width: 12.0),
                         IconText(
                             icon: Remix.scales_line,
-                            text: Text(repo.license?.name ?? '')),
+                            text: Text(
+                              repo.license?.name ?? '',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            )),
                       ],
                     ),
                     if (body.isNotEmpty) MarkdownBlockPlus(data: body),
@@ -340,35 +348,39 @@ class _RepoReleases extends StatelessWidget {
         }
 
         final releases = snapshot.data ?? [];
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Releases ${releases.length}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            // Text('${}'),
-            IconText(
-              icon: Remix.price_tag_line,
-              text: Text(
-                releases.last.name ?? '',
+        return Card(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Releases ${releases.length}',
                 style:
                     const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              trailing: TagLabel.other(
-                "Latest",
-                color: Colors.green,
+              const SizedBox(height: 10),
+              // Text('${}'),
+              IconText(
+                icon: Remix.price_tag_line,
+                iconColor: Colors.green,
+                text: Text(
+                  releases.last.name ?? '',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                trailing: TagLabel.other(
+                  "Latest",
+                  color: Colors.green,
+                ),
               ),
-            ),
-            const SizedBox(height: 10),
-            if (releases.length > 1)
-              Text(
-                '+ ${releases.length - 1} releases',
-                style: TextStyle(color: Colors.blue),
-              ),
-          ],
+              const SizedBox(height: 10),
+              if (releases.length > 1)
+                Text(
+                  '+ ${releases.length - 1} releases',
+                  style: TextStyle(color: Colors.blue),
+                ),
+            ],
+          ),
         );
       },
     );
@@ -480,6 +492,52 @@ class _TopBar2 extends StatelessWidget {
   }
 }
 
+/// 导航指示器
+class _RepoBreadcrumbBar extends StatelessWidget {
+  const _RepoBreadcrumbBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final repo = context.read<RepoModel>().repo;
+    return Selector<PathModel, List<String>>(
+      selector: (_, model) => model.segmentedPaths,
+      builder: (context, segmentedPaths, __) {
+        return BreadcrumbBar(
+          items: segmentedPaths
+              .map((e) => BreadcrumbItem(
+                  label: Text(e.isEmpty ? repo.name : e), value: e))
+              .toList(),
+          onItemPressed: (item) {
+            final key = "/${item.value}";
+            final model = context.read<PathModel>();
+            final pos = model.path.indexOf(key);
+            if (pos != -1) {
+              model.path = model.path.substring(0, pos + key.length);
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
+/// 关于/Release信息等
+class _CodePageRight extends StatelessWidget {
+  const _CodePageRight({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(width: double.infinity, child: Card(child: _RepoAbout())),
+        SizedBox(height: 2),
+        SizedBox(width: double.infinity, child: _RepoReleases()),
+      ],
+    );
+  }
+}
+
 class _CodePage extends StatelessWidget {
   const _CodePage(this.repo, {super.key});
 
@@ -489,56 +547,15 @@ class _CodePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // const SizedBox(height: 8.0),
         const Divider(size: 1),
         // const Padding(
         //   padding: EdgeInsets.symmetric(vertical: 8.0),
         //   child: _TopBar1(),
         // ),
         const _TopBar2(),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Card(
-            child: Selector<PathModel, List<String>>(
-              selector: (_, model) => model.segmentedPaths,
-              builder: (context, segmentedPaths, __) {
-                return BreadcrumbBar(
-                  items: segmentedPaths
-                      .map((e) => BreadcrumbItem(
-                          label: Text(e.isEmpty ? repo.name : e), value: e))
-                      .toList(),
-                  onItemPressed: (item) {
-                    final key = "/${item.value}";
-                    final model = context.read<PathModel>();
-                    final pos = model.path.indexOf(key);
-                    if (pos != -1) {
-                      model.path = model.path.substring(0, pos + key.length);
-                    }
-                  },
-                );
-              },
-            ),
-            // child: Selector<PathModel, List<String>>(
-            //   selector: (_, model) => model.segmentedPaths,
-            //   builder: (context, segmentedPaths, __) {
-            //     return BreadcrumbBar(
-            //       items: segmentedPaths
-            //           .map((e) => BreadcrumbItem(
-            //               label: Text(e.isEmpty ? repo.name : e), value: e))
-            //           .toList(),
-            //       onItemPressed: (item) {
-            //         final key = "/${item.value}";
-            //         final model = context.read<RepoModel>();
-            //         final pos = model.path.indexOf(key);
-            //         if (pos != -1) {
-            //           model.path =
-            //               model.path.substring(0, pos + key.length);
-            //         }
-            //       },
-            //     );
-            //   },
-            // ),
-          ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Card(child: _RepoBreadcrumbBar()),
         ),
         Expanded(
           child: ListView(
@@ -560,22 +577,8 @@ class _CodePage extends StatelessWidget {
                               },
                             ),
                           ),
-                          // Selector<RepoModel, String>(
-                          //   selector: (_, model) => model.path,
-                          //   builder: (_, p, __) {
-                          //     return Card(
-                          //         child: _RepoContents(
-                          //       repo,
-                          //       path: p, //context.watch<RepoModel>().path,
-                          //       onPathChange: (value) {
-                          //         model.path = value;
-                          //       },
-                          //     ));
-                          //   },
-                          // ),
                           const SizedBox(height: 8.0),
                           // readme，只有根目录下才显示README？或者文件中有就显示？
-
                           const _RepoReadMe(),
                         ]),
                   ),
@@ -584,16 +587,7 @@ class _CodePage extends StatelessWidget {
                   // 右边
                   const SizedBox(
                     width: 300,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Card(child: _RepoAbout()),
-                        SizedBox(height: 2),
-                        SizedBox(
-                            //  width: double.infinity,
-                            child: Card(child: _RepoReleases())),
-                      ],
-                    ),
+                    child: _CodePageRight(),
                   )
                   //  Expanded(flex: 1, child: Card(child: _RepoAbout(_repo))),
                 ],
