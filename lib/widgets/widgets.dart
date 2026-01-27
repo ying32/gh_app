@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/material.dart' as m;
 
 /// 带icon前缀的文本
 class IconText extends StatelessWidget {
@@ -70,25 +71,24 @@ class TagLabel extends StatelessWidget {
   }
 
   const TagLabel.archived({super.key, this.padding})
-      : color = Colors.orange,
+      : color = m.Colors.orange,
         text = const Text('已归档 ',
-            style: TextStyle(fontSize: 11, color: Colors.orange));
+            style: TextStyle(fontSize: 11, color: m.Colors.orange));
 
   const TagLabel.private({super.key, this.padding})
-      : color = Colors.black,
+      : color = m.Colors.black,
         text = const Text('私有 ', style: TextStyle(fontSize: 11));
 
   const TagLabel.public({super.key, this.padding})
-      : color = Colors.black,
+      : color = m.Colors.black,
         text = const Text('公开 ', style: TextStyle(fontSize: 11));
 
   factory TagLabel.other(String text,
-          {Color color = Colors.black, EdgeInsetsGeometry? padding}) =>
+          {Color color = m.Colors.black, EdgeInsetsGeometry? padding}) =>
       TagLabel(
           color: color,
           padding: padding,
-          text: Text(text,
-              style: const TextStyle(fontSize: 11, color: Colors.orange)));
+          text: Text(text, style: TextStyle(fontSize: 11, color: color)));
 }
 
 /// 链接跳转的
@@ -106,10 +106,10 @@ class LinkStyleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return m.Material(
       // color: Colors.transparent,
-      type: MaterialType.transparency,
-      child: InkWell(
+      type: m.MaterialType.transparency,
+      child: m.InkWell(
         onTap: onPressed,
         child: Padding(
           padding: padding,

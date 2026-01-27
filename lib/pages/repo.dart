@@ -1,22 +1,23 @@
 import 'package:file_icon/file_icon.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/fonts/remix_icon.dart';
+import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/highlight_plus.dart';
 import 'package:gh_app/widgets/markdown.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
+import 'package:provider/provider.dart';
 
 /// 仓库目录列表
 class _RepoContents extends StatelessWidget {
-  const _RepoContents(
-    this.repo, {
+  const _RepoContents({
     super.key,
     this.path = "/",
     required this.onPathChange,
   });
-  final Repository repo;
+
   final String path;
   final ValueChanged<String> onPathChange;
 
@@ -50,6 +51,7 @@ class _RepoContents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final repo = context.read<RepoModel>().repo;
     return SizedBox(
       width: double.infinity,
       child: FutureBuilder(
@@ -102,52 +104,52 @@ class _RepoContents extends StatelessWidget {
 
 /// README文件
 class _RepoReadMe extends StatelessWidget {
-  const _RepoReadMe(
-    this.repo, {
-    super.key,
-  });
-
-  final Repository repo;
+  const _RepoReadMe({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: GithubCache.instance.repoReadMe(repo),
-      builder: (_, snapshot) {
-        if (!snapshotIsOk(snapshot, false, false)) {
-          return const SizedBox.shrink();
-        }
-        final body = snapshot.data ?? '';
-        return Card(
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  const IconText(
-                      icon: Remix.book_open_line, text: Text('README')),
-                  const SizedBox(width: 12.0),
-                  IconText(
-                      icon: Remix.scales_line,
-                      text: Text(repo.license?.name ?? '')),
-                ],
-              ),
-              if (body.isNotEmpty) MarkdownBlockPlus(data: body),
-            ],
-          ),
-        );
-      },
-    );
+    return Selector<PathModel, String>(
+        selector: (_, model) => model.path,
+        builder: (_, p, __) {
+          if (p != "/") return const SizedBox.shrink();
+          final repo = context.read<RepoModel>().repo;
+          return FutureBuilder(
+            future: GithubCache.instance.repoReadMe(repo),
+            builder: (_, snapshot) {
+              if (!snapshotIsOk(snapshot, false, false)) {
+                return const SizedBox.shrink();
+              }
+              final body = snapshot.data ?? '';
+              return Card(
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        const IconText(
+                            icon: Remix.book_open_line, text: Text('README')),
+                        const SizedBox(width: 12.0),
+                        IconText(
+                            icon: Remix.scales_line,
+                            text: Text(repo.license?.name ?? '')),
+                      ],
+                    ),
+                    if (body.isNotEmpty) MarkdownBlockPlus(data: body),
+                  ],
+                ),
+              );
+            },
+          );
+        });
   }
 }
 
 /// 关于
 class _RepoAbout extends StatelessWidget {
-  const _RepoAbout(this.repo, {super.key});
-
-  final Repository repo;
+  const _RepoAbout({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final repo = context.read<RepoModel>().repo;
     const padding = EdgeInsets.symmetric(horizontal: 2, vertical: 8);
     return Column(
       mainAxisSize: MainAxisSize.max,
@@ -203,70 +205,74 @@ class _RepoAbout extends StatelessWidget {
   }
 }
 
-class RepoPage extends StatefulWidget {
-  const RepoPage({
-    super.key,
-    required this.repo,
-  });
-
-  final Repository repo;
+/// 分支列表
+class _Branches extends StatelessWidget {
+  const _Branches({super.key});
 
   @override
-  State<RepoPage> createState() => _RepoPageState();
+  Widget build(BuildContext context) {
+    final repo = context.read<RepoModel>().repo;
+
+    return FutureBuilder(
+      future: GithubCache.instance.repoBranches(repo),
+      builder: (_, snapshot) {
+        // if (!snapshotIsOk(snapshot, false, false)) {
+        //   return DropDownButton(
+        //     title: IconText(
+        //         icon: Remix.git_branch_line, text: Text(repo.defaultBranch)),
+        //     items: [
+        //       MenuFlyoutItem(
+        //           text: const Center(
+        //             child: SizedBox(width: 100, child: ProgressRing()),
+        //           ),
+        //           onPressed: () {})
+        //     ],
+        //   );
+        // }
+        return DropDownButton(
+            title: IconText(
+                icon: Remix.git_branch_line, text: Text(repo.defaultBranch)),
+            items: (snapshot.data ?? [Branch(repo.defaultBranch, null)])
+                .map((e) => MenuFlyoutItem(
+                    leading: e.name == repo.defaultBranch
+                        ? const Icon(Remix.check_line)
+                        : null,
+                    text: Text(e.name ?? ''),
+                    trailing: e.name == repo.defaultBranch
+                        ? TagLabel.other('默认')
+                        : null,
+                    onPressed: () {}))
+                .toList());
+      },
+    );
+  }
 }
 
-class _RepoPageState extends State<RepoPage> {
-  String _currentPath = "/";
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  Repository get _repo => widget.repo;
-
-  void _setCurrentPath(String path) {
-    if (path.isEmpty) return;
-    setState(() {
-      _currentPath = path;
-    });
-  }
-
-  void _onContentPathChange(String value) {
-    if (value == _currentPath) return;
-    _setCurrentPath(value);
-  }
-
-  List<String> get _segmentedPaths {
-    if (_currentPath.isEmpty || _currentPath == "/") return [""];
-    final arr = _currentPath.split("/");
-    return arr;
-  }
+class RepoPage extends StatelessWidget {
+  const RepoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasFluentTheme(context));
     final theme = FluentTheme.of(context);
 
+    final model = context.watch<RepoModel>();
+    final repo = model.repo;
+
     return ScaffoldPage(
       header: PageHeader(
         title: Row(
           children: [
-            Text(widget.repo.fullName),
-            if (_repo.isPrivate)
+            Text(repo.fullName),
+            if (repo.isPrivate)
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4),
                 child: Icon(Remix.git_repository_private_line),
               ),
-            if (_repo.archived)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: TagLabel(
-                    color: Colors.orange,
-                    text: Text(
-                      '已归档 ',
-                      style: TextStyle(fontSize: 11, color: Colors.orange),
-                    )),
+            if (repo.archived)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: TagLabel.archived(),
               ),
           ],
         ),
@@ -302,9 +308,9 @@ class _RepoPageState extends State<RepoPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Button(
-                        child: const IconText(
+                        child: IconText(
                           icon: Remix.eye_line,
-                          text: Text('关注/取消关注'),
+                          text: Text('${repo.watchersCount} 关注/取消关注'),
                         ),
                         onPressed: () => debugPrint('pressed button'),
                       ),
@@ -312,21 +318,21 @@ class _RepoPageState extends State<RepoPage> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Button(
-                        onPressed: _repo.isFork
+                        onPressed: repo.allowForking ?? false
                             ? null
                             : () => debugPrint('pressed button'),
-                        child: const IconText(
+                        child: IconText(
                           icon: Remix.git_fork_line,
-                          text: Text('分叉'),
+                          text: Text('${repo.forksCount} 分叉'),
                         ),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 4),
                       child: Button(
-                        child: const IconText(
+                        child: IconText(
                           icon: Remix.star_line,
-                          text: Text('点赞'),
+                          text: Text('${repo.stargazersCount} 点赞'),
                         ),
                         onPressed: () => debugPrint('pressed button'),
                       ),
@@ -338,20 +344,7 @@ class _RepoPageState extends State<RepoPage> {
             Card(
               child: Row(
                 children: [
-                  DropDownButton(
-                    title: IconText(
-                        icon: Remix.git_branch_line,
-                        text: Text(_repo.defaultBranch)),
-                    items: [
-                      MenuFlyoutItem(
-                          text: const Text('Send'), onPressed: () {}),
-                      const MenuFlyoutSeparator(),
-                      MenuFlyoutItem(
-                          text: const Text('Reply'), onPressed: () {}),
-                      MenuFlyoutItem(
-                          text: const Text('Reply all'), onPressed: () {}),
-                    ],
-                  ),
+                  const _Branches(),
                   const SizedBox(width: 10.0),
                   HyperlinkButton(
                     onPressed: () {},
@@ -384,30 +377,50 @@ class _RepoPageState extends State<RepoPage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               child: Card(
-                child: BreadcrumbBar(
-                  items: _segmentedPaths
-                      .map((e) => BreadcrumbItem(
-                          label: Text(e.isEmpty ? _repo.name : e), value: e))
-                      .toList(),
-                  onItemPressed: (item) {
-                    final key = "/${item.value}";
-                    final pos = _currentPath.indexOf(key);
-
-                    if (pos != -1) {
-                      _setCurrentPath(
-                          _currentPath.substring(0, pos + key.length));
-                    }
+                child: Selector<PathModel, List<String>>(
+                  selector: (_, model) => model.segmentedPaths,
+                  builder: (context, segmentedPaths, __) {
+                    return BreadcrumbBar(
+                      items: segmentedPaths
+                          .map((e) => BreadcrumbItem(
+                              label: Text(e.isEmpty ? repo.name : e), value: e))
+                          .toList(),
+                      onItemPressed: (item) {
+                        final key = "/${item.value}";
+                        final model = context.read<PathModel>();
+                        final pos = model.path.indexOf(key);
+                        if (pos != -1) {
+                          model.path =
+                              model.path.substring(0, pos + key.length);
+                        }
+                      },
+                    );
                   },
                 ),
+                // child: Selector<PathModel, List<String>>(
+                //   selector: (_, model) => model.segmentedPaths,
+                //   builder: (context, segmentedPaths, __) {
+                //     return BreadcrumbBar(
+                //       items: segmentedPaths
+                //           .map((e) => BreadcrumbItem(
+                //               label: Text(e.isEmpty ? repo.name : e), value: e))
+                //           .toList(),
+                //       onItemPressed: (item) {
+                //         final key = "/${item.value}";
+                //         final model = context.read<RepoModel>();
+                //         final pos = model.path.indexOf(key);
+                //         if (pos != -1) {
+                //           model.path =
+                //               model.path.substring(0, pos + key.length);
+                //         }
+                //       },
+                //     );
+                //   },
+                // ),
               ),
             ),
             Expanded(
               child: ListView(
-                // padding: EdgeInsetsDirectional.only(
-                //   bottom: kPageDefaultVerticalPadding,
-                //   start: PageHeader.horizontalPadding(context),
-                //   end: PageHeader.horizontalPadding(context),
-                // ),
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -419,23 +432,38 @@ class _RepoPageState extends State<RepoPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Card(
-                                  child: _RepoContents(
-                                _repo,
-                                path: _currentPath,
-                                onPathChange: _onContentPathChange,
-                              )),
+                                child: _RepoContents(
+                                  path: context.watch<PathModel>().path,
+                                  onPathChange: (value) {
+                                    context.read<PathModel>().path = value;
+                                  },
+                                ),
+                              ),
+                              // Selector<RepoModel, String>(
+                              //   selector: (_, model) => model.path,
+                              //   builder: (_, p, __) {
+                              //     return Card(
+                              //         child: _RepoContents(
+                              //       repo,
+                              //       path: p, //context.watch<RepoModel>().path,
+                              //       onPathChange: (value) {
+                              //         model.path = value;
+                              //       },
+                              //     ));
+                              //   },
+                              // ),
                               const SizedBox(height: 8.0),
                               // readme，只有根目录下才显示README？或者文件中有就显示？
-                              if (_currentPath == "/") _RepoReadMe(_repo),
+
+                              const _RepoReadMe(),
                             ]),
                       ),
                       // Expanded(child: )),
                       const SizedBox(width: 8.0),
                       // 右边
-
-                      SizedBox(
+                      const SizedBox(
                         width: 300,
-                        child: Card(child: _RepoAbout(_repo)),
+                        child: Card(child: _RepoAbout()),
                       )
                       //  Expanded(flex: 1, child: Card(child: _RepoAbout(_repo))),
                     ],
@@ -447,5 +475,14 @@ class _RepoPageState extends State<RepoPage> {
         ),
       ),
     );
+    // return Selector<RepoModel, Repository>(
+    //   selector: (_, model) => model.repo,
+    //   builder: (_, repo, __) {
+    //
+    //   },
+    //   // shouldRebuild: (previous, next) {
+    //   //   return false;
+    //   // },
+    // );
   }
 }

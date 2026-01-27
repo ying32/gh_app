@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:fluent_ui/fluent_ui.dart' as fui;
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -188,7 +187,7 @@ class UserInfoPanel extends StatelessWidget {
           icon: Remix.group_line,
           value: Row(
             children: [
-              fui.HyperlinkButton(
+              HyperlinkButton(
                 onPressed: () {
                   if (GoRouterState.of(context).uri.toString() !=
                       '/followers') {
@@ -198,7 +197,7 @@ class UserInfoPanel extends StatelessWidget {
                 child: Text("${user?.followersCount ?? 0}个关注者"),
               ),
               const Text('·'),
-              fui.HyperlinkButton(
+              HyperlinkButton(
                 onPressed: () {
                   if (GoRouterState.of(context).uri.toString() !=
                       '/following') {

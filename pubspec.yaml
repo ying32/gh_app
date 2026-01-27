@@ -37,6 +37,7 @@ dependencies:
 
   # 从4.13开始需要更高的版本，3.38?还是3.36?
   fluent_ui: 4.8.7
+  #fluent_ui: 4.10.0
 
   # 这个是github接口，9.25.0 需要dart 3.5
   github: 9.24.0

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:markdown_widget/config/configs.dart';
 import 'package:markdown_widget/widget/blocks/leaf/link.dart';

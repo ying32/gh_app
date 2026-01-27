@@ -52,9 +52,8 @@ class _RepoListItem extends StatelessWidget {
 
               const SizedBox(width: 8.0),
               // 公开或者私有
-              repo.isPrivate
-                  ? const TagLabel.private()
-                  : const TagLabel.public(),
+              if (repo.isPrivate) const TagLabel.private(),
+
               // 是否归档
               if (repo.archived)
                 const Padding(

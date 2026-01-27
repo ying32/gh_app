@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_prism/flutter_prism.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:path/path.dart' as path_lib;
@@ -75,7 +75,7 @@ class HighlightViewPlus extends StatelessWidget {
         height: 1.5);
     // 这里要优化下，先要查找语言有没有支持，有的话才继续，没有就不继续了
     final prism = Prism(
-        style: !context.isDark ? const PrismStyle() : const PrismStyle.dark());
+        style: context.isDark ? const PrismStyle.dark() : const PrismStyle());
     try {
       final textSpans = prism.render(source, _getLang(source));
       return SelectableText.rich(TextSpan(

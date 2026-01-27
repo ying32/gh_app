@@ -11,6 +11,9 @@ import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/settings.dart';
 import 'package:github/github.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+
+import 'models/repo_model.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -60,9 +63,20 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
                     : '',
               )),
       GoRoute(
-          path: '/repo',
-          builder: (context, state) =>
-              RepoPage(repo: state.extra as Repository)),
+        path: '/repo',
+        //builder: (context, state) => RepoPage(repo: state.extra as Repository),
+        builder: (context, state) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider<RepoModel>(
+              create: (_) => RepoModel(state.extra as Repository),
+            ),
+            ChangeNotifierProvider<PathModel>(
+              create: (_) => PathModel("/"),
+            )
+          ],
+          child: const RepoPage(),
+        ),
+      ),
     ],
   ),
 ]);

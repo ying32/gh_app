@@ -71,6 +71,9 @@ class GithubCache {
   /// 目录结构缓存 key=owner/name/path
   final Map<String, RepositoryContents> _contents = {};
 
+  /// 目录结构缓存 key=owner/name
+  final Map<String, List<Branch>> _branches = {};
+
   /// 当前user信息
   Future<CurrentUser?> get currentUser async =>
       _currentUser ??= await github?.users.getCurrentUser();
@@ -84,13 +87,30 @@ class GithubCache {
     if (_repos.containsKey(owner)) {
       return _repos[owner];
     }
-    final stream = owner.isEmpty
-        ? github?.repositories.listRepositories()
-        : github?.repositories.listUserRepositories(owner);
-    if (stream != null) {
-      final list = await stream.toList();
+    final list = await (owner.isEmpty
+            ? github?.repositories.listRepositories()
+            : github?.repositories.listUserRepositories(owner))
+        ?.toList();
+    if (list != null) {
       _repos[owner] = list;
       return list;
+    }
+    return null;
+  }
+
+  Future<List<Branch>?> repoBranches(Repository repo) async {
+    final slug = RepositorySlug(repo.owner!.login, repo.name);
+    if (_branches.containsKey(slug.fullName)) {
+      return _branches[slug.fullName];
+    }
+    try {
+      final list = await github?.repositories.listBranches(slug).toList();
+      if (list != null) {
+        _branches[slug.fullName] = list;
+        return list;
+      }
+    } catch (e) {
+      //
     }
     return null;
   }
