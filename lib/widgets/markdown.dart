@@ -18,6 +18,19 @@ class MarkdownBlockPlus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 这个编译不了，需要更新的，那就暂时不试了哈
+    // return MarkdownViewer(
+    //   data,
+    //   enableTaskList: true,
+    //   enableSuperscript: false,
+    //   enableSubscript: false,
+    //   enableFootnote: false,
+    //   enableImageSize: false,
+    //   enableKbd: false,
+    //   syntaxExtensions: const [],
+    //   elementBuilders: const [],
+    // );
+
     final config = (context.isDark
         ? MarkdownConfig.darkConfig
         : MarkdownConfig.defaultConfig);
