@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:gh_app/fonts/remix_icon.dart';
 
 /// 带icon前缀的文本
 class IconText extends StatelessWidget {
@@ -118,4 +119,20 @@ class LinkStyleButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Github的图标
+class GitHubIcon extends StatelessWidget {
+  const GitHubIcon({
+    super.key,
+    this.size = 16,
+    this.color,
+  });
+
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) =>
+      Icon(Remix.github_fill, size: size, color: color);
 }

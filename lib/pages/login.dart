@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/page.dart';
 
 const _authTypeStrings = ["Access Token", "OAuth2", "帐户密码"];
@@ -25,37 +26,13 @@ class _LoginPageState extends State<LoginPage> with PageMixin {
     super.dispose();
   }
 
-  Future<void> _showLogging() async => showDialog(
-        context: context,
-        barrierDismissible: true,
-        builder: (_) => const ContentDialog(
-          // style: ContentDialogThemeData(padding: EdgeInsets.zero),
-          constraints: BoxConstraints(maxWidth: 600),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ProgressRing(),
-              Padding(
-                padding: EdgeInsets.only(top: 8.0),
-                child: Text('登录中...'),
-              )
-            ],
-          ),
-        ),
-      );
+  Future<void> _showLogging() async => LoggingDialog.showLogging(context);
 
   Future<void> _showInfo(String msg,
           {String? error, InfoBarSeverity? severity}) =>
-      displayInfoBar(context, builder: (context, close) {
-        return InfoBar(
-          title: Text(msg),
-          content: error != null ? Text(error) : null,
-          severity: severity ?? InfoBarSeverity.success,
-        );
-      });
+      showInfoDialog(msg, context: context, error: error, severity: severity);
 
-  Future<void> _closeDialog() async =>
-      Navigator.of(context, rootNavigator: true).pop();
+  Future<void> _closeDialog() async => closeDialog(context);
 
   Future<void> _onLogin() async {
     _showLogging();

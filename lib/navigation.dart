@@ -6,7 +6,9 @@ import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
+import 'package:gh_app/widgets/widgets.dart';
 import 'package:gh_app/widgets/window_buttons.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -46,25 +48,25 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
 
   late final List<NavigationPaneItem> originalItems = [
     PaneItem(
-      key: const ValueKey('/'),
+      key: const ValueKey(RouterTable.root),
       icon: const _PaneItemIcon(Remix.home_line),
       title: const Text('主页'),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
-      key: const ValueKey('/issues'),
+      key: const ValueKey(RouterTable.issues),
       icon: const _PaneItemIcon(Remix.issues_line),
       title: const Text('问题'),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
-      key: const ValueKey('/pulls'),
+      key: const ValueKey(RouterTable.pulls),
       icon: const _PaneItemIcon(Remix.git_pull_request_line),
       title: const Text('合并请求'),
       body: const SizedBox.shrink(),
     ),
     PaneItem(
-      key: const ValueKey('/repos'),
+      key: const ValueKey(RouterTable.repos),
       icon: const _PaneItemIcon(Remix.git_repository_line),
       title: const Text('仓库'),
       body: const SizedBox.shrink(),
@@ -85,11 +87,11 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
   late final List<NavigationPaneItem> footerItems = [
     PaneItemSeparator(),
     PaneItem(
-      key: const ValueKey('/settings'),
+      key: const ValueKey(RouterTable.settings),
       icon: const _PaneItemIcon(Remix.settings_line),
       title: const Text('设置'),
       body: const SizedBox.shrink(),
-      onTap: () => pushRoute(context, '/settings'),
+      onTap: () => pushRoute(context, RouterTable.settings),
     ),
     _LinkPaneItemAction(
       icon: const _PaneItemIcon(FluentIcons.open_source),
@@ -136,6 +138,10 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
     } else {
       return indexOriginal;
     }
+  }
+
+  void _onGoToRepo() {
+    GoRepoDialog.showEditor(context);
   }
 
   @override
@@ -232,6 +238,17 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
               ),
             ),
           ),
+          DropDownButton(
+            leading: const SizedBox.shrink(),
+            title: const Icon(Remix.menu_line),
+            trailing: const SizedBox.shrink(),
+            items: [
+              MenuFlyoutItem(text: const Text('跳转仓库'), onPressed: _onGoToRepo),
+              // MenuFlyoutSeparator(),
+              // MenuFlyoutItem(text: const Text('Reply'), onPressed: () {}),
+              // MenuFlyoutItem(text: const Text('Reply all'), onPressed: () {}),
+            ],
+          ),
           const WindowButtons(),
         ]),
       ),
@@ -250,7 +267,7 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
               selected: _calculateSelectedIndex(context),
               header: const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8.0),
-                child: Icon(Remix.github_fill, size: 32),
+                child: GitHubIcon(size: 32),
               ),
               // header: UserInfoPanel(user: _currentUser),
               displayMode: PaneDisplayMode.compact, // appTheme.displayMode,

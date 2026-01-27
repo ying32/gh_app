@@ -38,7 +38,7 @@ class _RepoListItem extends StatelessWidget {
 
               LinkStyleButton(
                 onPressed: () {
-                  pushRoute(context, '/repo', extra: repo);
+                  pushRoute(context, RouterTable.repo, extra: repo);
                 },
                 text: Text(
                   "${repo.owner?.login ?? ''}/${repo.name}",
