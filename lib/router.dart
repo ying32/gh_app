@@ -101,17 +101,21 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
       GoRoute(
         path: RouterTable.repo,
         //builder: (context, state) => RepoPage(repo: state.extra as Repository),
-        builder: (context, state) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider<RepoModel>(
-              create: (_) => RepoModel(state.extra as Repository),
-            ),
-            ChangeNotifierProvider<PathModel>(
-              create: (_) => PathModel("/"),
-            )
-          ],
+        builder: (context, state) => ChangeNotifierProvider<RepoModel>(
+          create: (_) => RepoModel(state.extra as Repository),
           child: const RepoPage(),
         ),
+        // builder: (context, state) => MultiProvider(
+        //   providers: [
+        //     ChangeNotifierProvider<RepoModel>(
+        //       create: (_) => RepoModel(state.extra as Repository),
+        //     ),
+        //     ChangeNotifierProvider<PathModel>(
+        //       create: (_) => PathModel("/"),
+        //     )
+        //   ],
+        //   child: const RepoPage(),
+        // ),
       ),
     ],
   ),

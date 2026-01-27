@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/widgets/widgets.dart';
+import 'package:github/github.dart';
 import 'package:provider/provider.dart';
 
 import 'action_page.dart';
@@ -74,39 +75,56 @@ class RepoPage extends StatelessWidget {
     assert(debugCheckHasFluentTheme(context));
     final theme = FluentTheme.of(context);
 
-    final model = context.watch<RepoModel>();
-    final repo = model.repo;
+    // final model = context.read()<RepoModel>();
+    // final repo = model.repo;
 
-    return ScaffoldPage(
-      header: PageHeader(
-        title: Row(
-          children: [
-            Text(repo.fullName),
-            if (repo.isPrivate)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: Icon(Remix.git_repository_private_line),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<PathModel>(
+          create: (_) => PathModel("/"),
+        )
+      ],
+      child: WrapInit(
+        onInit: () {
+          print("初始");
+        },
+        child: Selector<RepoModel, Repository>(
+          selector: (_, model) => model.repo,
+          builder: (_, repo, __) {
+            return ScaffoldPage(
+              header: PageHeader(
+                title: Row(
+                  children: [
+                    Text(repo.fullName),
+                    if (repo.isPrivate)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: Icon(Remix.git_repository_private_line),
+                      ),
+                    if (repo.archived)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 4),
+                        child: TagLabel.archived(),
+                      ),
+                    const Spacer(),
+                    LinkAction(
+                      icon: const Icon(FluentIcons.open_source, size: 18),
+                      link: repo.htmlUrl,
+                    ),
+                  ],
+                ),
               ),
-            if (repo.archived)
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                child: TagLabel.archived(),
+              content: Padding(
+                padding: EdgeInsetsDirectional.only(
+                  bottom: kPageDefaultVerticalPadding,
+                  start: PageHeader.horizontalPadding(context),
+                  end: PageHeader.horizontalPadding(context),
+                ),
+                child: const _TabPages(),
               ),
-            const Spacer(),
-            LinkAction(
-              icon: const Icon(FluentIcons.open_source, size: 18),
-              link: repo.htmlUrl,
-            ),
-          ],
+            );
+          },
         ),
-      ),
-      content: Padding(
-        padding: EdgeInsetsDirectional.only(
-          bottom: kPageDefaultVerticalPadding,
-          start: PageHeader.horizontalPadding(context),
-          end: PageHeader.horizontalPadding(context),
-        ),
-        child: const _TabPages(),
       ),
     );
   }

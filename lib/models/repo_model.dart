@@ -23,16 +23,6 @@ class RepoModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  /// readme文件内容
-  String? _readMeContent;
-  String? get readMeContent => _readMeContent; // ?? _repo.readMe?.content;
-  set readMeContent(String? value) {
-    if (_readMeContent != value) {
-      _readMeContent = value;
-      notifyListeners();
-    }
-  }
 }
 
 class PathModel extends ChangeNotifier {
@@ -52,5 +42,17 @@ class PathModel extends ChangeNotifier {
     if (_path.isEmpty || _path == "/") return [""];
     final arr = _path.split("/");
     return arr;
+  }
+}
+
+class ReadMeModel extends ChangeNotifier {
+  /// readme文件内容
+  String? _readMeContent;
+  String? get readMeContent => _readMeContent; // ?? _repo.readMe?.content;
+  set readMeContent(String? value) {
+    if (_readMeContent != value) {
+      _readMeContent = value;
+      notifyListeners();
+    }
   }
 }

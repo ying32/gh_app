@@ -166,3 +166,29 @@ class LinkAction extends StatelessWidget {
     );
   }
 }
+
+/// 初始加载数据
+class WrapInit extends StatefulWidget {
+  const WrapInit({
+    super.key,
+    required this.child,
+    required this.onInit,
+  });
+
+  final Widget child;
+  final VoidCallback onInit;
+
+  @override
+  State<WrapInit> createState() => _WrapInitState();
+}
+
+class _WrapInitState extends State<WrapInit> {
+  @override
+  void initState() {
+    super.initState();
+    widget.onInit.call();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}

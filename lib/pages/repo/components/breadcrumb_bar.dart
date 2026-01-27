@@ -15,7 +15,9 @@ class RepoBreadcrumbBar extends StatelessWidget {
         return BreadcrumbBar(
           items: segmentedPaths
               .map((e) => BreadcrumbItem(
-                  label: Text(e.isEmpty ? repo.name : e), value: e))
+                  label: Text(e.isEmpty ? repo.name : e,
+                      style: TextStyle(color: Colors.blue)),
+                  value: e))
               .toList(),
           onItemPressed: (item) {
             final key = "/${item.value}";

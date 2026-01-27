@@ -166,44 +166,44 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
       key: viewKey,
       appBar: NavigationAppBar(
         automaticallyImplyLeading: false,
-        leading: () {
-          final enabled = widget.shellContext != null && router.canPop();
-
-          final onPressed = enabled
-              ? () {
-                  if (router.canPop()) {
-                    context.pop();
-                    setState(() {});
-                  }
-                }
-              : null;
-          return NavigationPaneTheme(
-            data: NavigationPaneTheme.of(context).merge(NavigationPaneThemeData(
-              unselectedIconColor: ButtonState.resolveWith((states) {
-                if (states.isDisabled) {
-                  return ButtonThemeData.buttonColor(context, states);
-                }
-                return ButtonThemeData.uncheckedInputColor(
-                  FluentTheme.of(context),
-                  states,
-                ).basedOnLuminance();
-              }),
-            )),
-            child: Builder(
-              builder: (context) => PaneItem(
-                icon: const Center(child: Icon(FluentIcons.back, size: 12.0)),
-                title: Text(localizations.backButtonTooltip),
-                body: const SizedBox.shrink(),
-                enabled: enabled,
-              ).build(
-                context,
-                false,
-                onPressed,
-                displayMode: PaneDisplayMode.compact,
-              ),
-            ),
-          );
-        }(),
+        // leading: () {
+        //   final enabled = widget.shellContext != null && router.canPop();
+        //
+        //   final onPressed = enabled
+        //       ? () {
+        //           if (router.canPop()) {
+        //             context.pop();
+        //             setState(() {});
+        //           }
+        //         }
+        //       : null;
+        //   return NavigationPaneTheme(
+        //     data: NavigationPaneTheme.of(context).merge(NavigationPaneThemeData(
+        //       unselectedIconColor: ButtonState.resolveWith((states) {
+        //         if (states.isDisabled) {
+        //           return ButtonThemeData.buttonColor(context, states);
+        //         }
+        //         return ButtonThemeData.uncheckedInputColor(
+        //           FluentTheme.of(context),
+        //           states,
+        //         ).basedOnLuminance();
+        //       }),
+        //     )),
+        //     child: Builder(
+        //       builder: (context) => PaneItem(
+        //         icon: const Center(child: Icon(FluentIcons.back, size: 12.0)),
+        //         title: Text(localizations.backButtonTooltip),
+        //         body: const SizedBox.shrink(),
+        //         enabled: enabled,
+        //       ).build(
+        //         context,
+        //         false,
+        //         onPressed,
+        //         displayMode: PaneDisplayMode.compact,
+        //       ),
+        //     ),
+        //   );
+        // }(),
         title: () {
           return const DragToMoveArea(
             child: Align(
@@ -264,6 +264,8 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
               // MenuFlyoutItem(text: const Text('Reply all'), onPressed: () {}),
             ],
           ),
+          const SizedBox(width: 10),
+
           const WindowButtons(),
         ]),
       ),
