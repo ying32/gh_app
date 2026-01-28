@@ -16,6 +16,7 @@ class UserHeadNameWidget extends StatelessWidget {
     this.avatarUrl,
     this.htmlUrl,
     this.imageSize = 64.0,
+    this.onlyNickName = false,
   });
 
   final String? login;
@@ -23,6 +24,16 @@ class UserHeadNameWidget extends StatelessWidget {
   final String? avatarUrl;
   final String? htmlUrl;
   final double imageSize;
+  final bool onlyNickName;
+
+  String get _displayName {
+    final nickName = name ?? login ?? '';
+    if (onlyNickName) return nickName;
+    if (nickName == "" || nickName == login) {
+      return login ?? '';
+    }
+    return "$login${"($nickName)"}";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +41,7 @@ class UserHeadNameWidget extends StatelessWidget {
       children: [
         if (avatarUrl != null)
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 5.0),
+            padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 1.0),
             child: ClipOval(
               child: CachedNetworkImage(
                 imageUrl: avatarUrl!,
@@ -48,7 +59,7 @@ class UserHeadNameWidget extends StatelessWidget {
             child: LinkStyleButton(
                 onPressed: () => open?.call(),
                 text: Text(
-                  "$login${name != null && name!.isNotEmpty ? "($name)" : ''}",
+                  _displayName,
                   style: TextStyle(
                       fontWeight: FontWeight.w500,
                       color: appTheme.color.lightest),
@@ -87,10 +98,12 @@ class CurrentUserHeadName extends StatelessWidget {
     this.user, {
     super.key,
     this.imageSize = 64.0,
+    this.onlyNickName = false,
   });
 
   final CurrentUser? user;
   final double imageSize;
+  final bool onlyNickName;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +114,7 @@ class CurrentUserHeadName extends StatelessWidget {
       avatarUrl: user?.avatarUrl,
       htmlUrl: user?.htmlUrl,
       imageSize: imageSize,
+      onlyNickName: onlyNickName,
     );
   }
 }

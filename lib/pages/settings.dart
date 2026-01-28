@@ -81,15 +81,15 @@ class _SettingsState extends State<Settings> with PageMixin {
     assert(debugCheckHasMediaQuery(context));
     final appTheme = context.watch<AppTheme>();
     const spacer = SizedBox(height: 10.0);
-    const biggerSpacer = SizedBox(height: 40.0);
-
-    const supportedLocales = FluentLocalizations.supportedLocales;
-    final currentLocale =
-        appTheme.locale ?? Localizations.maybeLocaleOf(context);
+    // const biggerSpacer = SizedBox(height: 40.0);
+    //
+    // const supportedLocales = FluentLocalizations.supportedLocales;
+    // final currentLocale =
+    //     appTheme.locale ?? Localizations.maybeLocaleOf(context);
     return ScaffoldPage.scrollable(
       header: const PageHeader(title: Text('设置')),
       children: [
-        Text('皮肤模式', style: FluentTheme.of(context).typography.subtitle),
+        Text('主题模式', style: FluentTheme.of(context).typography.subtitle),
         spacer,
         ...List.generate(ThemeMode.values.length, (index) {
           final mode = ThemeMode.values[index];
@@ -106,54 +106,6 @@ class _SettingsState extends State<Settings> with PageMixin {
             ),
           );
         }),
-        biggerSpacer,
-        Text('强调色', style: FluentTheme.of(context).typography.subtitle),
-        spacer,
-        Wrap(children: [
-          Tooltip(
-            message: accentColorNames[0],
-            child: _buildColorBlock(appTheme, systemAccentColor),
-          ),
-          ...List.generate(Colors.accentColors.length, (index) {
-            final color = Colors.accentColors[index];
-            return Tooltip(
-              message: accentColorNames[index + 1],
-              child: _buildColorBlock(appTheme, color),
-            );
-          }),
-        ]),
-        biggerSpacer,
-        Text('本地化', style: FluentTheme.of(context).typography.subtitle),
-        description(
-          content: const Text(
-            'The locale used by the fluent_ui widgets, such as TimePicker and '
-            'DatePicker. This does not reflect the language of this showcase app.',
-          ),
-        ),
-        spacer,
-        Wrap(
-          spacing: 15.0,
-          runSpacing: 10.0,
-          children: List.generate(
-            supportedLocales.length,
-            (index) {
-              final locale = supportedLocales[index];
-
-              return Padding(
-                padding: const EdgeInsetsDirectional.only(bottom: 8.0),
-                child: RadioButton(
-                  checked: currentLocale == locale,
-                  onChanged: (value) {
-                    if (value) {
-                      appTheme.locale = locale;
-                    }
-                  },
-                  content: Text('$locale'),
-                ),
-              );
-            },
-          ),
-        ),
       ],
     );
   }

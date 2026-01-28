@@ -14,15 +14,6 @@ class RepoModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  String? _selectedBranch;
-  String get selectedBranch => _selectedBranch ?? _repo.defaultBranch;
-  set selectedBranch(String? value) {
-    if (_selectedBranch != value) {
-      _selectedBranch = value;
-      notifyListeners();
-    }
-  }
 }
 
 class PathModel extends ChangeNotifier {
@@ -52,6 +43,18 @@ class ReadMeModel extends ChangeNotifier {
   set readMeContent(String? value) {
     if (_readMeContent != value) {
       _readMeContent = value;
+      notifyListeners();
+    }
+  }
+}
+
+///
+class RepoBranchModel extends ChangeNotifier {
+  String? _selectedBranch;
+  String? get selectedBranch => _selectedBranch;
+  set selectedBranch(String? value) {
+    if (_selectedBranch != value) {
+      _selectedBranch = value;
       notifyListeners();
     }
   }

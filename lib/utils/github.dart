@@ -134,32 +134,35 @@ class GithubCache {
   }
 
   /// README缓存
-  Future<String?> repoReadMe(Repository repo) async {
+  Future<String?> repoReadMe(Repository repo, {String? ref}) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
-    if (_readmes.containsKey(slug.fullName)) {
-      return _readmes[slug.fullName];
+    final key = "${slug.fullName}${ref ?? ''}";
+    if (_readmes.containsKey(key)) {
+      return _readmes[key];
     }
     try {
-      final file = await github?.repositories.getReadme(slug);
+      final file = await github?.repositories.getReadme(slug, ref: ref);
       if (file != null) {
-        _readmes[slug.fullName] = file.text;
+        _readmes[key] = file.text;
         return file.text;
       }
     } catch (e) {
-      _readmes[slug.fullName] = '';
+      _readmes[key] = '';
     }
     return null;
   }
 
   /// 目录内容缓存
-  Future<RepositoryContents?> repoContents(Repository repo, String path) async {
+  Future<RepositoryContents?> repoContents(Repository repo, String path,
+      {String? ref}) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
 
-    final key = "${slug.fullName}$path";
+    final key = "${slug.fullName}$path${ref ?? ''}";
     if (_contents.containsKey(key)) {
       return _contents[key];
     }
-    final content = await github?.repositories.getContents(slug, path);
+    final content =
+        await github?.repositories.getContents(slug, path, ref: ref);
     if (content != null) {
       // 如果是文件，则不保存在内存缓存中，直接写入磁盘
       if (content.isFile) {

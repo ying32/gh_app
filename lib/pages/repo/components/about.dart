@@ -61,7 +61,8 @@ class RepoAbout extends StatelessWidget {
               text: Text(
                 repo.license!.name!,
                 overflow: TextOverflow.ellipsis,
-              )),
+              ),
+              expanded: true),
         // Activity
         IconText(
             icon: Remix.star_line,

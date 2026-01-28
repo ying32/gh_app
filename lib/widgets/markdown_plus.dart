@@ -52,6 +52,7 @@ class MarkdownBlockPlus extends StatelessWidget {
         ? MarkdownConfig.darkConfig
         : MarkdownConfig.defaultConfig);
     return m.Material(
+      textStyle: FluentTheme.of(context).typography.body,
       type: m.MaterialType.transparency,
       child: MarkdownBlock(
           data: data,

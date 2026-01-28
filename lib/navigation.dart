@@ -223,19 +223,14 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
           //     return CurrentUserHeadName(user: snapshot.data, imageSize: 48);
           //   },
           // ),
-
           Selector<CurrentUserModel, CurrentUser?>(
             selector: (_, model) => model.user,
             builder: (context, user, __) {
-              return CurrentUserHeadName(user, imageSize: 48);
+              return CurrentUserHeadName(user,
+                  imageSize: 48, onlyNickName: true);
             },
           ),
-
-          // ChangeNotifierProvider.value(value: null,
-          //   child: CurrentUserHeadName(user: snapshot.data, imageSize: 48),
-          //
-          // ),
-
+          const SizedBox(width: 10),
           Align(
             alignment: AlignmentDirectional.centerEnd,
             child: Padding(
@@ -253,15 +248,12 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
               ),
             ),
           ),
-          DropDownButton(
-            leading: const SizedBox.shrink(),
-            title: const Icon(Remix.menu_line),
-            trailing: const SizedBox.shrink(),
+          IconPopupMenu(
+            icon: const Icon(Remix.menu_line, size: 18),
+            tooltip: '菜单',
             items: [
               MenuFlyoutItem(text: const Text('跳转仓库'), onPressed: _onGoToRepo),
               // MenuFlyoutSeparator(),
-              // MenuFlyoutItem(text: const Text('Reply'), onPressed: () {}),
-              // MenuFlyoutItem(text: const Text('Reply all'), onPressed: () {}),
             ],
           ),
           const SizedBox(width: 10),

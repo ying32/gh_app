@@ -3,7 +3,7 @@ import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/utils.dart';
-import 'package:gh_app/widgets/markdown.dart';
+import 'package:gh_app/widgets/markdown_plus.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -13,13 +13,13 @@ class RepoReadMe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<PathModel, String>(
-        selector: (_, model) => model.path,
+    return Selector2<PathModel, RepoBranchModel, (String, String?)>(
+        selector: (_, model, model2) => (model.path, model2.selectedBranch),
         builder: (_, p, __) {
-          if (p != "/") return const SizedBox.shrink();
+          if (p.$1 != "/") return const SizedBox.shrink();
           final repo = context.read<RepoModel>().repo;
           return FutureBuilder(
-            future: GithubCache.instance.repoReadMe(repo),
+            future: GithubCache.instance.repoReadMe(repo, ref: p.$2),
             builder: (_, snapshot) {
               if (!snapshotIsOk(snapshot, false, false)) {
                 return const SizedBox.shrink();
@@ -37,13 +37,14 @@ class RepoReadMe extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             )),
                         const SizedBox(width: 12.0),
-                        IconText(
-                            icon: Remix.scales_line,
-                            text: Text(
-                              repo.license?.name ?? '',
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            )),
+                        if (repo.license != null)
+                          IconText(
+                              icon: Remix.scales_line,
+                              text: Text(
+                                repo.license!.name ?? '',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              )),
                       ],
                     ),
                     if (body.isNotEmpty) MarkdownBlockPlus(data: body),

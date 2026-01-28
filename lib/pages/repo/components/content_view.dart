@@ -3,7 +3,7 @@ import 'dart:math' as math;
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/widgets/highlight_plus.dart';
-import 'package:gh_app/widgets/markdown.dart';
+import 'package:gh_app/widgets/markdown_plus.dart';
 import 'package:github/github.dart';
 import 'package:path/path.dart' as p;
 

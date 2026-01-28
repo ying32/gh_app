@@ -14,10 +14,12 @@ class RepoContents extends StatelessWidget {
   const RepoContents({
     super.key,
     this.path = "/",
+    this.ref,
     required this.onPathChange,
   });
 
   final String path;
+  final String? ref;
   final ValueChanged<String> onPathChange;
 
   /// 检测path，如果为空，则直接为 /
@@ -33,12 +35,7 @@ class RepoContents extends StatelessWidget {
             : Icon(Remix.folder_fill, color: Colors.blue.lighter),
       ),
       title: Text(file.name ?? ''),
-      trailing: FutureBuilder(
-        future: null,
-        builder: (_, snapshot) {
-          return const SizedBox.shrink();
-        },
-      ),
+      //trailing: const SizedBox.shrink(),
       onPressed: () {
         onPathChange.call("/${file.path}");
       },
@@ -51,7 +48,7 @@ class RepoContents extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: FutureBuilder(
-        future: GithubCache.instance.repoContents(repo, _checkedPath),
+        future: GithubCache.instance.repoContents(repo, _checkedPath, ref: ref),
         builder: (_, snapshot) {
           if (!snapshotIsOk(snapshot, false)) {
             return const Center(child: ProgressRing());
@@ -66,7 +63,6 @@ class RepoContents extends StatelessWidget {
                 "file encoding=${contents.file?.encoding}, type=${contents.file?.type}");
             return ContentView(contents.file!);
           }
-          //
           if (!contents.isDirectory || contents.tree == null) {
             return const SizedBox.shrink();
           }

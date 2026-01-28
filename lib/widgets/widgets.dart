@@ -14,6 +14,7 @@ class IconText extends StatelessWidget {
     this.padding,
     this.iconColor,
     this.trailing,
+    this.expanded = false,
   });
 
   final IconData icon;
@@ -23,13 +24,14 @@ class IconText extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
   final Color? iconColor;
   final Widget? trailing;
+  final bool expanded;
 
   @override
   Widget build(BuildContext context) {
     Widget widget = Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(icon, size: iconSize, color: iconColor),
       SizedBox(width: spacing),
-      text,
+      expanded ? Expanded(child: text) : text,
       if (trailing != null) ...[
         SizedBox(width: spacing),
         trailing!,
@@ -191,4 +193,32 @@ class _WrapInitState extends State<WrapInit> {
 
   @override
   Widget build(BuildContext context) => widget.child;
+}
+
+/// icon样式的弹出菜单
+class IconPopupMenu extends StatelessWidget {
+  const IconPopupMenu({
+    super.key,
+    required this.icon,
+    required this.items,
+    this.tooltip,
+  });
+
+  final Widget icon;
+  final String? tooltip;
+  final List<MenuFlyoutItemBase> items;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = DropDownButton(
+      buttonBuilder: (_, onOpen) => IconButton(icon: icon, onPressed: onOpen),
+      leading: const SizedBox.shrink(),
+      trailing: const SizedBox.shrink(),
+      items: items,
+    );
+    if (tooltip != null) {
+      child = Tooltip(message: tooltip, child: child);
+    }
+    return child;
+  }
 }

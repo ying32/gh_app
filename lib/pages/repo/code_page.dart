@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -15,7 +16,7 @@ import 'components/repo_releases.dart';
 
 /// 分支列表
 class _RepoBranches extends StatelessWidget {
-  const _RepoBranches({super.key});
+  const _RepoBranches();
 
   @override
   Widget build(BuildContext context) {
@@ -39,21 +40,30 @@ class _RepoBranches extends StatelessWidget {
         final branches = (snapshot.data ?? [Branch(repo.defaultBranch, null)]);
         return Row(
           children: [
-            DropDownButton(
-                title: IconText(
-                    icon: Remix.git_branch_line,
-                    text: Text(repo.defaultBranch)),
-                items: branches
-                    .map((e) => MenuFlyoutItem(
-                        leading: e.name == repo.defaultBranch
-                            ? const Icon(Remix.check_line)
-                            : null,
-                        text: Text(e.name ?? ''),
-                        trailing: e.name == repo.defaultBranch
-                            ? TagLabel.other('默认')
-                            : null,
-                        onPressed: () {}))
-                    .toList()),
+            Selector<RepoBranchModel, String?>(
+              selector: (_, model) => model.selectedBranch,
+              builder: (_, branch, __) => DropDownButton(
+                  title: IconText(
+                      icon: Remix.git_branch_line,
+                      text: Text(branch ?? repo.defaultBranch)),
+                  items: branches
+                      .map((e) => MenuFlyoutItem(
+                          leading: e.name == (branch ?? repo.defaultBranch)
+                              ? const Icon(Remix.check_line)
+                              : null,
+                          text: Text(e.name ?? ''),
+                          trailing: e.name == repo.defaultBranch
+                              ? TagLabel.other('默认',
+                                  color: context.isDark
+                                      ? Colors.white
+                                      : Colors.black)
+                              : null,
+                          onPressed: () {
+                            context.read<RepoBranchModel>().selectedBranch =
+                                e.name == repo.defaultBranch ? null : e.name;
+                          }))
+                      .toList()),
+            ),
             const SizedBox(width: 10.0),
             HyperlinkButton(
               onPressed: () {},
@@ -76,10 +86,7 @@ class _RepoBranches extends StatelessWidget {
 
 /// 顶部条1
 class _TopBar1 extends StatelessWidget {
-  const _TopBar1({
-    super.key,
-    this.useCard = true,
-  });
+  const _TopBar1({this.useCard = true});
 
   final bool useCard;
 
@@ -149,7 +156,7 @@ class _TopBar1 extends StatelessWidget {
 }
 
 class _TopBar2 extends StatelessWidget {
-  const _TopBar2({super.key});
+  const _TopBar2();
 
   @override
   Widget build(BuildContext context) {
@@ -160,19 +167,6 @@ class _TopBar2 extends StatelessWidget {
           Spacer(),
           _TopBar1(useCard: false),
           SizedBox(width: 10.0),
-          // FilledButton(
-          //   style: ButtonStyle(
-          //     backgroundColor: ButtonState.all(Colors.green),
-          //     // foregroundColor: ButtonState.all(Colors.white),
-          //     textStyle:
-          //         ButtonState.all(const TextStyle(color: Colors.white)), //????
-          //   ),
-          //   child: const IconText(
-          //       icon: Remix.code_line,
-          //       text: Text('代码'),
-          //       trailing: Icon(Remix.arrow_drop_down_fill, size: 16)),
-          //   onPressed: () {},
-          // )
         ],
       ),
     );
@@ -181,7 +175,7 @@ class _TopBar2 extends StatelessWidget {
 
 /// 关于/Release信息等
 class _CodePageRight extends StatelessWidget {
-  const _CodePageRight({super.key});
+  const _CodePageRight();
 
   @override
   Widget build(BuildContext context) {
@@ -223,7 +217,6 @@ class CodePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    // flex: 4,
                     child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,6 +224,9 @@ class CodePage extends StatelessWidget {
                           Card(
                             child: RepoContents(
                               path: context.watch<PathModel>().path,
+                              ref: context
+                                  .watch<RepoBranchModel>()
+                                  .selectedBranch,
                               onPathChange: (value) {
                                 context.read<PathModel>().path = value;
                               },
@@ -241,14 +237,9 @@ class CodePage extends StatelessWidget {
                           const RepoReadMe(),
                         ]),
                   ),
-                  // Expanded(child: )),
                   const SizedBox(width: 8.0),
                   // 右边
-                  const SizedBox(
-                    width: 300,
-                    child: _CodePageRight(),
-                  )
-                  //  Expanded(flex: 1, child: Card(child: _RepoAbout(_repo))),
+                  const SizedBox(width: 300, child: _CodePageRight())
                 ],
               ),
             ],

@@ -24,10 +24,13 @@ class PrismColdarkDarkStyle extends p.PrismStyle<TextStyle> {
     super.regex = const TextStyle(color: Color(0xfff4adf4)),
     super.function = const TextStyle(color: Color(0xffc699e3)),
     super.atrule = const TextStyle(color: Color(0xffe9ae7e)),
-    super.keyword = const TextStyle(color: Color(0xffe9ae7e)),
+    super.keyword =
+        const TextStyle(color: Color(0xffe9ae7e), fontWeight: FontWeight.w500),
     super.operator = const TextStyle(color: Color(0xffe9ae7e)),
-    super.deleted = const TextStyle(color: Color(0xffcd6660), fontWeight: FontWeight.w500),
-    super.important = const TextStyle(color: Color(0xffcd6660), fontWeight: FontWeight.w500),
+    super.deleted =
+        const TextStyle(color: Color(0xffcd6660), fontWeight: FontWeight.w500),
+    super.important =
+        const TextStyle(color: Color(0xffcd6660), fontWeight: FontWeight.w500),
     super.bold = const TextStyle(fontWeight: FontWeight.w500),
     super.italic = const TextStyle(fontStyle: FontStyle.italic),
     super.entity = const TextStyle(),
