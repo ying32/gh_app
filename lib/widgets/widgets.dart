@@ -28,15 +28,19 @@ class IconText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget widget = Row(mainAxisSize: MainAxisSize.min, children: [
-      Icon(icon, size: iconSize, color: iconColor),
-      SizedBox(width: spacing),
-      expanded ? Expanded(child: text) : text,
-      if (trailing != null) ...[
-        SizedBox(width: spacing),
-        trailing!,
-      ],
-    ]);
+    Widget widget = Row(
+        mainAxisSize: MainAxisSize.min,
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        // mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Icon(icon, size: iconSize, color: iconColor),
+          SizedBox(width: spacing),
+          expanded ? Expanded(child: text) : text,
+          if (trailing != null) ...[
+            SizedBox(width: spacing),
+            trailing!,
+          ],
+        ]);
     if (padding != null) {
       widget = Padding(padding: padding!, child: widget);
     }

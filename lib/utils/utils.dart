@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart' as fui;
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 
 /// Checks if the current environment is a desktop environment.
@@ -55,4 +56,13 @@ bool snapshotIsOk<T>(
   return snapshot.connectionState == fui.ConnectionState.done &&
       (checkData ? snapshot.hasData : true) &&
       (checkError ? !snapshot.hasError : true);
+}
+
+/// 转换十六进制颜色
+Color hexColorTo(String text) {
+  if (text.startsWith("#")) text = text.substring(1);
+  if (text.length == 3) {
+    text = "${text[0] * 2}, ${text[1] * 2}, ${text[2] * 2}";
+  }
+  return Color(int.tryParse("ff$text", radix: 16) ?? 0);
 }

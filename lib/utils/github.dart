@@ -139,6 +139,23 @@ class GithubCache {
     return null;
   }
 
+  Future<List<Issue>?> repoIssues(Repository repo, {bool isOpen = true}) async {
+    final slug = RepositorySlug(repo.owner!.login, repo.name);
+    //final state = isOpen ? 'OPEN' : 'CLOSED';
+    final state = isOpen ? 'open' : 'closed'; //open, closed, all
+    final key = "issues:${slug.fullName}/$state";
+    if (hasCache(key)) {
+      return loadCache(key);
+    }
+    try {
+      return storeToCache(
+          key, await github?.issues.listByRepo(slug, state: state).toList());
+    } catch (e) {
+      //
+    }
+    return null;
+  }
+
   /// README缓存
   Future<String?> repoReadMe(Repository repo, {String? ref}) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
