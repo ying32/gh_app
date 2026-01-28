@@ -92,7 +92,7 @@ class GithubCache {
 
   /// 获取仓库列表信息
   Future<List<Repository>?> userRepos(String owner) async {
-    final key = "$owner/repos";
+    final key = "repos:$owner";
     if (hasCache(key)) {
       return loadCache(key);
     }
@@ -111,7 +111,7 @@ class GithubCache {
 
   Future<List<Branch>?> repoBranches(Repository repo) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
-    final key = slug.fullName;
+    final key = "branches:${slug.fullName}";
     if (hasCache(key)) {
       return loadCache(key);
     }
@@ -126,7 +126,7 @@ class GithubCache {
 
   Future<List<Release>?> repoReleases(Repository repo) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
-    final key = slug.fullName;
+    final key = "release:${slug.fullName}";
     if (hasCache(key)) {
       return loadCache(key);
     }
@@ -142,7 +142,7 @@ class GithubCache {
   /// README缓存
   Future<String?> repoReadMe(Repository repo, {String? ref}) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
-    final key = "${slug.fullName}${ref ?? ''}";
+    final key = "readme:${slug.fullName}/${ref ?? ''}";
     if (hasCache(key)) {
       return loadCache(key);
     }
@@ -159,7 +159,7 @@ class GithubCache {
   Future<RepositoryContents?> repoContents(Repository repo, String path,
       {String? ref}) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
-    final key = "${slug.fullName}$path/${ref ?? ''}";
+    final key = "contents:${slug.fullName}/$path/${ref ?? ''}";
     if (hasCache(key)) {
       return loadCache(key);
     }
