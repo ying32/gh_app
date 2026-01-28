@@ -17,7 +17,7 @@ class RepoModel extends ChangeNotifier {
 }
 
 class PathModel extends ChangeNotifier {
-  PathModel(this._path);
+  PathModel([this._path = ""]);
 
   /// 当前仓库信息
   String _path;
@@ -31,7 +31,7 @@ class PathModel extends ChangeNotifier {
 
   List<String> get segmentedPaths {
     if (_path.isEmpty || _path == "/") return [""];
-    final arr = _path.split("/");
+    final arr = "/$_path".split("/");
     return arr;
   }
 }

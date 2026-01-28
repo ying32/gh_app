@@ -80,7 +80,7 @@ class RepoPage extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<PathModel>(create: (_) => PathModel("/")),
+        ChangeNotifierProvider<PathModel>(create: (_) => PathModel()),
         ChangeNotifierProvider<RepoBranchModel>(
             create: (_) => RepoBranchModel()),
       ],

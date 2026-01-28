@@ -16,7 +16,7 @@ class RepoReadMe extends StatelessWidget {
     return Selector2<PathModel, RepoBranchModel, (String, String?)>(
         selector: (_, model, model2) => (model.path, model2.selectedBranch),
         builder: (_, p, __) {
-          if (p.$1 != "/") return const SizedBox.shrink();
+          if (p.$1 != "") return const SizedBox.shrink();
           final repo = context.read<RepoModel>().repo;
           return FutureBuilder(
             future: GithubCache.instance.repoReadMe(repo, ref: p.$2),

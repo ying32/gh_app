@@ -62,18 +62,8 @@ class GithubCache {
 
   CurrentUser? _currentUser;
 
-  /// 仓库列表缓存，key=owner
-  final Map<String, List<Repository>> _repos = {};
-
-  /// README缓存 key=owner/name
-  final Map<String, String> _readmes = {};
-
-  /// 目录结构缓存 key=owner/name/path
-  final Map<String, RepositoryContents> _contents = {};
-
-  /// 目录结构缓存 key=owner/name
-  final Map<String, List<Branch>> _branches = {};
-  final Map<String, List<Release>> _release = {};
+  /// 缓存
+  final _responsesCache = <String, dynamic>{};
 
   /// 当前user信息
   Future<CurrentUser?> get currentUser async =>
@@ -83,33 +73,51 @@ class GithubCache {
   Future<String> get cacheRoot async =>
       p.join((await getApplicationSupportDirectory()).path, "RepoCaches");
 
+  /// 缓存
+  bool hasCache(String key) => _responsesCache.containsKey(key);
+
+  /// 从缓存中加载
+  T? loadCache<T>(String key) {
+    final value = _responsesCache[key];
+    if (value == null || value is! T) return null;
+    return value;
+  }
+
+  /// 存到缓存中
+  T? storeToCache<T>(String key, T? value) {
+    if (value == null) return value;
+    _responsesCache[key] = value;
+    return value;
+  }
+
   /// 获取仓库列表信息
   Future<List<Repository>?> userRepos(String owner) async {
-    if (_repos.containsKey(owner)) {
-      return _repos[owner];
+    final key = "$owner/repos";
+    if (hasCache(key)) {
+      return loadCache(key);
     }
-    final list = await (owner.isEmpty
-            ? github?.repositories.listRepositories()
-            : github?.repositories.listUserRepositories(owner))
-        ?.toList();
-    if (list != null) {
-      _repos[owner] = list;
-      return list;
+    try {
+      return storeToCache(
+          key,
+          await (owner.isEmpty
+                  ? github?.repositories.listRepositories()
+                  : github?.repositories.listUserRepositories(owner))
+              ?.toList());
+    } catch (e) {
+      //
     }
     return null;
   }
 
   Future<List<Branch>?> repoBranches(Repository repo) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
-    if (_branches.containsKey(slug.fullName)) {
-      return _branches[slug.fullName];
+    final key = slug.fullName;
+    if (hasCache(key)) {
+      return loadCache(key);
     }
     try {
-      final list = await github?.repositories.listBranches(slug).toList();
-      if (list != null) {
-        _branches[slug.fullName] = list;
-        return list;
-      }
+      return storeToCache(
+          key, await github?.repositories.listBranches(slug).toList());
     } catch (e) {
       //
     }
@@ -118,15 +126,13 @@ class GithubCache {
 
   Future<List<Release>?> repoReleases(Repository repo) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
-    if (_release.containsKey(slug.fullName)) {
-      return _release[slug.fullName];
+    final key = slug.fullName;
+    if (hasCache(key)) {
+      return loadCache(key);
     }
     try {
-      final list = await github?.repositories.listReleases(slug).toList();
-      if (list != null) {
-        _release[slug.fullName] = list;
-        return list;
-      }
+      return storeToCache(
+          key, await github?.repositories.listReleases(slug).toList());
     } catch (e) {
       //
     }
@@ -137,17 +143,14 @@ class GithubCache {
   Future<String?> repoReadMe(Repository repo, {String? ref}) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
     final key = "${slug.fullName}${ref ?? ''}";
-    if (_readmes.containsKey(key)) {
-      return _readmes[key];
+    if (hasCache(key)) {
+      return loadCache(key);
     }
     try {
-      final file = await github?.repositories.getReadme(slug, ref: ref);
-      if (file != null) {
-        _readmes[key] = file.text;
-        return file.text;
-      }
+      return storeToCache(
+          key, (await github?.repositories.getReadme(slug, ref: ref))?.text);
     } catch (e) {
-      _readmes[key] = '';
+      storeToCache(key, "");
     }
     return null;
   }
@@ -156,11 +159,11 @@ class GithubCache {
   Future<RepositoryContents?> repoContents(Repository repo, String path,
       {String? ref}) async {
     final slug = RepositorySlug(repo.owner!.login, repo.name);
-
-    final key = "${slug.fullName}$path${ref ?? ''}";
-    if (_contents.containsKey(key)) {
-      return _contents[key];
+    final key = "${slug.fullName}$path/${ref ?? ''}";
+    if (hasCache(key)) {
+      return loadCache(key);
     }
+
     final content =
         await github?.repositories.getContents(slug, path, ref: ref);
     if (content != null) {
@@ -169,8 +172,7 @@ class GithubCache {
         // 先放这吧
         // _writeCacheFile(slug, content.file);
       }
-      _contents[key] = content;
-      return content;
+      return storeToCache(key, content);
     }
     return null;
   }

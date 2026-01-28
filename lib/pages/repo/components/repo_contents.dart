@@ -13,7 +13,7 @@ import 'content_view.dart';
 class RepoContents extends StatelessWidget {
   const RepoContents({
     super.key,
-    this.path = "/",
+    this.path = "",
     this.ref,
     required this.onPathChange,
   });
@@ -21,9 +21,6 @@ class RepoContents extends StatelessWidget {
   final String path;
   final String? ref;
   final ValueChanged<String> onPathChange;
-
-  /// 检测path，如果为空，则直接为 /
-  String get _checkedPath => path.isEmpty ? "/" : path;
 
   Widget _buildItem(GitHubFile file) {
     final isFile = file.type == "file";
@@ -37,7 +34,7 @@ class RepoContents extends StatelessWidget {
       title: Text(file.name ?? ''),
       //trailing: const SizedBox.shrink(),
       onPressed: () {
-        onPathChange.call("/${file.path}");
+        onPathChange.call(file.path ?? '');
       },
     );
   }
@@ -48,7 +45,7 @@ class RepoContents extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: FutureBuilder(
-        future: GithubCache.instance.repoContents(repo, _checkedPath, ref: ref),
+        future: GithubCache.instance.repoContents(repo, path, ref: ref),
         builder: (_, snapshot) {
           if (!snapshotIsOk(snapshot, false)) {
             return const Center(child: ProgressRing());

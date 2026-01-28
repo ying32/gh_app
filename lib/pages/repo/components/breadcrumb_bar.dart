@@ -22,9 +22,12 @@ class RepoBreadcrumbBar extends StatelessWidget {
           onItemPressed: (item) {
             final key = "/${item.value}";
             final model = context.read<PathModel>();
-            final pos = model.path.indexOf(key);
+            final path = "/${model.path}";
+            final pos = path.indexOf(key);
             if (pos != -1) {
-              model.path = model.path.substring(0, pos + key.length);
+              model.path = path.substring(1, pos + key.length);
+            } else {
+              model.path = "";
             }
           },
         );

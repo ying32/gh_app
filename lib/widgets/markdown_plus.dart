@@ -25,8 +25,7 @@ class MarkdownBlockPlus extends StatelessWidget {
     if (url != null) {
       // 没有host当对目录的
       if (url.host.isEmpty && url.path.isNotEmpty) {
-        context.read<PathModel>().path =
-            url.path.startsWith("/") ? url.path : "/${url.path}";
+        context.read<PathModel>().path = url.path;
       } else {
         launchUrl(url);
       }
