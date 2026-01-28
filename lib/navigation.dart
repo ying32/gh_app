@@ -1,10 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/login.dart';
 import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';

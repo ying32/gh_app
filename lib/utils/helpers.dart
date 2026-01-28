@@ -31,4 +31,7 @@ extension IntHelper on int {
         >= k1PB => "${_toSizeString(this / k1GB, fDigits)}PB",
         _ => '',
       };
+
+  String toKiloString() =>
+      this < 1000 ? "$this" : "${(this / 1000.0).toStringAsFixed(1)}k";
 }

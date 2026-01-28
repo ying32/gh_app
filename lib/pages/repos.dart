@@ -1,12 +1,32 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
+
+/// 语言的圆点
+class _LangCircleDot extends StatelessWidget {
+  const _LangCircleDot(this.lang, {super.key});
+  final String lang;
+  @override
+  Widget build(BuildContext context) {
+    if (lang.isEmpty) return const SizedBox.shrink();
+    return ClipOval(
+      child: Container(
+          width: 10.0,
+          height: 10.0,
+          color: Color(int.tryParse(
+                  "FF${(languageColors[lang] ?? '').replaceFirst("#", "")}",
+                  radix: 16) ??
+              Colors.green.green)),
+    );
+  }
+}
 
 class _RepoListItem extends StatelessWidget {
   const _RepoListItem(this.repo);
@@ -98,10 +118,8 @@ class _RepoListItem extends StatelessWidget {
           Row(
             children: [
               // 语言的一个圆，颜色还要待弄下哈
-              ClipOval(
-                child:
-                    Container(width: 10.0, height: 10.0, color: Colors.green),
-              ),
+              _LangCircleDot(repo.language),
+
               // 语言
               Padding(
                   padding: padding,
@@ -122,7 +140,7 @@ class _RepoListItem extends StatelessWidget {
                 child: IconText(
                     icon: Remix.git_fork_line,
                     // padding: padding,
-                    text: Text('${repo.forks ?? 0}')),
+                    text: Text((repo.forks ?? 0).toKiloString())),
               ),
               // 关注数
               HyperlinkButton(
@@ -130,7 +148,7 @@ class _RepoListItem extends StatelessWidget {
                 child: IconText(
                     icon: Remix.star_line,
                     // padding: padding,
-                    text: Text('${repo.stargazersCount}')),
+                    text: Text(repo.stargazersCount.toKiloString())),
               ),
               // 当前打开的issue数，这里貌似包含pull requests的数量
               HyperlinkButton(
@@ -138,7 +156,7 @@ class _RepoListItem extends StatelessWidget {
                 child: IconText(
                     icon: Remix.issues_line,
                     // padding: padding,
-                    text: Text('${repo.openIssuesCount}')),
+                    text: Text(repo.openIssuesCount.toKiloString())),
               ),
               // 最后更新时间
               Padding(

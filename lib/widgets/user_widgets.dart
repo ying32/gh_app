@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';

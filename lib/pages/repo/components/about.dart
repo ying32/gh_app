@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
+import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -65,15 +66,15 @@ class RepoAbout extends StatelessWidget {
         IconText(
             icon: Remix.star_line,
             padding: padding,
-            text: Text('${repo.stargazersCount}个点赞')),
+            text: Text('${repo.stargazersCount.toKiloString()} 点赞')),
         IconText(
             icon: Remix.eye_line,
             padding: padding,
-            text: Text('${repo.watchersCount}个关注')),
+            text: Text('${repo.watchersCount.toKiloString()} 关注')),
         IconText(
             icon: Remix.git_fork_line,
             padding: padding,
-            text: Text('${repo.forksCount}个分叉')),
+            text: Text('${repo.forksCount.toKiloString()} 分叉')),
       ],
     );
   }

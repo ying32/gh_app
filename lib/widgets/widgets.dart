@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
-import 'package:gh_app/fonts/remix_icon.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:url_launcher/link.dart';
 
 /// 带icon前缀的文本

@@ -1,7 +1,7 @@
 import 'package:file_icon/file_icon.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:github/github.dart';

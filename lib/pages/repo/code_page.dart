@@ -1,7 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/fonts/remix_icon.dart';
 import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
 import 'package:provider/provider.dart';
@@ -114,7 +115,7 @@ class _TopBar1 extends StatelessWidget {
             onPressed: _onWatch,
             child: IconText(
               icon: Remix.eye_line,
-              text: Text('${repo.watchersCount} 关注/取消关注'),
+              text: Text('${repo.watchersCount.toKiloString()} 关注/取消关注'),
             ),
           ),
         ),
@@ -124,7 +125,7 @@ class _TopBar1 extends StatelessWidget {
             onPressed: repo.allowForking != true ? null : _onFork,
             child: IconText(
               icon: Remix.git_fork_line,
-              text: Text('${repo.forksCount} 分叉'),
+              text: Text('${repo.forksCount.toKiloString()} 分叉'),
             ),
           ),
         ),
@@ -134,7 +135,7 @@ class _TopBar1 extends StatelessWidget {
             onPressed: _onStar,
             child: IconText(
               icon: Remix.star_line,
-              text: Text('${repo.stargazersCount} 点赞'),
+              text: Text('${repo.stargazersCount.toKiloString()} 点赞'),
             ),
           ),
         ),
