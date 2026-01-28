@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_prism/flutter_prism.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
+import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
+import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:path/path.dart' as path_lib;
 
 /// 修改自：flutter_highlight-0.7.0\lib\flutter_highlight.dart
@@ -96,7 +98,9 @@ class HighlightViewPlus extends StatelessWidget {
       return SelectableText(source, style: style);
     }
     final prism = Prism(
-        style: context.isDark ? const PrismStyle.dark() : const PrismStyle());
+        style: context.isDark
+            ? const PrismColdarkDarkStyle()
+            : const PrismColdarkColdStyle());
     try {
       final textSpans = prism.render(source, lang);
       return SelectableText.rich(TextSpan(style: style, children: textSpans));

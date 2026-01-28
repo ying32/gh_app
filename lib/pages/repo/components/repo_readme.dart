@@ -6,7 +6,6 @@ import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/markdown.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// README文件
 class RepoReadMe extends StatelessWidget {
@@ -47,24 +46,7 @@ class RepoReadMe extends StatelessWidget {
                             )),
                       ],
                     ),
-                    if (body.isNotEmpty)
-                      MarkdownBlockPlus(
-                        data: body,
-                        onTap: (link) {
-                          final url = Uri.tryParse(link);
-                          if (url != null) {
-                            // 没有host当对目录的
-                            if (url.host.isEmpty && url.path.isNotEmpty) {
-                              context.read<PathModel>().path =
-                                  url.path.startsWith("/")
-                                      ? url.path
-                                      : "/${url.path}";
-                            } else {
-                              launchUrl(url);
-                            }
-                          }
-                        },
-                      ),
+                    if (body.isNotEmpty) MarkdownBlockPlus(data: body),
                   ],
                 ),
               );

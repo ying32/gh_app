@@ -1,9 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:markdown_widget/config/configs.dart';
 import 'package:markdown_widget/widget/blocks/leaf/link.dart';
 import 'package:markdown_widget/widget/markdown_block.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MarkdownBlockPlus extends StatelessWidget {
   const MarkdownBlockPlus({
@@ -16,6 +19,19 @@ class MarkdownBlockPlus extends StatelessWidget {
   final String data;
   final bool selectable;
   final ValueCallback<String>? onTap;
+
+  void onDefaultLinkAction(BuildContext context, String link) {
+    final url = Uri.tryParse(link);
+    if (url != null) {
+      // 没有host当对目录的
+      if (url.host.isEmpty && url.path.isNotEmpty) {
+        context.read<PathModel>().path =
+            url.path.startsWith("/") ? url.path : "/${url.path}";
+      } else {
+        launchUrl(url);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,16 +54,13 @@ class MarkdownBlockPlus extends StatelessWidget {
     return m.Material(
       type: m.MaterialType.transparency,
       child: MarkdownBlock(
-        data: data,
-        selectable: selectable,
-        config: onTap != null
-            ? config.copy(configs: [
-                LinkConfig(
-                    onTap: onTap,
-                    style: const TextStyle(color: Color(0xff0969da)))
-              ])
-            : config,
-      ),
+          data: data,
+          selectable: selectable,
+          config: config.copy(configs: [
+            LinkConfig(
+                onTap: onTap ?? (link) => onDefaultLinkAction(context, link),
+                style: const TextStyle(color: Color(0xff0969da)))
+          ])),
     );
   }
 }

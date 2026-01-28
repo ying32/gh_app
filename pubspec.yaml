@@ -68,6 +68,7 @@ dependencies:
   markdown_widget: ^2.3.2+8
 
   # 语法高亮
+  dart_prism: ^0.2.1
   flutter_prism: ^0.2.2
   #markdown_viewer: ^0.6.2
 
@@ -87,6 +88,10 @@ dev_dependencies:
 
   # icon产生工具
   icons_launcher: ^2.1.7
+
+  # dart run gh_app:pasercss
+  # css解析，用于prism-themes生成dart导入
+  csslib: ^1.0.2
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

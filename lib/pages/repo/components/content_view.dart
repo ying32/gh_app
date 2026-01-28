@@ -3,7 +3,9 @@ import 'dart:math' as math;
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/widgets/highlight_plus.dart';
+import 'package:gh_app/widgets/markdown.dart';
 import 'package:github/github.dart';
+import 'package:path/path.dart' as p;
 
 /// 内容视图
 class ContentView extends StatelessWidget {
@@ -51,10 +53,14 @@ class ContentView extends StatelessWidget {
       if (_isImage(data)) {
         return Image.memory(data);
       }
-      return HighlightViewPlus(
-        utf8.decode(data), // 这里还要处理编码
-        fileName: file.name ?? '',
-      );
+      final filename = file.name ?? '';
+      // 这里还要处理编码
+      final body = utf8.decode(data);
+      final ext = p.extension(filename).toLowerCase();
+      if (ext == ".md" || ext == ".markdown") {
+        return MarkdownBlockPlus(data: body);
+      }
+      return HighlightViewPlus(body, fileName: filename);
     } catch (e) {
       return Text("Error: $e");
     }
