@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_prism/flutter_prism.dart';
@@ -110,7 +110,7 @@ class HighlightViewPlus extends StatelessWidget {
       return SelectableText(
         source,
         style: style,
-        selectionHeightStyle: BoxHeightStyle.max,
+        selectionHeightStyle: ui.BoxHeightStyle.max,
       );
     }
     final prism = Prism(
@@ -122,14 +122,14 @@ class HighlightViewPlus extends StatelessWidget {
       return SelectableText.rich(
         TextSpan(style: style, children: textSpans),
         // contextMenuBuilder: _defaultContextMenuBuilder,
-        selectionHeightStyle: BoxHeightStyle.max,
+        selectionHeightStyle: ui.BoxHeightStyle.max,
       );
     } catch (e) {
       // 如果没有查找到语法他会报一个错误，所以这里直接使用默认的
       return SelectableText(
         source,
         style: style,
-        selectionHeightStyle: BoxHeightStyle.max,
+        selectionHeightStyle: ui.BoxHeightStyle.max,
       );
     }
   }

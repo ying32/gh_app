@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 /// GraphQL查询
+/// https://docs.github.com/zh/graphql/reference/queries
 class GitHubGraphQL {
   GitHubGraphQL({
     this.auth = const Authentication.anonymous(),
@@ -23,6 +24,17 @@ class GitHubGraphQL {
   /// github实例
   final GitHub _github;
 
+  /// 一个查询
+  /// ```json
+  /// {
+  ///   "query": "query MyQuery($id: string) { thing(id: $id) { id name created } }",
+  ///   "variables": {
+  ///     "id": "thing_123"
+  ///   },
+  ///   "operationName": "MyQuery"
+  /// }
+  ///
+  /// ```
   Future<T> query<S, T>(
     String body, {
     int? statusCode,
@@ -112,6 +124,9 @@ class GitHubAPI {
 
   /// V4版本API，使用GraphQL操作的
   final GitHubGraphQL graphql;
+
+  /// 是否使用匿名方式
+  bool get isAnonymous => auth.isAnonymous;
 }
 
 /// 默认的API

@@ -67,6 +67,7 @@ dependencies:
   #highlight: any
   #flutter_syntax_view: ^4.1.7
   #flutter_markdown: ^0.7.3+2
+  markdown: ^7.2.1
   markdown_widget: ^2.3.2+8
 
   # 语法高亮

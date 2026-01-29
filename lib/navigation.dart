@@ -269,8 +269,8 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
           child: widget.child,
         );
       },
-      content: gitHubAPI.auth.isAnonymous ? const LoginPage() : null,
-      pane: gitHubAPI.auth.isAnonymous
+      content: gitHubAPI.isAnonymous ? const LoginPage() : null,
+      pane: gitHubAPI.isAnonymous
           ? null
           : NavigationPane(
               selected: _calculateSelectedIndex(context),
@@ -279,6 +279,7 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
                 child: GitHubIcon(size: 32),
               ),
               // header: UserInfoPanel(user: _currentUser),
+              // displayMode: PaneDisplayMode.minimal, // appTheme.displayMode,
               displayMode: PaneDisplayMode.compact, // appTheme.displayMode,
               //indicator: const StickyNavigationIndicator(),
 
