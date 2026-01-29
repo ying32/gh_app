@@ -47,7 +47,7 @@ class WrapNavigationPage extends StatelessWidget {
                   // semanticLabel: 'Document #$index',
                   icon: const Icon(Remix.home_line),
                   body: const HomePage(),
-                  closeIcon: null,
+                  closeIcon: FluentIcons.emoji,
                   onClosed: null)
             ]),
         child: const NavigationPage());
@@ -82,6 +82,14 @@ class _LeftNav extends StatelessWidget {
       icon: Remix.git_repository_line,
       title: '我的仓库',
       body: const ReposPage(),
+    ),
+    // todo: 还没写哈
+    _NavItem(
+      key: const ValueKey(RouterTable.repos),
+      icon: Remix.star_line,
+      title: '我收藏的仓库',
+      //body: const ReposPage(),
+      body: const SizedBox.shrink(),
     ),
     _NavItem(
       key: const ValueKey(RouterTable.search),
@@ -136,7 +144,7 @@ class _LeftNav extends StatelessWidget {
         const LinkAction(
           message: '源代码',
           icon: Icon(FluentIcons.open_source, size: 18),
-          link: 'https://github.com/ying32/gh_app',
+          link: appRepoUrl,
         ),
         const SizedBox(height: 8),
       ],
@@ -203,18 +211,12 @@ class NavigationPage extends StatefulWidget {
 }
 
 class _NavigationPageState extends State<NavigationPage> with WindowListener {
-  bool value = false;
-
   final viewKey = GlobalKey(debugLabel: 'Navigation View Key');
-  final searchKey = GlobalKey(debugLabel: 'Search Bar Key');
-  final searchFocusNode = FocusNode();
-  final searchController = TextEditingController();
 
   @override
   void initState() {
     windowManager.addListener(this);
     super.initState();
-
     // 获取当前user
     GithubCache.instance.currentUser.then((e) {
       context.read<CurrentUserModel>().user = e;
@@ -224,17 +226,15 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
   @override
   void dispose() {
     windowManager.removeListener(this);
-    searchController.dispose();
-    searchFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final localizations = FluentLocalizations.of(context);
+    // final localizations = FluentLocalizations.of(context);
 
-    final appTheme = context.watch<AppTheme>();
-    final theme = FluentTheme.of(context);
+    // final appTheme = context.watch<AppTheme>();
+    // final theme = FluentTheme.of(context);
     // if (widget.shellContext != null) {
     //   if (router.canPop() == false) {
     //     setState(() {});
@@ -246,6 +246,7 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
+        leading: const GitHubIcon(size: 32),
         automaticallyImplyLeading: false,
         title: () {
           return const DragToMoveArea(

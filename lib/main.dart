@@ -50,16 +50,13 @@ void main() async {
     //   await windowManager.focus();
     //   await windowManager.setPreventClose(true);
     // });
-
+    await windowManager.setTitle(appTitle);
+    await windowManager.setSize(const Size(1280, 768));
+    await windowManager.setMinimumSize(const Size(1280, 768));
+    await windowManager.center();
     windowManager.waitUntilReadyToShow().then((_) async {
-      await windowManager.setTitleBarStyle(
-        TitleBarStyle.hidden,
-        windowButtonVisibility: false,
-      );
-      await windowManager.setTitle(appTitle);
-      await windowManager.setMinimumSize(const Size(1280, 768));
-      await windowManager.setSize(const Size(1280, 768));
-      await windowManager.center();
+      await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
+          windowButtonVisibility: false);
       await windowManager.show();
       await windowManager.setPreventClose(true);
       await windowManager.setSkipTaskbar(false);

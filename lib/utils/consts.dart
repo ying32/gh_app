@@ -16,3 +16,6 @@ class RouterTable {
   static const repo = "/repo";
   static const search = "/search";
 }
+
+/// 项目url
+const appRepoUrl = 'https://github.com/ying32/gh_app';
