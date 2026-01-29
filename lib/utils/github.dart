@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:gh_app/utils/utils.dart';
 import 'package:github/github.dart';
@@ -7,13 +8,130 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+/// 带缓存功能的
+class CacheGitHub extends GitHub {
+  CacheGitHub({
+    super.auth,
+    super.endpoint,
+    super.version,
+    super.client,
+    this.isGraphQL = false,
+  });
+
+  final bool isGraphQL;
+
+  /// 缓存
+  final _caches = <String, dynamic>{};
+
+  /// 缓存根目录
+  Future<String> get cacheRoot async =>
+      p.join((await getApplicationSupportDirectory()).path, "Caches");
+
+  /// 仓库缓存根目录
+  Future<String> get repoCacheRoot async => p.join(await cacheRoot, "Repos");
+
+  /// REST API缓存根目录
+  Future<String> get restfulApiCacheRoot async =>
+      p.join(await cacheRoot, "restful");
+
+  /// GraphQl API缓存目录
+  Future<String> get graphqlApiCacheRoot async =>
+      p.join(await cacheRoot, "graphql");
+
+  /// 从缓存中加载
+  Future<Uint8List?> _readCachedFile(String key) async {
+    final file = File(p.join(
+        await (isGraphQL ? graphqlApiCacheRoot : restfulApiCacheRoot), key));
+    if (await file.exists()) {
+      try {
+        return file.readAsBytes();
+      } catch (e) {
+        //
+      }
+    }
+    return null;
+  }
+
+  /// 写到缓存中
+  Future<File?> _writeFileCache(String key, Uint8List data) async {
+    final dir =
+        Directory(await (isGraphQL ? graphqlApiCacheRoot : restfulApiCacheRoot))
+          ..createSync(recursive: true);
+    try {
+      final file = File(p.join(dir.path, key));
+      // 打上标记
+      _caches[key] = null;
+      return file.writeAsBytes(data, flush: true);
+    } catch (e) {
+      // 保存失败
+    }
+    return null;
+  }
+
+  String _paramsToString(Map<String, dynamic>? params) {
+    if (params == null || params.isEmpty) return '';
+    final buff = StringBuffer();
+    final keys = params.keys.toList()..sort();
+    for (final key in keys) {
+      buff.write("$key=${params[key]},");
+    }
+    return buff.toString();
+  }
+
+  @override
+  Future<http.Response> request(
+    String method,
+    String path, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? params,
+    dynamic body,
+    int? statusCode,
+    void Function(http.Response response)? fail,
+    String? preview,
+  }) async {
+    final key =
+        md5String("$method:$endpoint:$path:${_paramsToString(params)}:$body");
+
+    /// 一个简易的
+    Future<http.Response> doRequest() async {
+      final res = await super.request(method, path,
+          headers: headers,
+          params: params,
+          body: body,
+          statusCode: statusCode,
+          fail: fail,
+          preview: preview);
+      // 200的时候才写数据
+      if (res.statusCode == 200) {
+        _writeFileCache(key, res.bodyBytes);
+      }
+      return res;
+    }
+
+    // 已经缓存了，直接返回缓存
+    final data = await _readCachedFile(key);
+    if (data != null && data.isNotEmpty) {
+      // 本次是否已经更新过缓存了
+      if (!_caches.containsKey(key)) {
+        // 这个更新了怎么通知呢？
+        doRequest();
+      }
+      return http.Response.bytes(data, 200,
+          headers: {"content-type": "application/json; charset=utf-8"});
+    }
+
+    return doRequest();
+  }
+}
+
 /// GraphQL查询
 /// https://docs.github.com/zh/graphql/reference/queries
 class GitHubGraphQL {
   GitHubGraphQL({
     this.auth = const Authentication.anonymous(),
     this.endpoint = 'https://api.github.com/graphql',
-  }) : _github = GitHub(auth: auth, endpoint: endpoint, version: '');
+  }) : _github = CacheGitHub(
+            auth: auth, endpoint: endpoint, version: '', isGraphQL: true);
 
   /// Authentication Information
   Authentication auth;
@@ -22,7 +140,7 @@ class GitHubGraphQL {
   final String endpoint;
 
   /// github实例
-  final GitHub _github;
+  final CacheGitHub _github;
 
   /// 一个查询
   /// ```json
@@ -113,14 +231,14 @@ class GitHubGraphQL {
 class GitHubAPI {
   GitHubAPI({
     this.auth = const Authentication.anonymous(),
-  })  : restful = GitHub(auth: auth),
+  })  : restful = CacheGitHub(auth: auth),
         graphql = GitHubGraphQL(auth: auth);
 
   /// Authentication Information
   final Authentication auth;
 
   /// V3版本API，使用Restful操作的
-  final GitHub restful;
+  final CacheGitHub restful;
 
   /// V4版本API，使用GraphQL操作的
   final GitHubGraphQL graphql;
@@ -191,266 +309,83 @@ class GithubCache {
 
   CurrentUser? _currentUser;
 
-  /// 缓存
-  final _responsesCache = <String, dynamic>{};
-
   /// 当前user信息
   Future<CurrentUser?> get currentUser async =>
       _currentUser ??= (gitHubAPI.auth.isAnonymous
           ? null
           : await gitHubAPI.restful.users.getCurrentUser());
 
-  /// 缓存根目录
-  Future<String> get cacheRoot async =>
-      p.join((await getApplicationSupportDirectory()).path, "Caches");
-
-  /// 仓库缓存根目录
-  Future<String> get repoCacheRoot async => p.join(await cacheRoot, "Repos");
-
-  /// REST API缓存根目录
-  Future<String> get restfulApiCacheRoot async =>
-      p.join(await cacheRoot, "restful");
-
-  /// GraphQl API缓存目录
-  Future<String> get graphqlApiCacheRoot async =>
-      p.join(await cacheRoot, "graphql");
-
-  /// 缓存
-  bool hasCache(String key) => _responsesCache.containsKey(md5String(key));
-
-  /// 从缓存中加载
-  Future<T?> loadCache<S, T2, T>(String key,
-      [JSONConverter<S, T2>? converter]) async {
-    key = md5String(key);
-    final value = _responsesCache[key];
-    // if (value == null) {
-    //   // 缓存文件
-    //   final file = File(p.join(await restfulApiCacheRoot, key));
-    //   if (file.existsSync()) {
-    //     //
-    //   }
-    // }
-
-    if (value == null || value is! T) return null;
-    return value;
-  }
-
   Future<List<Notification>?> get currentUserNotifications async {
-    const key = "currentUserNotifications:";
-    if (hasCache(key)) {
-      return loadCache(key, Notification.fromJson);
-    }
-    return storeToCache(
-        key, await gitHubAPI.restful.activity.listNotifications().toList());
+    return gitHubAPI.restful.activity.listNotifications().toList();
   }
 
   ///
   Future<List<User>?> userFollowers([String owner = '']) async {
-    final key = "userFollowers:$owner";
-    if (hasCache(key)) {
-      return loadCache(key, User.fromJson);
-    }
-    try {
-      return storeToCache(
-          key,
-          await (owner.isEmpty
-                  ? gitHubAPI.restful.users.listCurrentUserFollowers()
-                  : gitHubAPI.restful.users.listUserFollowers(owner))
-              .toList());
-    } catch (e) {
-      //
-    }
-    return null;
+    return (owner.isEmpty
+            ? gitHubAPI.restful.users.listCurrentUserFollowers()
+            : gitHubAPI.restful.users.listUserFollowers(owner))
+        .toList();
   }
 
   Future<List<User>?> userFollowing([String owner = '']) async {
-    final key = "userFollowing:$owner";
-    if (hasCache(key)) {
-      return loadCache(key, User.fromJson);
-    }
-    try {
-      return storeToCache(
-        key,
-        await gitHubAPI.restful.users.listCurrentUserFollowing().toList(),
-        // await (owner.isEmpty
-        //     ? githubV3.users.listCurrentUserFollowing()
-        //     : )
-        //     .toList(),
-      );
-    } catch (e) {
-      //
-    }
-    return null;
-  }
-
-  /// 存到缓存中
-  Future<T?> storeToCache<T>(String key, T? value) async {
-    if (value == null) return value;
-    key = md5String(key);
-    _responsesCache[key] = value;
-    // final dir = Directory(await restfulApiCacheRoot)
-    //   ..createSync(recursive: true);
-    // try {
-    //   final file = File(p.join(dir.path, key));
-    //   final body = value is String ? value : jsonEncode(value);
-    //   if (body.isNotEmpty) {
-    //     file.writeAsString(body, flush: true);
-    //   }
-    // } catch (e) {
-    //   // 保存失败
-    // }
-    return value;
+    return gitHubAPI.restful.users.listCurrentUserFollowing().toList();
   }
 
   /// 获取仓库列表信息
   Future<List<Repository>?> userRepos(String owner) async {
-    final key = "repos:$owner";
-    if (hasCache(key)) {
-      return loadCache(key, Repository.fromJson);
-    }
-    return storeToCache(
-        key,
-        await (owner.isEmpty
-                ? gitHubAPI.restful.repositories.listRepositories()
-                : gitHubAPI.restful.repositories.listUserRepositories(owner))
-            .toList());
+    return (owner.isEmpty
+            ? gitHubAPI.restful.repositories.listRepositories()
+            : gitHubAPI.restful.repositories.listUserRepositories(owner))
+        .toList();
   }
 
   Future<Repository?> userRepo(String owner, String name) async {
     final slug = RepositorySlug(owner, name);
-    final key = "repo:${slug.fullName}";
-    if (hasCache(key)) {
-      return loadCache(key, Repository.fromJson);
-    }
-    try {
-      return storeToCache(
-          key, await gitHubAPI.restful.repositories.getRepository(slug));
-    } catch (e) {
-      //
-    }
-    return null;
+
+    return gitHubAPI.restful.repositories.getRepository(slug);
   }
 
   Future<List<Branch>?> repoBranches(Repository repo) async {
     final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-    final key = "branches:${slug.fullName}";
-    if (hasCache(key)) {
-      return loadCache(key, Branch.fromJson);
-    }
-    try {
-      return storeToCache(key,
-          await gitHubAPI.restful.repositories.listBranches(slug).toList());
-    } catch (e) {
-      //
-    }
-    return null;
+
+    return gitHubAPI.restful.repositories.listBranches(slug).toList();
   }
 
   Future<List<Release>?> repoReleases(Repository repo) async {
     final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-    final key = "release:${slug.fullName}";
-    if (hasCache(key)) {
-      return loadCache(key, Release.fromJson);
-    }
-    try {
-      return storeToCache(key,
-          await gitHubAPI.restful.repositories.listReleases(slug).toList());
-    } catch (e) {
-      //
-    }
-    return null;
+
+    return gitHubAPI.restful.repositories.listReleases(slug).toList();
   }
 
   Future<List<Issue>?> repoIssues(Repository repo, {bool isOpen = true}) async {
     final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
     //final state = isOpen ? 'OPEN' : 'CLOSED';
     final state = isOpen ? 'open' : 'closed'; //open, closed, all
-    final key = "issues:${slug.fullName}/$state";
-    if (hasCache(key)) {
-      return loadCache(key, Issue.fromJson);
-    }
-    try {
-      return storeToCache(
-          key,
-          await gitHubAPI.restful.issues
-              .listByRepo(slug, state: state)
-              .toList());
-    } catch (e) {
-      //
-    }
-    return null;
+
+    return gitHubAPI.restful.issues.listByRepo(slug, state: state).toList();
   }
 
   Future<List<PullRequest>?> repoPullRequests(Repository repo,
       {bool isOpen = true}) async {
     final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
     final state = isOpen ? 'open' : 'closed'; //open, closed, all
-    final key = "pullRequests:${slug.fullName}/$state";
-    if (hasCache(key)) {
-      return loadCache(key, PullRequest.fromJson);
-    }
-    try {
-      return storeToCache(
-          key,
-          await gitHubAPI.restful.pullRequests
-              .list(slug, state: state)
-              .toList());
-    } catch (e) {
-      //
-    }
-    return null;
+
+    return gitHubAPI.restful.pullRequests.list(slug, state: state).toList();
   }
 
   /// README缓存
   Future<String?> repoReadMe(Repository repo, {String? ref}) async {
     final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-    final key = "readme:${slug.fullName}/${ref ?? ''}";
-    if (hasCache(key)) {
-      return loadCache(key);
-    }
-    try {
-      return storeToCache(
-          key,
-          (await gitHubAPI.restful.repositories.getReadme(slug, ref: ref))
-              .text);
-    } catch (e) {
-      storeToCache(key, "");
-    }
-    return null;
+
+    return (await gitHubAPI.restful.repositories.getReadme(slug, ref: ref))
+        .text;
   }
 
   /// 目录内容缓存
   Future<RepositoryContents?> repoContents(Repository repo, String path,
       {String? ref}) async {
     final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-    final key = "contents:${slug.fullName}/$path/${ref ?? ''}";
-    if (hasCache(key)) {
-      return loadCache(key, RepositoryContents.fromJson);
-    }
-    final content =
-        await gitHubAPI.restful.repositories.getContents(slug, path, ref: ref);
-    // 如果是文件，则不保存在内存缓存中，直接写入磁盘
-    if (content.isFile) {
-      // 先放这吧
-      // _writeCacheFile(slug, content.file);
-    }
-    return storeToCache(key, content);
-  }
 
-  Future _writeCacheFile(RepositorySlug slug, GitHubFile? file) async {
-    if (file == null || file.path == null) return;
-    final cacheFile = File(p.join(await cacheRoot, slug.owner, slug.name,
-        file.path?.replaceAll('/', Platform.pathSeparator)));
-    if (await cacheFile.exists()) return;
-    await cacheFile.create(recursive: true);
-    // file.encoding 要判断编码，目前只知道base64
-    return cacheFile.writeAsBytesSync(
-        base64Decode(file.content!.replaceAll("\n", "")),
-        flush: true);
+    return gitHubAPI.restful.repositories.getContents(slug, path, ref: ref);
   }
 }
-
-/// 登录
-// Future<bool> login(AuthField value) async {
-//   return false;
-// }
