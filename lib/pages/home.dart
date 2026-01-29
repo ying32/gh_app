@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/user_model.dart';
+import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
@@ -27,11 +29,50 @@ class _HomePageState extends State<HomePage> {
       icon: const GitHubIcon(size: 20),
       closeIcon: null,
       body: Card(
-        child: Selector<CurrentUserModel, CurrentUser?>(
-          selector: (_, model) => model.user,
-          builder: (context, user, __) {
-            return UserInfoPanel(user);
-          },
+        child: Column(
+          children: [
+            Selector<CurrentUserModel, CurrentUser?>(
+              selector: (_, model) => model.user,
+              builder: (context, user, __) {
+                return UserInfoPanel(user);
+              },
+            ),
+            //
+            Button(
+                child: const Text('GraphQl测试'),
+                onPressed: () {
+                  if (kDebugMode) {
+                    print("开始测试");
+                    // 查询: { "query": "query { viewer { login }" }
+                    // 返回数据：
+                    // {"data":{"viewer":{"login":"ying32"}}}
+                    const test1 = 'query { viewer { login } }';
+                    // ={"data":{"organization":{"membersWithRole":{"edges":[{"node":{"name":"Matt Todd","avatarUrl
+                    const test2 = '''query {
+    organization(login:"github") {
+    membersWithRole(first: 100) {
+      edges {
+        node {
+          name
+          avatarUrl
+        }
+      }
+    }
+  }
+}''';
+
+                    gitHubAPI.graphql.query(test1, statusCode: 200).then((e) {
+                      if (e is Map) {
+                        print("返回结果=状态=$e");
+                      } else {
+                        print("返回结果=状态=${e.statusCode}, ${e.body}");
+                      }
+                    }).onError((e, s) {
+                      print("错误=$e");
+                    });
+                  }
+                }),
+          ],
         ),
       ),
     )

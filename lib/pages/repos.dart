@@ -18,12 +18,14 @@ class _LangCircleDot extends StatelessWidget {
     if (lang.isEmpty) return const SizedBox.shrink();
     return ClipOval(
       child: Container(
-          width: 10.0,
-          height: 10.0,
-          color: Color(int.tryParse(
-                  "FF${(languageColors[lang] ?? '').replaceFirst("#", "")}",
-                  radix: 16) ??
-              Colors.green.green)),
+        width: 10.0,
+        height: 10.0,
+        color: hexColorTo(languageColors[lang] ?? ''),
+        // color: Color(int.tryParse(
+        //         "FF${(languageColors[lang] ?? '').replaceFirst("#", "")}",
+        //         radix: 16) ??
+        //     Colors.green.green),
+      ),
     );
   }
 }

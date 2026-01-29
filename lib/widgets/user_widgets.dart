@@ -126,12 +126,14 @@ class UserLineInfo extends StatelessWidget {
     required this.value,
     this.isLink = false,
     this.isEmail = false,
+    this.textColor,
   });
 
   final IconData? icon;
   final dynamic value;
   final bool isLink;
   final bool isEmail;
+  final Color? textColor;
 
   Widget _build(Widget child) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -157,9 +159,9 @@ class UserLineInfo extends StatelessWidget {
       if (icon == null) return _build(value);
       return _build(IconText(icon: icon!, text: value));
     } else {
-      Widget child = Text("$value");
+      Widget child = Text("$value", style: TextStyle(color: textColor));
       if (icon == null) return child;
-      return _build(IconText(icon: icon!, text: child));
+      return _build(IconText(icon: icon!, text: child, iconColor: textColor));
     }
   }
 }

@@ -43,17 +43,27 @@ class GithubApp extends StatelessWidget {
               brightness: Brightness.dark,
               accentColor: appTheme.color,
               visualDensity: VisualDensity.standard,
+              selectionColor: Colors.blue.lightest.withOpacity(0.5),
               focusTheme: FocusThemeData(
                 glowFactor: is10footScreen(context) ? 2.0 : 0.0,
               ),
+              resources: const ResourceDictionary.dark(
+                  // cardBackgroundFillColorDefault: Color(0xd2000000),
+                  ),
             ),
             theme: FluentThemeData(
               fontFamily: appTheme.fontFamily,
               accentColor: appTheme.color,
               visualDensity: VisualDensity.standard,
+              selectionColor: Colors.blue.lightest.withOpacity(0.5),
               focusTheme: FocusThemeData(
                 glowFactor: is10footScreen(context) ? 2.0 : 0.0,
               ),
+              // flutter\packages\flutter\lib\src\material\desktop_text_selection_toolbar.dart
+              // _defaultToolbarBuilder, 发现他上下文菜单使用了card的背景色，过于透明，效果反而不好
+              resources: const ResourceDictionary.light(
+                  // cardBackgroundFillColorDefault: Color(0xd2ffffff),
+                  ),
             ),
             locale: appTheme.locale,
             builder: (context, child) {

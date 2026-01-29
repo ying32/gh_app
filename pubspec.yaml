@@ -42,6 +42,8 @@ dependencies:
   # 这个是github接口，9.25.0 需要dart 3.5
   github: 9.24.0
 
+  crypto: ^3.0.3
+
   provider: ^6.0.5
   system_theme: ^2.3.1
   window_manager: ^0.3.0

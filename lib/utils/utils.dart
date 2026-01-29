@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fui;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
@@ -66,3 +69,7 @@ Color hexColorTo(String text) {
   }
   return Color(int.tryParse("ff$text", radix: 16) ?? 0);
 }
+
+/// md5
+String md5String(String text) =>
+    md5.convert(utf8.encode(text)).toString().toLowerCase();

@@ -1,7 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/router.dart';
 import 'package:gh_app/utils/github.dart';
-import 'package:github/github.dart';
 
 mixin DialogClose {}
 
@@ -73,9 +72,7 @@ class _GoRepoDialogState extends State<GoRepoDialog> {
     }
     final segments = u.pathSegments;
     setState(() => _loading = true);
-    github?.repositories
-        .getRepository(RepositorySlug(segments[0], segments[1]))
-        .then((repo) {
+    GithubCache.instance.userRepo(segments[0], segments[1]).then((repo) {
       //print("e=${e.toJson()}");
       closeDialog(context);
       pushShellRoute(RouterTable.repo, extra: repo);

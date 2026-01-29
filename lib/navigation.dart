@@ -269,8 +269,8 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
           child: widget.child,
         );
       },
-      content: github == null ? const LoginPage() : null,
-      pane: github == null
+      content: gitHubAPI.auth.isAnonymous ? const LoginPage() : null,
+      pane: gitHubAPI.auth.isAnonymous
           ? null
           : NavigationPane(
               selected: _calculateSelectedIndex(context),

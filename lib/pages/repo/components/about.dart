@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/helpers.dart';
+import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -32,10 +33,15 @@ class RepoAbout extends StatelessWidget {
 
         // blog
         if (repo.homepage.isNotEmpty)
-          IconText(
+          UserLineInfo(
+              textColor: Colors.blue,
               icon: Remix.links_line,
-              padding: padding,
-              text: Text(repo.homepage)),
+              value: repo.homepage,
+              isLink: true),
+        // IconText(
+        //     icon: Remix.links_line,
+        //     padding: padding,
+        //     text: Text(repo.homepage)),
 
         if (repo.topics?.isNotEmpty ?? false)
           // tags

@@ -47,6 +47,15 @@ class MarkdownBlockPlus extends StatelessWidget {
     //   elementBuilders: const [],
     // );
 
+    // final markdownGenerator =   MarkdownGenerator();
+    // final widgets = markdownGenerator.buildWidgets(data, config: config);
+    // final column = Column(
+    //   mainAxisSize: MainAxisSize.min,
+    //   crossAxisAlignment: CrossAxisAlignment.start,
+    //   children: widgets,
+    // );
+    // return selectable ? SelectionArea(child: column) : column;
+
     final config = (context.isDark
         ? MarkdownConfig.darkConfig
         : MarkdownConfig.defaultConfig);

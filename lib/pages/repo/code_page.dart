@@ -122,14 +122,15 @@ class _TopBar1 extends StatelessWidget {
             onPressed: _onWatch,
             child: IconText(
               icon: Remix.eye_line,
-              text: Text('${repo.watchersCount.toKiloString()} 关注/取消关注'),
+              text: Text('${repo.watchersCount.toKiloString()} 关注'),
             ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Button(
-            onPressed: repo.allowForking != true ? null : _onFork,
+            onPressed:
+                repo.allowForking == true && !repo.isFork ? _onFork : null,
             child: IconText(
               icon: Remix.git_fork_line,
               text: Text('${repo.forksCount.toKiloString()} 分叉'),

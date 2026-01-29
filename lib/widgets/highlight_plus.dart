@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_prism/flutter_prism.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
@@ -50,6 +52,7 @@ class HighlightViewPlus extends StatelessWidget {
   static final _fileHighlights = {
     "CMakeLists.txt": "cmake",
     "Podfile": "ruby",
+    "Makefile": "makefile",
   };
 
   /// 这个正则还要重新弄下，这个识别不太好
@@ -84,6 +87,15 @@ class HighlightViewPlus extends StatelessWidget {
     return ext;
   }
 
+  static Widget _defaultContextMenuBuilder(
+      BuildContext context, EditableTextState editableTextState) {
+    return FluentTextSelectionToolbar.editableText(
+      editableTextState: editableTextState
+        ..contextMenuButtonItems
+            .add(ContextMenuButtonItem(label: 'ff', onPressed: () {})),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     const style = TextStyle(
@@ -95,7 +107,11 @@ class HighlightViewPlus extends StatelessWidget {
     final lang = _getLang(source);
     print("lang=$lang");
     if (lang.isEmpty) {
-      return SelectableText(source, style: style);
+      return SelectableText(
+        source,
+        style: style,
+        selectionHeightStyle: BoxHeightStyle.max,
+      );
     }
     final prism = Prism(
         style: context.isDark
@@ -103,10 +119,18 @@ class HighlightViewPlus extends StatelessWidget {
             : const PrismColdarkColdStyle());
     try {
       final textSpans = prism.render(source, lang);
-      return SelectableText.rich(TextSpan(style: style, children: textSpans));
+      return SelectableText.rich(
+        TextSpan(style: style, children: textSpans),
+        // contextMenuBuilder: _defaultContextMenuBuilder,
+        selectionHeightStyle: BoxHeightStyle.max,
+      );
     } catch (e) {
       // 如果没有查找到语法他会报一个错误，所以这里直接使用默认的
-      return SelectableText(source, style: style);
+      return SelectableText(
+        source,
+        style: style,
+        selectionHeightStyle: BoxHeightStyle.max,
+      );
     }
   }
 }

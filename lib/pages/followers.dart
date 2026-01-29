@@ -1,34 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
-import 'package:github/github.dart';
 
-class FollowersPage extends StatefulWidget {
+class FollowersPage extends StatelessWidget {
   const FollowersPage({super.key});
-
-  @override
-  State<FollowersPage> createState() => _FollowersPageState();
-}
-
-class _FollowersPageState extends State<FollowersPage> {
-  final List<User> _users = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _init();
-  }
-
-  void _init() async {
-    _users.clear();
-    github?.users.listCurrentUserFollowers().listen((user) {
-      if (mounted) {
-        setState(() {
-          _users.add(user);
-        });
-      }
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,23 +16,36 @@ class _FollowersPageState extends State<FollowersPage> {
         title: Text('关注我的人'),
         commandBar: Row(mainAxisAlignment: MainAxisAlignment.end, children: []),
       ),
-      content: ListView.separated(
-        itemCount: _users.length,
-        // controller: scrollController,
-        padding: EdgeInsetsDirectional.only(
-          bottom: kPageDefaultVerticalPadding,
-          start: PageHeader.horizontalPadding(context),
-          end: PageHeader.horizontalPadding(context),
-        ),
-        itemBuilder: (context, index) {
-          final item = _users[index];
-          return ListTile(
-            title: UserHeadName(user: item),
-            subtitle: Text(item.bio ?? ' '),
+      content: FutureBuilder(
+        future: GithubCache.instance.userFollowers(),
+        builder: (_, snapshot) {
+          if (!snapshotIsOk(snapshot, false, false)) {
+            return const Center(
+              child: ProgressRing(),
+            );
+          }
+          if (snapshot.data == null || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text('没有数据'),
+            );
+          }
+          return ListView.separated(
+            itemCount: snapshot.data!.length,
+            // controller: scrollController,
+            padding: EdgeInsetsDirectional.only(
+              bottom: kPageDefaultVerticalPadding,
+              start: PageHeader.horizontalPadding(context),
+              end: PageHeader.horizontalPadding(context),
+            ),
+            itemBuilder: (context, index) {
+              final item = snapshot.data![index];
+              return ListTile(title: UserHeadName(user: item));
+            },
+            separatorBuilder: (context, index) {
+              return const Divider(size: 1);
+            },
           );
         },
-        separatorBuilder: (BuildContext context, int index) =>
-            const Divider(size: 1, direction: Axis.horizontal),
       ),
     );
   }
