@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/navigation.dart';
 import 'package:gh_app/pages/followers.dart';
 import 'package:gh_app/pages/following.dart';
 import 'package:gh_app/pages/home.dart';
@@ -8,25 +7,15 @@ import 'package:gh_app/pages/login.dart';
 import 'package:gh_app/pages/pulls.dart';
 import 'package:gh_app/pages/repo/repo.dart';
 import 'package:gh_app/pages/repos.dart';
+import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:github/github.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'models/repo_model.dart';
-
-/// 跳由表
-class RouterTable {
-  static const root = "/";
-  static const settings = "/settings";
-  static const login = "/login";
-  static const followers = "/followers";
-  static const following = "/following";
-  static const issues = "/issues";
-  static const pulls = "/pulls";
-  static const repos = "/repos";
-  static const repo = "/repo";
-}
+import 'navigation_style2.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -64,7 +53,7 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
   ShellRoute(
     navigatorKey: _shellNavigatorKey,
     builder: (context, state, child) {
-      return NavigationPage(
+      return NavigationStyle2Page(
         shellContext: _shellNavigatorKey.currentContext,
         child: child,
       );
@@ -75,7 +64,7 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
           builder: (context, state) => const HomePage()),
       GoRoute(
           path: RouterTable.settings,
-          builder: (context, state) => const Settings()),
+          builder: (context, state) => const SettingsPage()),
       GoRoute(
           path: RouterTable.login,
           builder: (context, state) => const LoginPage()),
@@ -117,6 +106,9 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
         //   child: const RepoPage(),
         // ),
       ),
+      GoRoute(
+          path: RouterTable.search,
+          builder: (context, state) => const SearchPage()),
     ],
   ),
 ]);

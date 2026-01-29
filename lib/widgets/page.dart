@@ -24,4 +24,11 @@ mixin PageMixin {
       );
     });
   }
+
+  /// 显示错误
+  Widget errorDescription(Object? error) {
+    return Center(
+      child: Text("$error", style: TextStyle(fontSize: 18, color: Colors.red)),
+    );
+  }
 }

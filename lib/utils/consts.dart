@@ -2,3 +2,17 @@ const String appTitle = 'GitHub桌面板';
 
 /// 皮肤对应的颜色
 const themeModeStrings = ['跟随系统', '浅色模式', '深色模式'];
+
+/// 跳由表
+class RouterTable {
+  static const root = "/";
+  static const settings = "/settings";
+  static const login = "/login";
+  static const followers = "/followers";
+  static const following = "/following";
+  static const issues = "/issues";
+  static const pulls = "/pulls";
+  static const repos = "/repos";
+  static const repo = "/repo";
+  static const search = "/search";
+}

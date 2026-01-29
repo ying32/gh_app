@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -206,14 +205,14 @@ class UserInfoPanel extends StatelessWidget {
             children: [
               HyperlinkButton(
                 onPressed: () {
-                  pushRoute(context, RouterTable.followers);
+                  // pushRoute(context, RouterTable.followers);
                 },
                 child: Text("${user?.followersCount ?? 0}个关注者"),
               ),
               const Text('·'),
               HyperlinkButton(
                 onPressed: () {
-                  pushRoute(context, RouterTable.following);
+                  //pushRoute(context, RouterTable.following);
                 },
                 child: Text("${user?.followingCount ?? 0}个关注"),
               ),

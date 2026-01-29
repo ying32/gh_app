@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/models/tabview_model.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
@@ -70,13 +72,22 @@ class _TabPagesState extends State<_TabPages> {
 class RepoPage extends StatelessWidget {
   const RepoPage({super.key});
 
+  static void createNewTab(BuildContext context, Repository repo) {
+    context.read<TabviewModel>().addTab(
+          ChangeNotifierProvider<RepoModel>(
+            create: (_) => RepoModel(repo),
+            child: const RepoPage(),
+          ),
+          key: ValueKey("${RouterTable.repo}/${repo.fullName}"),
+          title: repo.fullName,
+          // icon: Remix.git_repository_line,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasFluentTheme(context));
-    final theme = FluentTheme.of(context);
-
-    // final model = context.read()<RepoModel>();
-    // final repo = model.repo;
+    // assert(debugCheckHasFluentTheme(context));
+    // final theme = FluentTheme.of(context);
 
     return MultiProvider(
       providers: [
@@ -117,7 +128,7 @@ class RepoPage extends StatelessWidget {
               content: Padding(
                 padding: EdgeInsetsDirectional.only(
                   bottom: kPageDefaultVerticalPadding,
-                  start: PageHeader.horizontalPadding(context),
+                  // start: PageHeader.horizontalPadding(context),
                   end: PageHeader.horizontalPadding(context),
                 ),
                 child: const _TabPages(),

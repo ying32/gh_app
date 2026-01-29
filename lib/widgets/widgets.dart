@@ -152,10 +152,12 @@ class LinkAction extends StatelessWidget {
     super.key,
     required this.icon,
     required this.link,
+    this.message,
   });
 
   final Icon icon;
   final String link;
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +166,7 @@ class LinkAction extends StatelessWidget {
       builder: (context, followLink) => Semantics(
         link: true,
         child: Tooltip(
-          message: link,
+          message: message ?? link,
           child: IconButton(
             icon: icon,
             onPressed: () => followLink?.call(),

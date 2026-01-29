@@ -1,6 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/router.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github.dart';
+import 'package:github/github.dart';
+import 'package:window_manager/window_manager.dart';
 
 mixin DialogClose {}
 
@@ -23,19 +26,25 @@ Future<void> showInfoDialog(String msg,
 
 /// 跳转仓库对话框，Root路由
 class GoRepoDialog extends StatefulWidget {
-  const GoRepoDialog({super.key});
+  const GoRepoDialog({
+    super.key,
+    this.onSuccess,
+  });
+
+  final ValueChanged<Repository>? onSuccess;
 
   @override
   State<GoRepoDialog> createState() => _GoRepoDialogState();
 
-  static Future<void> showEditor(
+  static Future<void> show(
     BuildContext context, {
     bool barrierDismissible = true,
+    ValueChanged<Repository>? onSuccess,
   }) async =>
       showDialog(
         context: context,
         barrierDismissible: barrierDismissible,
-        builder: (_) => const GoRepoDialog(),
+        builder: (_) => GoRepoDialog(onSuccess: onSuccess),
       );
 }
 
@@ -75,11 +84,16 @@ class _GoRepoDialogState extends State<GoRepoDialog> {
     GithubCache.instance.userRepo(segments[0], segments[1]).then((repo) {
       //print("e=${e.toJson()}");
       closeDialog(context);
+
+      if (widget.onSuccess != null) {
+        widget.onSuccess!.call(repo!);
+        return;
+      }
       pushShellRoute(RouterTable.repo, extra: repo);
       // github.repositories.listTags(slug)
     }).onError((e, s) {
-      print(e);
-      print(s);
+      // print(e);
+      // print(s);
       showInfoDialog("错误",
           context: context, error: "$e", severity: InfoBarSeverity.error);
     }).whenComplete(() {
@@ -147,9 +161,43 @@ class LoggingDialog extends StatelessWidget with DialogClose {
     );
   }
 
-  static Future<void> showLogging(BuildContext context) async => showDialog(
+  static Future<void> show(BuildContext context) async => showDialog(
         context: context,
         barrierDismissible: true,
         builder: (_) => const LoggingDialog(),
       );
+}
+
+class ExitAppDialog extends StatelessWidget {
+  const ExitAppDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ContentDialog(
+      title: const Text('退出提示'),
+      content: const Text('是否真的要退出$appTitle？'),
+      actions: [
+        FilledButton(
+          child: const Text('是'),
+          onPressed: () {
+            Navigator.pop(context);
+            windowManager.destroy();
+          },
+        ),
+        Button(
+          child: const Text('否'),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  static void show(BuildContext context, bool mounted) async {
+    bool isPreventClose = await windowManager.isPreventClose();
+    if (isPreventClose && mounted) {
+      showDialog(context: context, builder: (_) => const ExitAppDialog());
+    }
+  }
 }

@@ -2,12 +2,12 @@ import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
-import 'package:gh_app/router.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:provider/provider.dart';
 
 import 'models/user_model.dart';
+import 'navigation.dart';
 
 ///  用于pc端下支持手势的
 class CustomMaterialScrollBehavior extends FluentScrollBehavior {
@@ -33,7 +33,8 @@ class GithubApp extends StatelessWidget {
         value: appTheme,
         builder: (context, child) {
           final appTheme = context.watch<AppTheme>();
-          return FluentApp.router(
+          //return FluentApp.router(
+          return FluentApp(
             title: appTitle,
             themeMode: appTheme.mode,
             debugShowCheckedModeBanner: false,
@@ -81,9 +82,12 @@ class GithubApp extends StatelessWidget {
               );
             },
             scrollBehavior: CustomMaterialScrollBehavior(),
-            routeInformationParser: router.routeInformationParser,
-            routerDelegate: router.routerDelegate,
-            routeInformationProvider: router.routeInformationProvider,
+            // 非router模式，这里会使用tab模式的
+            home: const WrapNavigationPage(),
+            // 使用路由模式的
+            // routeInformationParser: router.routeInformationParser,
+            // routerDelegate: router.routerDelegate,
+            // routeInformationProvider: router.routeInformationProvider,
           );
         },
       ),

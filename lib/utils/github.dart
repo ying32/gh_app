@@ -235,6 +235,15 @@ class GithubCache {
     return value;
   }
 
+  Future<List<Notification>?> get currentUserNotifications async {
+    const key = "currentUserNotifications:";
+    if (hasCache(key)) {
+      return loadCache(key, Notification.fromJson);
+    }
+    return storeToCache(
+        key, await gitHubAPI.restful.activity.listNotifications().toList());
+  }
+
   ///
   Future<List<User>?> userFollowers([String owner = '']) async {
     final key = "userFollowers:$owner";
@@ -299,17 +308,12 @@ class GithubCache {
     if (hasCache(key)) {
       return loadCache(key, Repository.fromJson);
     }
-    try {
-      return storeToCache(
-          key,
-          await (owner.isEmpty
-                  ? gitHubAPI.restful.repositories.listRepositories()
-                  : gitHubAPI.restful.repositories.listUserRepositories(owner))
-              .toList());
-    } catch (e) {
-      print("====================userRepos=$owner, error=$e");
-    }
-    return null;
+    return storeToCache(
+        key,
+        await (owner.isEmpty
+                ? gitHubAPI.restful.repositories.listRepositories()
+                : gitHubAPI.restful.repositories.listUserRepositories(owner))
+            .toList());
   }
 
   Future<Repository?> userRepo(String owner, String name) async {
