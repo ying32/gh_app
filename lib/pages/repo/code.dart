@@ -1,18 +1,4 @@
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/models/repo_model.dart';
-import 'package:gh_app/utils/build_context_helper.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
-import 'package:gh_app/utils/github.dart';
-import 'package:gh_app/utils/helpers.dart';
-import 'package:gh_app/widgets/widgets.dart';
-import 'package:github/github.dart';
-import 'package:provider/provider.dart';
-
-import 'components/about.dart';
-import 'components/breadcrumb_bar.dart';
-import 'components/repo_contents.dart';
-import 'components/repo_readme.dart';
-import 'components/repo_releases.dart';
+part of '../repo.dart';
 
 /// 分支列表
 class _RepoBranches extends StatelessWidget {
@@ -192,8 +178,8 @@ class _CodePageRight extends StatelessWidget {
 }
 
 /// 代码页面
-class CodePage extends StatelessWidget {
-  const CodePage(this.repo, {super.key});
+class RepoCodePage extends StatelessWidget {
+  const RepoCodePage(this.repo, {super.key});
 
   final Repository repo;
 
@@ -223,7 +209,7 @@ class CodePage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Card(
-                            child: RepoContents(
+                            child: RepoContentsListView(
                               path: context.watch<PathModel>().path,
                               ref: context
                                   .watch<RepoBranchModel>()

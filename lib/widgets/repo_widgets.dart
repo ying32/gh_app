@@ -1,11 +1,22 @@
+import 'dart:convert';
+import 'dart:math' as math;
+
+import 'package:file_icon/file_icon.dart';
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/pages/repo/repo.dart';
+import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
+import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
+import 'package:path/path.dart' as p;
+import 'package:provider/provider.dart';
+
+import 'highlight_plus.dart';
+import 'markdown_plus.dart';
 
 /// 语言的圆点
 class LangCircleDot extends StatelessWidget {
@@ -28,6 +39,7 @@ class LangCircleDot extends StatelessWidget {
   }
 }
 
+/// 仓库列表项目
 class RepoListItem extends StatelessWidget {
   const RepoListItem(this.repo, {super.key});
 
@@ -175,6 +187,7 @@ class RepoListItem extends StatelessWidget {
   }
 }
 
+/// 仓库列表
 class RepoListView extends StatelessWidget {
   const RepoListView({
     super.key,
@@ -201,6 +214,175 @@ class RepoListView extends StatelessWidget {
       },
       separatorBuilder: (BuildContext context, int index) => const SizedBox(
           height: 2), // Divider(size: 1, direction: Axis.horizontal),
+    );
+  }
+}
+
+/// 仓库路径导航指示条
+class RepoBreadcrumbBar extends StatelessWidget {
+  const RepoBreadcrumbBar({super.key, this.repo});
+
+  final Repository? repo;
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<PathModel, List<String>>(
+      selector: (_, model) => model.segmentedPaths,
+      builder: (context, segmentedPaths, __) {
+        final r = repo ?? context.read<RepoModel>().repo;
+        return BreadcrumbBar(
+          items: segmentedPaths
+              .map((e) => BreadcrumbItem(
+                  label: Text(e.isEmpty ? r.name : e,
+                      style: TextStyle(color: Colors.blue)),
+                  value: e))
+              .toList(),
+          onItemPressed: (item) {
+            final key = "/${item.value}";
+            final model = context.read<PathModel>();
+            final path = "/${model.path}";
+            final pos = path.indexOf(key);
+            if (pos != -1) {
+              model.path = path.substring(1, pos + key.length);
+            } else {
+              model.path = "";
+            }
+          },
+        );
+      },
+    );
+  }
+}
+
+/// 内容视图
+class RepoContentView extends StatelessWidget {
+  const RepoContentView(this.file, {super.key});
+
+  final GitHubFile file;
+
+  bool get _canPreview => (file.size ?? 0) <= 1024 * 1024 * 1;
+
+  static const _jpegHeader = [0xFF, 0xD8, 0xFF];
+  static const tiffHeader1 = [0x49, 0x49, 0x2A];
+  static const tiffHeader2 = [0x4D, 0x4D, 0x2A];
+  static const tiffHeader3 = [0x4D, 0x4D, 0x00];
+  static const pngHeader = [0x89, 0x50, 0x4E, 0x47];
+  static const bmpHeader = [0x42, 0x4D];
+  static const gifHeader = [0x47, 0x49, 0x46];
+
+  bool _compareBytes(List<int> data1, List<int> data2) {
+    final count = math.min(data1.length, data2.length);
+    for (int i = 0; i < count; i++) {
+      if (data1[i] != data2[i]) return false;
+    }
+    return true;
+  }
+
+  /// 判断file类型
+  bool _isImage(List<int> data) {
+    return _compareBytes(data, _jpegHeader) ||
+        _compareBytes(data, tiffHeader1) ||
+        _compareBytes(data, tiffHeader2) ||
+        _compareBytes(data, tiffHeader3) ||
+        _compareBytes(data, pngHeader) ||
+        _compareBytes(data, bmpHeader) ||
+        _compareBytes(data, gifHeader);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_canPreview) {
+      return const Center(child: Text('<...文件太大...>'));
+    }
+    try {
+      // 解码数据
+      final data = base64Decode(file.content!.replaceAll("\n", ""));
+      if (_isImage(data)) {
+        return Image.memory(data);
+      }
+      final filename = file.name ?? '';
+      // 这里还要处理编码
+      final body = utf8.decode(data);
+      final ext = p.extension(filename).toLowerCase();
+      if (ext == ".md" || ext == ".markdown") {
+        return MarkdownBlockPlus(data: body);
+      }
+      return HighlightViewPlus(body, fileName: filename);
+    } catch (e) {
+      return Text("Error: $e");
+    }
+  }
+}
+
+/// 仓库目录列表
+class RepoContentsListView extends StatelessWidget {
+  const RepoContentsListView({
+    super.key,
+    this.path = "",
+    this.ref,
+    required this.onPathChange,
+  });
+
+  final String path;
+  final String? ref;
+  final ValueChanged<String> onPathChange;
+
+  Widget _buildItem(GitHubFile file) {
+    final isFile = file.type == "file";
+    return ListTile(
+      leading: SizedBox(
+        width: 24,
+        child: isFile
+            ? FileIcon(file.name ?? '', size: 24)
+            : Icon(Remix.folder_fill, color: Colors.blue.lighter),
+      ),
+      title: Text(file.name ?? ''),
+      //trailing: const SizedBox.shrink(),
+      onPressed: () {
+        onPathChange.call(file.path ?? '');
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final repo = context.read<RepoModel>().repo;
+    return SizedBox(
+      width: double.infinity,
+      child: FutureBuilder(
+        future: GithubCache.instance.repoContents(repo, path, ref: ref),
+        builder: (_, snapshot) {
+          if (!snapshotIsOk(snapshot, false)) {
+            return const Center(child: ProgressRing());
+          }
+          final contents = snapshot.data;
+          if (contents == null) {
+            return const SizedBox.shrink();
+          }
+          // 如果数据是文件，则显示内容
+          if (contents.isFile) {
+            print(
+                "file encoding=${contents.file?.encoding}, type=${contents.file?.type}");
+            return RepoContentView(contents.file!);
+          }
+          if (!contents.isDirectory || contents.tree == null) {
+            return const SizedBox.shrink();
+          }
+          // 返回目录结构
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...contents.tree!
+                  .where((e) => e.type == "dir")
+                  .map((e) => _buildItem(e)),
+              ...contents.tree!
+                  .where((e) => e.type == "file")
+                  .map((e) => _buildItem(e)),
+            ],
+          );
+        },
+      ),
     );
   }
 }

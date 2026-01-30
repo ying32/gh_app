@@ -1,17 +1,28 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
+import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
+import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/helpers.dart';
+import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/issues_widgets.dart';
+import 'package:gh_app/widgets/markdown_plus.dart';
+import 'package:gh_app/widgets/repo_widgets.dart';
+import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
 import 'package:provider/provider.dart';
 
-import 'action_page.dart';
-import 'code_page.dart';
-import 'issues_page.dart';
-import 'pull_request_page.dart';
-import 'wiki_page.dart';
+part 'repo/action.dart';
+part 'repo/code.dart';
+part 'repo/components/about.dart';
+part 'repo/components/repo_readme.dart';
+part 'repo/components/repo_releases.dart';
+part 'repo/issues.dart';
+part 'repo/pull_request.dart';
+part 'repo/wiki.dart';
 
 class _TabPages extends StatefulWidget {
   const _TabPages({super.key});
@@ -33,31 +44,31 @@ class _TabPagesState extends State<_TabPages> {
           text: const Text('代码'),
           icon: const Icon(Remix.code_line),
           closeIcon: null,
-          body: CodePage(repo),
+          body: RepoCodePage(repo),
         ),
         Tab(
           text: Text('问题 ${repo.openIssues ?? 0}'),
           icon: const Icon(Remix.issues_line),
           closeIcon: null,
-          body: IssuesPage(repo),
+          body: RepoIssuesPage(repo),
         ),
         Tab(
           text: const Text('合并请求 ${0}'),
           icon: const Icon(Remix.git_pull_request_line),
           closeIcon: null,
-          body: PullRequestPage(repo),
+          body: RepoPullRequestPage(repo),
         ),
         Tab(
           text: const Text('Actions'),
           icon: const Icon(Remix.play_circle_line),
           closeIcon: null,
-          body: ActionPage(repo),
+          body: RepoActionPage(repo),
         ),
         Tab(
           text: const Text('Wiki'),
           icon: const Icon(Remix.book_open_line),
           closeIcon: null,
-          body: WikiPage(repo),
+          body: RepoWikiPage(repo),
         ),
       ],
       onChanged: (index) {

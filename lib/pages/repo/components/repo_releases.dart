@@ -1,10 +1,4 @@
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/models/repo_model.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
-import 'package:gh_app/utils/github.dart';
-import 'package:gh_app/utils/utils.dart';
-import 'package:gh_app/widgets/widgets.dart';
-import 'package:provider/provider.dart';
+part of '../../repo.dart';
 
 /// Release
 class RepoReleases extends StatelessWidget {

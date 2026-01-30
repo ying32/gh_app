@@ -24,35 +24,32 @@ class HighlightViewPlus extends StatelessWidget {
 
   // 因为有些不能根据扩展名识别，所以这里维护一个
   static final _extHighlights = {
-    "iml": "xml",
-    "manifest": "xml",
-    "dproj": "xml",
-    "rc": "c",
-    "arb": "json",
-    "firebaserc": "json",
-    "fmx": "pascal",
-    "lfm": "pascal",
-    "dfm": "pascal",
-    "dpr": "pascal",
-    "lpr": "pascal",
-    "inc": "pascal",
-    "dpk": "pascal",
-    "lpk": "pascal",
-    "pas": "pascal",
-    "pp": "pascal",
-    "bat": "batch",
-    "cmd": "batch",
-    "dof": "ini",
-    "desktop": "ini",
-    "rs": "rust",
-    "h": "cpp",
+    "xml": {"iml", "manifest", "dproj"},
+    "c": {"rc"},
+    "json": {"arb", "firebaserc"},
+    "pascal": {
+      "fmx",
+      "lfm",
+      "dfm",
+      "dpr",
+      "lpr",
+      "inc",
+      "dpk",
+      "lpk",
+      "pas",
+      "pp"
+    },
+    "batch": {"bat", "cmd"},
+    "ini": {"dof", "desktop"},
+    "rust": {"rs"},
+    "cpp": {"h"},
   };
 
   /// 这个是查询纯文件名的
   static final _fileHighlights = {
-    "CMakeLists.txt": "cmake",
-    "Podfile": "ruby",
-    "Makefile": "makefile",
+    "cmake": {"CMakeLists.txt"},
+    "ruby": {"Podfile"},
+    "makefile": {"Makefile"},
   };
 
   /// 这个正则还要重新弄下，这个识别不太好
@@ -63,9 +60,11 @@ class HighlightViewPlus extends StatelessWidget {
     // 根据文件名查询语法
     final shortName = path_lib.basename(fileName);
 
-    var highlight = _fileHighlights[shortName];
-    if (highlight != null) {
-      return highlight;
+    // 匹配文件全名
+    for (final key in _fileHighlights.keys) {
+      if (_fileHighlights[key]?.contains(shortName) ?? false) {
+        return key;
+      }
     }
     // 根据扩展名查询
     var ext = path_lib.extension(shortName).toLowerCase();
@@ -75,9 +74,11 @@ class HighlightViewPlus extends StatelessWidget {
     }
     if (ext.startsWith(".")) ext = ext.substring(1);
     // 这个只是临时的，想要好的，还得做内容识别
-    highlight = _extHighlights[ext];
-    if (highlight != null) {
-      return highlight;
+    // 匹配扩展名
+    for (final key in _extHighlights.keys) {
+      if (_extHighlights[key]?.contains(shortName) ?? false) {
+        return key;
+      }
     }
     // 根据文件内容判断，这里判断为xml格式的
     if (data.startsWith(_xmlStartPattern)) {

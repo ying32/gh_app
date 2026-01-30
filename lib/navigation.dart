@@ -5,7 +5,7 @@ import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/home.dart';
 import 'package:gh_app/pages/issues.dart';
 import 'package:gh_app/pages/pulls.dart';
-import 'package:gh_app/pages/repo/repo.dart';
+import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';

@@ -1,9 +1,4 @@
-import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
-import 'package:gh_app/utils/github.dart';
-import 'package:gh_app/utils/utils.dart';
-import 'package:gh_app/widgets/widgets.dart';
-import 'package:github/github.dart';
+part of '../repo.dart';
 
 class _PullRequestItem extends StatelessWidget {
   const _PullRequestItem(this.data, {super.key});
@@ -56,8 +51,8 @@ class _PullRequestItem extends StatelessWidget {
   }
 }
 
-class PullRequestPage extends StatelessWidget {
-  const PullRequestPage(this.repo, {super.key});
+class RepoPullRequestPage extends StatelessWidget {
+  const RepoPullRequestPage(this.repo, {super.key});
 
   final Repository repo;
 
