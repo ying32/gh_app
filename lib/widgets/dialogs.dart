@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/github/github.dart';
 import 'package:window_manager/window_manager.dart';
 
 mixin DialogClose {}

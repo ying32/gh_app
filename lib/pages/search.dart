@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:github/github.dart';

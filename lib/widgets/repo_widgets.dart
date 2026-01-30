@@ -7,7 +7,7 @@ import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
-import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/widgets.dart';

@@ -6,7 +6,7 @@ import 'package:flutter_prism/flutter_prism.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
-import 'package:gh_app/utils/github.dart';
+import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:gh_app/widgets/widgets.dart';
