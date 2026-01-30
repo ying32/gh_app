@@ -1,13 +1,13 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 
 class CurrentUserModel extends ChangeNotifier {
   CurrentUserModel(this._user);
 
   /// 当前仓库信息
-  CurrentUser? _user;
-  CurrentUser? get user => _user;
-  set user(CurrentUser? value) {
+  QLUser? _user;
+  QLUser? get user => _user;
+  set user(QLUser? value) {
     if (value != _user) {
       _user = value;
       notifyListeners();

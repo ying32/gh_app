@@ -20,8 +20,9 @@ import 'markdown_plus.dart';
 
 /// 语言的圆点
 class LangCircleDot extends StatelessWidget {
-  const LangCircleDot(this.lang, {super.key});
+  const LangCircleDot(this.lang, {super.key, this.color});
   final String lang;
+  final String? color;
   @override
   Widget build(BuildContext context) {
     if (lang.isEmpty) return const SizedBox.shrink();
@@ -29,11 +30,7 @@ class LangCircleDot extends StatelessWidget {
       child: Container(
         width: 10.0,
         height: 10.0,
-        color: hexColorTo(languageColors[lang] ?? ''),
-        // color: Color(int.tryParse(
-        //         "FF${(languageColors[lang] ?? '').replaceFirst("#", "")}",
-        //         radix: 16) ??
-        //     Colors.green.green),
+        color: hexColorTo(color ?? languageColors[lang] ?? ''),
       ),
     );
   }
@@ -41,9 +38,14 @@ class LangCircleDot extends StatelessWidget {
 
 /// 仓库列表项目
 class RepoListItem extends StatelessWidget {
-  const RepoListItem(this.repo, {super.key});
+  const RepoListItem(
+    this.repo, {
+    super.key,
+    this.isPinStyle = false,
+  });
 
   final Repository repo;
+  final bool isPinStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -68,25 +70,39 @@ class RepoListItem extends StatelessWidget {
               //   child: Text("${repo.owner?.login ?? ''}/${repo.name}"),
               // ),
 
+              if (isPinStyle)
+                const Padding(
+                  padding: EdgeInsets.only(right: 8.0),
+                  child: Icon(Remix.git_repository_line),
+                ),
               LinkStyleButton(
                 onPressed: () {
                   RepoPage.createNewTab(context, repo);
 
                   //pushRoute(context, RouterTable.repo, extra: repo);
                 },
-                text: Text(
-                  "${repo.owner?.login ?? ''}/${repo.name}",
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16.0,
-                  ),
-                ),
+                text: !isPinStyle
+                    ? Text(
+                        "${repo.owner?.login ?? ''}/${repo.name}",
+                        style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0),
+                      )
+                    : Text(
+                        repo.name,
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16.0,
+                        ),
+                      ),
               ),
 
               const SizedBox(width: 8.0),
               // 公开或者私有
               if (repo.isPrivate) const TagLabel.private(),
+              if (isPinStyle && !repo.isPrivate) const TagLabel.public(),
 
               // 是否归档
               if (repo.archived)
@@ -95,10 +111,11 @@ class RepoListItem extends StatelessWidget {
                     child: TagLabel.archived()),
 
               const Spacer(),
-              LinkAction(
-                icon: const Icon(FluentIcons.open_source, size: 18),
-                link: repo.htmlUrl,
-              ),
+              if (!isPinStyle)
+                LinkAction(
+                  icon: const Icon(FluentIcons.open_source, size: 18),
+                  link: repo.htmlUrl,
+                ),
             ],
           ),
 
@@ -112,7 +129,7 @@ class RepoListItem extends StatelessWidget {
           ),
 
           // 关键词
-          if (repo.topics?.isNotEmpty ?? false)
+          if (!isPinStyle && (repo.topics?.isNotEmpty ?? false))
             // tags
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -140,7 +157,7 @@ class RepoListItem extends StatelessWidget {
                   child: Text(repo.language,
                       style: TextStyle(color: appTheme.color.lightest))),
               // 授权协议
-              if (repo.license?.name != null) ...[
+              if (!isPinStyle && repo.license?.name != null) ...[
                 IconText(
                     icon: Remix.scales_line,
                     padding: padding,
@@ -164,20 +181,22 @@ class RepoListItem extends StatelessWidget {
                     // padding: padding,
                     text: Text(repo.stargazersCount.toKiloString())),
               ),
-              // 当前打开的issue数，这里貌似包含pull requests的数量
-              HyperlinkButton(
-                onPressed: () {},
-                child: IconText(
-                    icon: Remix.issues_line,
-                    // padding: padding,
-                    text: Text(repo.openIssuesCount.toKiloString())),
-              ),
-              // 最后更新时间
-              Padding(
-                padding: padding,
-                child: Text(timeToLabel(repo.updatedAt),
-                    style: TextStyle(color: appTheme.color.lightest)),
-              ),
+              if (!isPinStyle)
+                // 当前打开的issue数，这里貌似包含pull requests的数量
+                HyperlinkButton(
+                  onPressed: () {},
+                  child: IconText(
+                      icon: Remix.issues_line,
+                      // padding: padding,
+                      text: Text(repo.openIssuesCount.toKiloString())),
+                ),
+              if (!isPinStyle)
+                // 最后更新时间
+                Padding(
+                  padding: padding,
+                  child: Text(timeToLabel(repo.updatedAt),
+                      style: TextStyle(color: appTheme.color.lightest)),
+                ),
             ],
           ),
         ],
@@ -213,7 +232,7 @@ class RepoListView extends StatelessWidget {
         return RepoListItem(repo);
       },
       separatorBuilder: (BuildContext context, int index) => const SizedBox(
-          height: 2), // Divider(size: 1, direction: Axis.horizontal),
+          height: 8), // Divider(size: 1, direction: Axis.horizontal),
     );
   }
 }

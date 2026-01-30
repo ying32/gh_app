@@ -6,9 +6,9 @@ import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:github/github.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/link.dart';
@@ -217,7 +217,7 @@ class _NavigationStyle2PageState extends State<NavigationStyle2Page>
           );
         }(),
         actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          Selector<CurrentUserModel, CurrentUser?>(
+          Selector<CurrentUserModel, QLUser?>(
             selector: (_, model) => model.user,
             builder: (context, user, __) {
               return const SizedBox

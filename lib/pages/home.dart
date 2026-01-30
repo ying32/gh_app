@@ -1,9 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/utils/github/github.dart';
-import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
-import 'package:github/github.dart';
 import 'package:provider/provider.dart';
 
 import 'login.dart';
@@ -41,36 +41,54 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Selector<CurrentUserModel, CurrentUser?>(
+                      Selector<CurrentUserModel, QLUser?>(
                         selector: (_, model) => model.user,
                         builder: (context, user, __) {
                           if (user == null) return const SizedBox.shrink();
-                          return UserInfoPanel(user);
+                          print(
+                              "user.pinnedItems=${user.pinnedItems?.firstOrNull?.name}");
+                          return Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              UserInfoPanel(user),
+                              if (user.pinnedItems?.isNotEmpty ?? false)
+                                SizedBox(
+                                  width: 500,
+                                  height: 500,
+                                  child: Column(
+                                    children: user.pinnedItems!
+                                        .map((e) =>
+                                            RepoListItem(e, isPinStyle: true))
+                                        .toList(),
+                                  ),
+                                ),
+                            ],
+                          );
                         },
                       ),
-                      Expanded(
-                        child: FutureBuilder(
-                          future: GithubCache.instance.currentUserNotifications,
-                          builder: (_, snapshot) {
-                            if (!snapshotIsOk(snapshot)) {
-                              return const SizedBox.shrink();
-                            }
-                            return ListView.separated(
-                              itemCount: snapshot.data?.length ?? 0,
-                              itemBuilder: (BuildContext context, int index) {
-                                final item = snapshot.data![index];
-                                return ListTile(
-                                  title: Text("${item.reason}"),
-                                );
-                              },
-                              separatorBuilder:
-                                  (BuildContext context, int index) =>
-                                      const Divider(size: 1),
-                            );
-                            //
-                          },
-                        ),
-                      )
+                      // Expanded(
+                      //   child: FutureBuilder(
+                      //     future: GithubCache.instance.currentUserNotifications,
+                      //     builder: (_, snapshot) {
+                      //       if (!snapshotIsOk(snapshot)) {
+                      //         return const SizedBox.shrink();
+                      //       }
+                      //       return ListView.separated(
+                      //         itemCount: snapshot.data?.length ?? 0,
+                      //         itemBuilder: (BuildContext context, int index) {
+                      //           final item = snapshot.data![index];
+                      //           return ListTile(
+                      //             title: Text("${item.reason}"),
+                      //           );
+                      //         },
+                      //         separatorBuilder:
+                      //             (BuildContext context, int index) =>
+                      //                 const Divider(size: 1),
+                      //       );
+                      //       //
+                      //     },
+                      //   ),
+                      // )
                     ],
                   ),
                 ),

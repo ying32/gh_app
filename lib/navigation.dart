@@ -2,11 +2,11 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/models/user_model.dart';
+import 'package:gh_app/pages/graphql_test.dart';
 import 'package:gh_app/pages/home.dart';
 import 'package:gh_app/pages/issues.dart';
 import 'package:gh_app/pages/pulls.dart';
 import 'package:gh_app/pages/repo.dart';
-import 'package:gh_app/pages/repo/graphql_test.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
@@ -15,6 +15,7 @@ import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
@@ -33,6 +34,28 @@ class _NavItem {
   String title;
   IconData icon;
   Widget body;
+}
+
+class _NavItemIconButton extends StatelessWidget {
+  const _NavItemIconButton(this.item, {super.key});
+
+  final _NavItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: item.title,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: IconButton(
+            icon: Icon(item.icon, size: 18),
+            onPressed: () {
+              context.read<TabviewModel>().addTab(
+                  key: item.key, item.body, title: item.title, icon: item.icon);
+            }),
+      ),
+    );
+  }
 }
 
 class WrapNavigationPage extends StatelessWidget {
@@ -59,12 +82,6 @@ class _LeftNav extends StatelessWidget {
   _LeftNav({super.key});
 
   final List<_NavItem> originalItems = [
-    // _NavItem(
-    //   key: const ValueKey(RouterTable.root),
-    //   icon: Remix.home_line,
-    //   title: '主页',
-    //   body: const HomePage(),
-    // ),
     _NavItem(
       key: const ValueKey(RouterTable.issues),
       icon: Remix.issues_line,
@@ -116,18 +133,7 @@ class _LeftNav extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ...originalItems.map((e) => Tooltip(
-              message: e.title,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                child: IconButton(
-                    icon: Icon(e.icon, size: 18),
-                    onPressed: () {
-                      context.read<TabviewModel>().addTab(
-                          key: e.key, e.body, title: e.title, icon: e.icon);
-                    }),
-              ),
-            )),
+        ...originalItems.map((e) => _NavItemIconButton(e)),
         if (kDebugMode) ...[
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -142,15 +148,7 @@ class _LeftNav extends StatelessWidget {
         ),
         ...footerItems.map((e) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
-              child: Tooltip(
-                message: e.title,
-                child: IconButton(
-                    icon: Icon(e.icon, size: 18),
-                    onPressed: () {
-                      context.read<TabviewModel>().addTab(
-                          key: e.key, e.body, title: e.title, icon: e.icon);
-                    }),
-              ),
+              child: _NavItemIconButton(e),
             )),
         const LinkAction(
           message: '源代码',
@@ -276,7 +274,7 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
           );
         }(),
         actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          Selector<CurrentUserModel, CurrentUser?>(
+          Selector<CurrentUserModel, QLUser?>(
             selector: (_, model) => model.user,
             builder: (context, user, __) {
               return Row(

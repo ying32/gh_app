@@ -6,6 +6,107 @@ import 'package:http/http.dart' as http;
 
 import 'cache_github.dart';
 
+/// 仓库的主语言
+class QLPrimaryLanguage {
+  const QLPrimaryLanguage({
+    this.color,
+    this.name,
+  });
+  final String? color;
+  final String? name;
+
+  QLPrimaryLanguage.fromJson(Map<String, dynamic> input)
+      : color = input['color'],
+        name = input['name'];
+}
+
+/// 仓库信息
+class QLRepository extends Repository {
+  QLRepository({
+    super.name,
+    super.forksCount,
+    super.forks,
+    super.stargazersCount,
+    super.isPrivate,
+    super.description,
+    super.owner,
+    this.primaryLanguage,
+  }) : super(language: primaryLanguage?.name ?? '');
+
+  final QLPrimaryLanguage? primaryLanguage;
+
+  factory QLRepository.fromJson(Map<String, dynamic> input) {
+    return QLRepository(
+      name: input['name'] ?? '',
+      forksCount: input['forkCount'] ?? 0,
+      forks: input['forkCount'],
+      stargazersCount: input['stargazerCount'] ?? 0,
+      isPrivate: input['isPrivate'] ?? false,
+      description: input['description'] ?? '',
+      primaryLanguage: input['primaryLanguage'] != null
+          ? QLPrimaryLanguage.fromJson(input['primaryLanguage'])
+          : null,
+      owner: input['owner'] != null
+          ? UserInformation(input['owner']['login'] ?? '', 0, '', '')
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {};
+}
+
+/// GraphQL查询的user
+class QLUser extends User {
+  QLUser({
+    super.login,
+    super.avatarUrl,
+    super.htmlUrl,
+    super.name,
+    super.company,
+    super.blog,
+    super.location,
+    super.email,
+    super.bio,
+    super.followersCount,
+    super.followingCount,
+    this.pinnedItems,
+    String? twUserName,
+  }) : _twUserName = twUserName {
+    super.twitterUsername = _twUserName;
+  }
+
+  /// 置顶项目
+  final List<QLRepository>? pinnedItems;
+  final String? _twUserName;
+
+  factory QLUser.fromJson(Map<String, dynamic> input) {
+    input = input['viewer'] ?? input['user'];
+    return QLUser(
+      login: input['login'],
+      name: input['name'],
+      avatarUrl: input['avatarUrl'],
+      company: input['company'],
+      bio: input['bio'],
+      email: input['email'],
+      location: input['location'],
+      twUserName: input['twitterUsername'],
+      htmlUrl: input['url'],
+      blog: input['websiteUrl'],
+      followersCount: input['followers']?['totalCount'],
+      followingCount: input['following']?['totalCount'],
+      pinnedItems: input['pinnedItems']?['nodes'] != null
+          ? List.of(input['pinnedItems']?['nodes'])
+              .map((e) => QLRepository.fromJson(e))
+              .toList()
+          : null,
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {};
+}
+
 /// GraphQL查询
 /// https://docs.github.com/zh/graphql/reference/queries
 /// API

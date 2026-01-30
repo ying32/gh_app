@@ -63,14 +63,20 @@ class _SearchPageState extends State<SearchPage>
     super.build(context);
     return Card(
         child: Column(children: [
-      TextBox(
-        controller: _controller,
-        placeholder: '请输入一个要搜索的关键字',
-        onEditingComplete: _searching
-            ? null
-            : () {
-                _doSearch(_controller.text.trim());
-              },
+      SizedBox(
+        width: MediaQuery.of(context).size.width / 2,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 15.0),
+          child: TextBox(
+            controller: _controller,
+            placeholder: '请输入一个要搜索的关键字',
+            onEditingComplete: _searching
+                ? null
+                : () {
+                    _doSearch(_controller.text.trim());
+                  },
+          ),
+        ),
       ),
       const SizedBox(height: 8.0),
       Expanded(

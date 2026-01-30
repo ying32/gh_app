@@ -3,6 +3,7 @@ import 'package:github/github.dart';
 
 import 'cache_github.dart';
 import 'graphql.dart';
+import 'graphql_querys.dart';
 
 class GitHubAPI {
   GitHubAPI({
@@ -83,13 +84,14 @@ class GithubCache {
   static GithubCache? _instance;
   static GithubCache get instance => _instance ??= GithubCache._();
 
-  CurrentUser? _currentUser;
+  QLUser? _currentUser;
 
   /// 当前user信息
-  Future<CurrentUser?> get currentUser async =>
+  Future<QLUser?> get currentUser async =>
       _currentUser ??= (gitHubAPI.auth.isAnonymous
           ? null
-          : await gitHubAPI.restful.users.getCurrentUser());
+          : await gitHubAPI.graphql
+              .query(qlQueryUser, convert: QLUser.fromJson, statusCode: 200));
 
   Future<List<Notification>?> get currentUserNotifications async {
     return gitHubAPI.restful.activity.listNotifications().toList();

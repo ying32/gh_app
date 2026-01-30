@@ -7,6 +7,7 @@ import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql_querys.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:gh_app/widgets/widgets.dart';
@@ -50,47 +51,6 @@ class _GraphQLTestState extends State<GraphQLTest> {
   String _bodyText = "";
   Map _json = {};
   bool _loading = false;
-
-  // 查询User
-  // viewer 换成   user(login:"ying32") 可以查其它用户的
-  final String _apiUser = '''query {
-  viewer {
-    login
-    name
-    avatarUrl
-    company
-    bio
-    email
-    location
-    twitterUsername
-    url
-    websiteUrl
-    followers  {
-      totalCount
-    }
-    following {
-      totalCount
-    }
-    pinnedItems(first: 6, types:REPOSITORY) {
-      nodes {
-        ... on Repository {
-          name
-          forkCount
-          stargazerCount
-          isPrivate
-          description
-          owner {
-            login
-          }
-          primaryLanguage {
-            color
-            name
-          }
-        }
-      } 
-    }
-  }
-}''';
 
   // 只查询user的仓库信息
   final String _apiRepos = '''query {
@@ -454,7 +414,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
                         MenuFlyoutItem(
                             text: const Text('当前用户信息'),
                             onPressed: () {
-                              _controller.text = _apiUser;
+                              _controller.text = qlQueryUser;
                             }),
                         MenuFlyoutItem(
                             text: const Text('当前用户仓库列表'),
