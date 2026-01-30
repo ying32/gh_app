@@ -331,6 +331,8 @@ class GithubCache {
     return gitHubAPI.restful.users.listCurrentUserFollowing().toList();
   }
 
+  Future<User?> userInfo(String name) => gitHubAPI.restful.users.getUser(name);
+
   /// 获取仓库列表信息
   Future<List<Repository>?> userRepos(String owner) async {
     return (owner.isEmpty

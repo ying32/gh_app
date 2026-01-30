@@ -305,7 +305,7 @@ class RepoContentView extends StatelessWidget {
       final body = utf8.decode(data);
       final ext = p.extension(filename).toLowerCase();
       if (ext == ".md" || ext == ".markdown") {
-        return MarkdownBlockPlus(data: body);
+        return MarkdownBlockPlusDefaultAction(body);
       }
       return HighlightViewPlus(body, fileName: filename);
     } catch (e) {

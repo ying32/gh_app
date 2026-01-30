@@ -39,7 +39,9 @@ class FollowingPage extends StatelessWidget {
             ),
             itemBuilder: (context, index) {
               final item = snapshot.data![index];
-              return ListTile(title: UserHeadName(user: item));
+              return ListTile(
+                  leading: UserHeadImage(item.avatarUrl),
+                  title: UserNameWidget(item));
             },
             separatorBuilder: (context, index) {
               return const Divider(size: 1);

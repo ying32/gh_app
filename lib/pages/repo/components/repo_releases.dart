@@ -42,9 +42,12 @@ class RepoReleases extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               if (releases.length > 1)
-                Text(
-                  '+ ${releases.length - 1} releases',
-                  style: TextStyle(color: Colors.blue),
+                LinkStyleButton(
+                  text: Text('+ ${releases.length - 1} releases',
+                      style: TextStyle(color: Colors.blue)),
+                  onPressed: () {
+                    ReleasesPage.createNewTab(context, repo, releases);
+                  },
                 ),
             ],
           ),

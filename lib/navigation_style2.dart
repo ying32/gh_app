@@ -7,7 +7,6 @@ import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/widgets/dialogs.dart';
-import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:gh_app/widgets/window_buttons.dart';
 import 'package:github/github.dart';
@@ -150,7 +149,7 @@ class _NavigationStyle2PageState extends State<NavigationStyle2Page>
   }
 
   void _onGoToRepo() {
-    GoRepoDialog.show(context);
+    GoGithubDialog.show(context);
   }
 
   @override
@@ -222,8 +221,8 @@ class _NavigationStyle2PageState extends State<NavigationStyle2Page>
           Selector<CurrentUserModel, CurrentUser?>(
             selector: (_, model) => model.user,
             builder: (context, user, __) {
-              return CurrentUserHeadName(user,
-                  imageSize: 48, onlyNickName: true);
+              return const SizedBox
+                  .shrink(); // UserHeadImageName(user, imageSize: 48, onlyNickName: true);
             },
           ),
           const SizedBox(width: 10),

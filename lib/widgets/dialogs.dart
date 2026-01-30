@@ -1,8 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github.dart';
-import 'package:github/github.dart';
 import 'package:window_manager/window_manager.dart';
 
 mixin DialogClose {}
@@ -24,40 +23,85 @@ Future<void> showInfoDialog(String msg,
       );
     });
 
-/// 跳转仓库对话框，Root路由
-class GoRepoDialog extends StatefulWidget {
-  const GoRepoDialog({
+/// 跳转解析github对话框，Root路由
+class GoGithubDialog extends StatefulWidget {
+  const GoGithubDialog({
     super.key,
     this.onSuccess,
   });
 
-  final ValueChanged<Repository>? onSuccess;
+  final ValueChanged<dynamic>? onSuccess;
 
   @override
-  State<GoRepoDialog> createState() => _GoRepoDialogState();
+  State<GoGithubDialog> createState() => _GoGithubDialogState();
 
   static Future<void> show(
     BuildContext context, {
     bool barrierDismissible = true,
-    ValueChanged<Repository>? onSuccess,
+    ValueChanged? onSuccess,
   }) async =>
       showDialog(
         context: context,
         barrierDismissible: barrierDismissible,
-        builder: (_) => GoRepoDialog(onSuccess: onSuccess),
+        builder: (_) => GoGithubDialog(onSuccess: onSuccess),
       );
 }
 
-class _GoRepoDialogState extends State<GoRepoDialog> {
-  final TextEditingController _controller =
-      TextEditingController(text: "https://github.com/ying32/git_app");
+class _GoGithubDialogState extends State<GoGithubDialog> {
+  final TextEditingController _controller = TextEditingController();
 
   bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (kDebugMode) {
+      _controller.text = "https://github.com/ying32/gh_app";
+    }
+  }
 
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  void _doUserRepo(String owner, String name) {
+    GithubCache.instance.userRepo(owner, name).then((repo) {
+      closeDialog(context);
+      if (widget.onSuccess != null) {
+        widget.onSuccess!.call(repo!);
+        return;
+      }
+      // pushShellRoute(RouterTable.repo, extra: repo);
+      // github.repositories.listTags(slug)
+    }).onError((e, s) {
+      // print(e);
+      // print(s);
+      showInfoDialog("错误",
+          context: context, error: "$e", severity: InfoBarSeverity.error);
+    }).whenComplete(() {
+      setState(() => _loading = false);
+    });
+  }
+
+  void _doUserInfo(String name) {
+    GithubCache.instance.userInfo(name).then((user) {
+      closeDialog(context);
+      if (widget.onSuccess != null) {
+        widget.onSuccess!.call(user!);
+        return;
+      }
+      // pushShellRoute(RouterTable.repo, extra: repo);
+      // github.repositories.listTags(slug)
+    }).onError((e, s) {
+      // print(e);
+      // print(s);
+      showInfoDialog("错误",
+          context: context, error: "$e", severity: InfoBarSeverity.error);
+    }).whenComplete(() {
+      setState(() => _loading = false);
+    });
   }
 
   void _onGoTo() {
@@ -73,38 +117,30 @@ class _GoRepoDialogState extends State<GoRepoDialog> {
           context: context, severity: InfoBarSeverity.error);
       return;
     }
-    if ((u.host != "github.com" && u.host != "www.github.com") ||
-        u.pathSegments.length < 2) {
+    if ((u.host != "github.com" && u.host != "www.github.com")) {
       showInfoDialog('请输入一个github仓库链接',
           context: context, severity: InfoBarSeverity.error);
       return;
     }
-    final segments = u.pathSegments;
+    final segments = u.pathSegments.where((e) => e.isNotEmpty).toList();
+    if (kDebugMode) {
+      print("segments=$segments");
+    }
     setState(() => _loading = true);
-    GithubCache.instance.userRepo(segments[0], segments[1]).then((repo) {
-      //print("e=${e.toJson()}");
-      closeDialog(context);
-
-      if (widget.onSuccess != null) {
-        widget.onSuccess!.call(repo!);
-        return;
-      }
-      pushShellRoute(RouterTable.repo, extra: repo);
-      // github.repositories.listTags(slug)
-    }).onError((e, s) {
-      // print(e);
-      // print(s);
-      showInfoDialog("错误",
-          context: context, error: "$e", severity: InfoBarSeverity.error);
-    }).whenComplete(() {
-      setState(() => _loading = false);
-    });
+    switch (segments.length) {
+      case 1:
+        _doUserInfo(segments[0]);
+        break;
+      case 2:
+        _doUserRepo(segments[0], segments[1]);
+        break;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return ContentDialog(
-      title: const Text('输入github仓库链接'),
+      title: const Text('输入github的链接'),
       // style: ContentDialogThemeData(padding: EdgeInsets.zero),
       constraints: const BoxConstraints(maxWidth: 600),
       content: Column(
@@ -113,58 +149,65 @@ class _GoRepoDialogState extends State<GoRepoDialog> {
           TextBox(
             controller: _controller,
             maxLines: null,
-            placeholder: '例如：https://github.com/ying32/gh_app',
+            placeholder: '输入一个github仓库、用户等页面链接',
             expands: false,
-          ),
-          const SizedBox(height: 8.0),
-          Row(
-            children: [
-              if (_loading)
-                const SizedBox(
-                    width: 25,
-                    height: 25,
-                    child: ProgressRing(backgroundColor: Colors.transparent)),
-              const Spacer(),
-              FilledButton(
-                onPressed: _loading ? null : _onGoTo,
-                child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 30),
-                    child: Text('前往')),
-              ),
-            ],
           ),
         ],
       ),
+      actions: [
+        Row(
+          children: [
+            if (_loading)
+              const SizedBox(
+                  width: 25,
+                  height: 25,
+                  child: ProgressRing(backgroundColor: Colors.transparent)),
+            const Spacer(),
+            FilledButton(
+              onPressed: _loading ? null : _onGoTo,
+              child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30),
+                  child: Text('前往')),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
 
-/// 登录提示框
-class LoggingDialog extends StatelessWidget with DialogClose {
-  const LoggingDialog({super.key});
+/// 提示框
+class LoadingDialog extends StatelessWidget with DialogClose {
+  const LoadingDialog({
+    super.key,
+    required this.text,
+  });
+
+  final Widget text;
 
   @override
   Widget build(BuildContext context) {
-    return const ContentDialog(
+    return ContentDialog(
       // style: ContentDialogThemeData(padding: EdgeInsets.zero),
-      constraints: BoxConstraints(maxWidth: 600),
+      constraints: const BoxConstraints(maxWidth: 600),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ProgressRing(),
+          const ProgressRing(),
           Padding(
-            padding: EdgeInsets.only(top: 8.0),
-            child: Text('登录中...'),
+            padding: const EdgeInsets.only(top: 8.0),
+            child: text, //Text('登录中...'),
           )
         ],
       ),
     );
   }
 
-  static Future<void> show(BuildContext context) async => showDialog(
+  static Future<void> show(BuildContext context, Widget text) async =>
+      showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (_) => const LoggingDialog(),
+        builder: (_) => LoadingDialog(text: text),
       );
 }
 

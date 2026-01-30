@@ -40,7 +40,7 @@ class RepoReadMe extends StatelessWidget {
                               )),
                       ],
                     ),
-                    if (body.isNotEmpty) MarkdownBlockPlus(data: body),
+                    if (body.isNotEmpty) MarkdownBlockPlusDefaultAction(body),
                   ],
                 ),
               );

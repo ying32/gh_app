@@ -7,116 +7,159 @@ import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
 import 'package:url_launcher/link.dart';
 
-class UserHeadNameWidget extends StatelessWidget {
-  const UserHeadNameWidget({
-    super.key,
-    required this.login,
-    this.name,
-    this.avatarUrl,
-    this.htmlUrl,
-    this.imageSize = 64.0,
-    this.onlyNickName = false,
-  });
+/// 用户头像
+class UserHeadImage extends StatelessWidget {
+  const UserHeadImage(this.avatarUrl, {super.key, this.imageSize = 64});
 
-  final String? login;
-  final String? name;
   final String? avatarUrl;
-  final String? htmlUrl;
   final double imageSize;
-  final bool onlyNickName;
-
-  String get _displayName {
-    final nickName = name ?? login ?? '';
-    if (onlyNickName) return nickName;
-    if (nickName == "" || nickName == login) {
-      return login ?? '';
-    }
-    return "$login${"($nickName)"}";
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        if (avatarUrl != null)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 1.0),
-            child: ClipOval(
-              child: CachedNetworkImage(
-                imageUrl: avatarUrl!,
-                fit: BoxFit.cover,
-                width: imageSize,
-                errorWidget: (_, __, ___) =>
-                    Icon(Remix.github_fill, size: imageSize),
-              ),
+    return avatarUrl == null
+        ? const SizedBox.shrink()
+        : ClipOval(
+            child: CachedNetworkImage(
+              imageUrl: avatarUrl!,
+              fit: BoxFit.cover,
+              width: imageSize,
+              errorWidget: (_, __, ___) =>
+                  Icon(Remix.github_fill, size: imageSize),
             ),
-          ),
-        Link(
-          uri: Uri.parse(htmlUrl ?? ''),
-          builder: (context, open) => Semantics(
-            link: true,
-            child: LinkStyleButton(
-                onPressed: () => open?.call(),
-                text: Text(
-                  _displayName,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      color: appTheme.color.lightest),
-                )),
-          ),
-        )
-      ],
-    );
+          );
   }
 }
 
-class UserHeadName extends StatelessWidget {
-  const UserHeadName({
+class UserNameWidget extends StatelessWidget {
+  const UserNameWidget(
+    this.user, {
     super.key,
-    required this.user,
-    this.imageSize = 40.0,
+    this.onlyNickName = false,
   });
 
   final User? user;
-  final double imageSize;
-
-  @override
-  Widget build(BuildContext context) {
-    return UserHeadNameWidget(
-      login: user?.login,
-      name: user?.name,
-      avatarUrl: user?.avatarUrl,
-      htmlUrl: user?.htmlUrl,
-      imageSize: imageSize,
-    );
-  }
-}
-
-class CurrentUserHeadName extends StatelessWidget {
-  const CurrentUserHeadName(
-    this.user, {
-    super.key,
-    this.imageSize = 64.0,
-    this.onlyNickName = false,
-  });
-
-  final CurrentUser? user;
-  final double imageSize;
   final bool onlyNickName;
 
+  String get _displayName {
+    final nickName = user?.name ?? user?.login ?? '';
+    if (onlyNickName) return nickName;
+    if (nickName == "" || nickName == user?.login) {
+      return user?.login ?? '';
+    }
+    return "${user?.login}${"($nickName)"}";
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (user == null) return const SizedBox.shrink();
-    return UserHeadNameWidget(
-      login: user?.login,
-      name: user?.name,
-      avatarUrl: user?.avatarUrl,
-      htmlUrl: user?.htmlUrl,
-      imageSize: imageSize,
-      onlyNickName: onlyNickName,
+    return Text(
+      _displayName,
+      style: TextStyle(
+          fontWeight: FontWeight.w500, color: appTheme.color.lightest),
     );
   }
 }
+
+// class UserHeadNameWidget extends StatelessWidget {
+//   const UserHeadNameWidget({
+//     super.key,
+//     required this.login,
+//     this.name,
+//     this.avatarUrl,
+//     this.htmlUrl,
+//     this.imageSize = 64.0,
+//     this.onlyNickName = false,
+//   });
+//
+//   final String? login;
+//   final String? name;
+//   final String? avatarUrl;
+//   final String? htmlUrl;
+//   final double imageSize;
+//   final bool onlyNickName;
+//
+//   String get _displayName {
+//     final nickName = name ?? login ?? '';
+//     if (onlyNickName) return nickName;
+//     if (nickName == "" || nickName == login) {
+//       return login ?? '';
+//     }
+//     return "$login${"($nickName)"}";
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       children: [
+//         Padding(
+//           padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 1.0),
+//           child: UserHeadImage(avatarUrl, imageSize: imageSize),
+//         ),
+//         Link(
+//           uri: Uri.parse(htmlUrl ?? ''),
+//           builder: (context, open) => Semantics(
+//             link: true,
+//             child: LinkStyleButton(
+//                 onPressed: () => open?.call(),
+//                 text: Text(
+//                   _displayName,
+//                   style: TextStyle(
+//                       fontWeight: FontWeight.w500,
+//                       color: appTheme.color.lightest),
+//                 )),
+//           ),
+//         )
+//       ],
+//     );
+//   }
+// }
+//
+// class UserHeadName extends StatelessWidget {
+//   const UserHeadName({
+//     super.key,
+//     required this.user,
+//     this.imageSize = 40.0,
+//   });
+//
+//   final User? user;
+//   final double imageSize;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return UserHeadNameWidget(
+//       login: user?.login,
+//       name: user?.name,
+//       avatarUrl: user?.avatarUrl,
+//       htmlUrl: user?.htmlUrl,
+//       imageSize: imageSize,
+//     );
+//   }
+// }
+//
+// class UserHeadImageName extends StatelessWidget {
+//   const UserHeadImageName(
+//     this.user, {
+//     super.key,
+//     this.imageSize = 64.0,
+//     this.onlyNickName = false,
+//   });
+//
+//   final User? user;
+//   final double imageSize;
+//   final bool onlyNickName;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     if (user == null) return const SizedBox.shrink();
+//     return UserHeadNameWidget(
+//       login: user?.login,
+//       name: user?.name,
+//       avatarUrl: user?.avatarUrl,
+//       htmlUrl: user?.htmlUrl,
+//       imageSize: imageSize,
+//       onlyNickName: onlyNickName,
+//     );
+//   }
+// }
 
 class UserLineInfo extends StatelessWidget {
   const UserLineInfo({
@@ -153,7 +196,9 @@ class UserLineInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (value == null) return const SizedBox.shrink();
+    if (value == null || (value is String && (value as String).isEmpty)) {
+      return const SizedBox.shrink();
+    }
     if (value is Widget) {
       if (icon == null) return _build(value);
       return _build(IconText(icon: icon!, text: value));
@@ -188,7 +233,7 @@ class UserInfoPanel extends StatelessWidget {
     super.key,
   });
 
-  final CurrentUser? user;
+  final User? user;
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +242,14 @@ class UserInfoPanel extends StatelessWidget {
       // mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        CurrentUserHeadName(user),
+        Row(
+          children: [
+            UserHeadImage(user?.avatarUrl, imageSize: 64),
+            const SizedBox(width: 10.0),
+            UserNameWidget(user),
+          ],
+        ),
+
         UserLineInfo(icon: null, value: user?.bio),
         UserLineInfo(
           icon: Remix.group_line,
@@ -280,7 +332,7 @@ class UserInfoPanel extends StatelessWidget {
         //               )),
         //         ),
         //       )),
-        UserLineDiskUseInfo(value: user?.diskUsage),
+        //UserLineDiskUseInfo(value: user?.diskUsage),
         const SizedBox(height: 8.0),
       ],
     );

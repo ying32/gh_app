@@ -14,7 +14,8 @@ class _IssueItem extends StatelessWidget {
       ),
       title: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
-        child: Row(
+        child: Wrap(
+          runSpacing: 6.0,
           children: [
             Text(
               issue.title,

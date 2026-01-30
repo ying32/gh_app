@@ -26,7 +26,8 @@ class _LoginPageState extends State<LoginPage> with PageMixin {
     super.dispose();
   }
 
-  Future<void> _showLogging() async => LoggingDialog.show(context);
+  Future<void> _showLogging() async =>
+      LoadingDialog.show(context, const Text('登录中...'));
 
   Future<void> _showInfo(String msg,
           {String? error, InfoBarSeverity? severity}) =>

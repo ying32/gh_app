@@ -9,6 +9,7 @@ import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
+import 'package:gh_app/pages/user_info.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
@@ -43,7 +44,7 @@ class WrapNavigationPage extends StatelessWidget {
         create: (_) => TabviewModel([
               Tab(
                   key: const ValueKey(RouterTable.root),
-                  text: const Text('主页'),
+                  text: const Text('我的'),
                   // semanticLabel: 'Document #$index',
                   icon: const Icon(Remix.home_line),
                   body: const HomePage(),
@@ -174,8 +175,13 @@ class _MainTabView extends StatelessWidget {
               closeButtonVisibility: CloseButtonVisibilityMode.always,
               showScrollButtons: false,
               onNewPressed: () {
-                GoRepoDialog.show(context, onSuccess: (newRepo) {
-                  RepoPage.createNewTab(context, newRepo);
+                GoGithubDialog.show(context, onSuccess: (data) {
+                  if (data is Repository) {
+                    RepoPage.createNewTab(context, data);
+                  } else if (data is User) {
+                    // 创建User页面
+                    UserInfoPage.createNewTab(context, data);
+                  }
                 });
               },
               // onReorder: (oldIndex, newIndex) {
@@ -263,8 +269,12 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
           Selector<CurrentUserModel, CurrentUser?>(
             selector: (_, model) => model.user,
             builder: (context, user, __) {
-              return CurrentUserHeadName(user,
-                  imageSize: 48, onlyNickName: true);
+              return Row(
+                children: [
+                  UserHeadImage(user?.avatarUrl, imageSize: 40),
+                  UserNameWidget(user, onlyNickName: true),
+                ],
+              );
             },
           ),
           const SizedBox(width: 10),

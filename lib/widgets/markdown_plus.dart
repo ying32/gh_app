@@ -52,12 +52,42 @@ class MarkdownBlockPlus extends StatelessWidget {
     super.key,
     required this.data,
     this.selectable = true,
-    this.onTap,
+    required this.onTap,
   });
 
   final String data;
   final bool selectable;
-  final ValueCallback<String>? onTap;
+  final ValueCallback<String> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // 这个编译不了，需要更新的，那就暂时不试了哈
+    final config = (context.isDark
+            ? MarkdownConfig.darkConfig
+            : MarkdownConfig.defaultConfig)
+        .copy(configs: [
+      LinkConfig(onTap: onTap, style: const TextStyle(color: Color(0xff0969da)))
+    ]);
+
+    // 这个代码段选择不了？
+    // final markdownGenerator = MarkdownGenerator();
+    // final span = markdownGenerator.buildTextSpan(data, config: config);
+    // return selectable
+    //     ? SelectableText.rich(span, selectionHeightStyle: ui.BoxHeightStyle.max)
+    //     : RichText(text: span);
+
+    return mt.Material(
+      textStyle: FluentTheme.of(context).typography.body,
+      type: mt.MaterialType.transparency,
+      child: MarkdownBlock(data: data, selectable: selectable, config: config),
+    );
+  }
+}
+
+class MarkdownBlockPlusDefaultAction extends StatelessWidget {
+  const MarkdownBlockPlusDefaultAction(this.body, {super.key});
+
+  final String body;
 
   void onDefaultLinkAction(BuildContext context, String link) {
     final url = Uri.tryParse(link);
@@ -73,27 +103,9 @@ class MarkdownBlockPlus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 这个编译不了，需要更新的，那就暂时不试了哈
-    final config = (context.isDark
-            ? MarkdownConfig.darkConfig
-            : MarkdownConfig.defaultConfig)
-        .copy(configs: [
-      LinkConfig(
-          onTap: onTap ?? (link) => onDefaultLinkAction(context, link),
-          style: const TextStyle(color: Color(0xff0969da)))
-    ]);
-
-    // 这个代码段选择不了？
-    // final markdownGenerator = MarkdownGenerator();
-    // final span = markdownGenerator.buildTextSpan(data, config: config);
-    // return selectable
-    //     ? SelectableText.rich(span, selectionHeightStyle: ui.BoxHeightStyle.max)
-    //     : RichText(text: span);
-
-    return mt.Material(
-      textStyle: FluentTheme.of(context).typography.body,
-      type: mt.MaterialType.transparency,
-      child: MarkdownBlock(data: data, selectable: selectable, config: config),
+    return MarkdownBlockPlus(
+      data: body,
+      onTap: (link) => onDefaultLinkAction(context, link),
     );
   }
 }

@@ -15,6 +15,8 @@ class RouterTable {
   static const repos = "/repos";
   static const repo = "/repo";
   static const search = "/search";
+  static const user = "/user";
+  static const release = "/release";
 }
 
 /// 项目url

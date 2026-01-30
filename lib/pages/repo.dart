@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
+import 'package:gh_app/pages/releases.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
@@ -108,7 +110,9 @@ class RepoPage extends StatelessWidget {
       ],
       child: WrapInit(
         onInit: () {
-          print("初始");
+          if (kDebugMode) {
+            print("初始");
+          }
         },
         child: Selector<RepoModel, Repository>(
           selector: (_, model) => model.repo,
@@ -117,6 +121,16 @@ class RepoPage extends StatelessWidget {
               header: PageHeader(
                 title: Row(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: IconButton(
+                        icon:
+                            UserHeadImage(repo.owner?.avatarUrl, imageSize: 60),
+                        onPressed: () {
+                          // UserInfoPage.createNewTab(context, repo.owner!);
+                        },
+                      ),
+                    ),
                     Text(repo.fullName),
                     if (repo.isPrivate)
                       const Padding(
@@ -132,6 +146,7 @@ class RepoPage extends StatelessWidget {
                     LinkAction(
                       icon: const Icon(FluentIcons.open_source, size: 18),
                       link: repo.htmlUrl,
+                      message: '在浏览器中打开',
                     ),
                   ],
                 ),
