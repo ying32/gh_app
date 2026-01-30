@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:url_launcher/link.dart';
+import 'package:window_manager/window_manager.dart';
 
 /// 带icon前缀的文本
 class IconText extends StatelessWidget {
@@ -226,5 +227,22 @@ class IconPopupMenu extends StatelessWidget {
       child = Tooltip(message: tooltip, child: child);
     }
     return child;
+  }
+}
+
+/// 窗口标标题栏和按钮
+class WindowButtons extends StatelessWidget {
+  const WindowButtons({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 138,
+      height: 50,
+      child: WindowCaption(
+        brightness: FluentTheme.of(context).brightness,
+        backgroundColor: Colors.transparent,
+      ),
+    );
   }
 }

@@ -8,7 +8,6 @@ import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:gh_app/widgets/window_buttons.dart';
 import 'package:github/github.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';

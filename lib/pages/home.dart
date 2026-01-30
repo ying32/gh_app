@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/utils/utils.dart';
@@ -17,11 +16,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     // assert(debugCheckHasFluentTheme(context));
@@ -44,7 +38,7 @@ class _HomePageState extends State<HomePage> {
             : SizedBox(
                 width: double.infinity,
                 child: Card(
-                  child: Column(
+                  child: Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
                       Selector<CurrentUserModel, CurrentUser?>(
@@ -76,44 +70,7 @@ class _HomePageState extends State<HomePage> {
                             //
                           },
                         ),
-                      ),
-                      //
-                      if (kDebugMode)
-                        Button(
-                            child: const Text('GraphQl测试'),
-                            onPressed: () {
-                              if (kDebugMode) {
-                                print("开始测试");
-                                // 查询: { "query": "query { viewer { login }" }
-                                // 返回数据：
-                                // {"data":{"viewer":{"login":"ying32"}}}
-                                const test1 = 'query { viewer { login } }';
-                                // ={"data":{"organization":{"membersWithRole":{"edges":[{"node":{"name":"Matt Todd","avatarUrl
-                                const test2 = '''query {
-              organization(login:"github") {
-              membersWithRole(first: 100) {
-                edges {
-                      node {
-                        name
-                        avatarUrl
-                      }
-                }
-              }
-                        }
-                      }''';
-                                gitHubAPI.graphql
-                                    .query(test1, statusCode: 200)
-                                    .then((e) {
-                                  if (e is Map) {
-                                    print("返回结果=状态=$e");
-                                  } else {
-                                    print("返回结果=状态=${e.statusCode}, ${e.body}");
-                                  }
-                                }).onError((e, s) {
-                                  print("错误=$e");
-                                });
-                              }
-                            }),
+                      )
                     ],
                   ),
                 ),

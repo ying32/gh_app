@@ -125,7 +125,7 @@ class RepoPage extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 8.0),
                       child: IconButton(
                         icon:
-                            UserHeadImage(repo.owner?.avatarUrl, imageSize: 60),
+                            UserHeadImage(repo.owner?.avatarUrl, imageSize: 50),
                         onPressed: () {
                           // UserInfoPage.createNewTab(context, repo.owner!);
                         },

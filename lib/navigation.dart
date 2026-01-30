@@ -6,6 +6,7 @@ import 'package:gh_app/pages/home.dart';
 import 'package:gh_app/pages/issues.dart';
 import 'package:gh_app/pages/pulls.dart';
 import 'package:gh_app/pages/repo.dart';
+import 'package:gh_app/pages/repo/graphql_test.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
@@ -17,7 +18,6 @@ import 'package:gh_app/utils/github.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:gh_app/widgets/window_buttons.dart';
 import 'package:github/github.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -128,8 +128,18 @@ class _LeftNav extends StatelessWidget {
                     }),
               ),
             )),
+        if (kDebugMode) ...[
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Divider(direction: Axis.horizontal),
+          ),
+          const OpenGraphQLIconButton(),
+        ],
         const Spacer(),
-        const Divider(size: 1, direction: Axis.horizontal),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Divider(direction: Axis.horizontal),
+        ),
         ...footerItems.map((e) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: Tooltip(

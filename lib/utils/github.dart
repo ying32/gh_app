@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:github/github.dart';
 import 'package:http/http.dart' as http;
@@ -126,6 +126,11 @@ class CacheGitHub extends GitHub {
 
 /// GraphQL查询
 /// https://docs.github.com/zh/graphql/reference/queries
+/// API
+/// https://cli.github.com/manual/gh_api
+///
+/// GitHub GraphQL API 文档
+/// https://docs.github.com/zh/graphql
 class GitHubGraphQL {
   GitHubGraphQL({
     this.auth = const Authentication.anonymous(),
@@ -167,6 +172,7 @@ class GitHubGraphQL {
     final response = await _query(body,
         headers: headers, params: params, statusCode: statusCode, fail: fail);
     final json = jsonDecode(response.body);
+
     // 有错误，这个错误在定义了[statusCode]时会解析
     // {"message":"Problems parsing JSON","documentation_url":"https://docs.github.com/graphql","status":"400"}
     // 实际为422错误，但没有哈
@@ -176,7 +182,8 @@ class GitHubGraphQL {
       // 按理说应该状态码返回422，但没返回的原因是啥？？？？
       //response = response.o = 422;
       // 有错误了，这里他错误了也会返回个200，造成原来的解析不了
-      _github.handleStatusCode(response);
+      _github.handleStatusCode(http.Response.bytes(response.bodyBytes, 422,
+          headers: response.headers, isRedirect: response.isRedirect));
     }
     // 实际数据节点
     final data = json['data']; // ?? json
@@ -190,6 +197,9 @@ class GitHubGraphQL {
     return returnValue;
   }
 
+  String _encodeQuery(String text) =>
+      text.replaceAll('"', r'\"').replaceAll("\r", "").replaceAll('\n', r"\n");
+
   //  "Content-Type: application/json",
   //   "Accept: application/vnd.github.v4.idl"
   /// 查询方法，先不公开，嗯，也许另有打算吧
@@ -200,12 +210,22 @@ class GitHubGraphQL {
     Map<String, String>? headers,
     Map<String, dynamic>? params,
   }) async =>
-      _request(
-          '{ "query": "${body.replaceAll('"', r'\"').replaceAll(RegExp(r'\r|\n'), r"\n")}" }',
-          statusCode: statusCode,
-          fail: fail,
-          headers: headers,
-          params: params);
+      _request('{ "query": "${_encodeQuery(body)}" }',
+          statusCode: statusCode, fail: fail, headers: headers, params: params);
+
+  // Future<http.Response> _mutation(
+  //   String body, {
+  //   int? statusCode,
+  //   void Function(http.Response response)? fail,
+  //   Map<String, String>? headers,
+  //   Map<String, dynamic>? params,
+  // }) async =>
+  //     _request(
+  //         '{ "query": "${body.replaceAll('"', r'\"').replaceAll(RegExp(r'\r|\n'), r"\n")}" }',
+  //         statusCode: statusCode,
+  //         fail: fail,
+  //         headers: headers,
+  //         params: params);
 
   /// 忽略path字段，强制为[endpoint]，本可不这样做的，但是他内部的[request]方法在判断[path]时
   /// 附加了一个”/“符号，造成服务端识为这是一个rest API。
@@ -217,7 +237,9 @@ class GitHubGraphQL {
     int? statusCode,
     void Function(http.Response response)? fail,
   }) async {
-    //print("body: $body");
+    if (kDebugMode) {
+      print("body: $body");
+    }
     return _github.request("POST", endpoint,
         headers: headers,
         params: params,
@@ -336,7 +358,8 @@ class GithubCache {
   /// 获取仓库列表信息
   Future<List<Repository>?> userRepos(String owner) async {
     return (owner.isEmpty
-            ? gitHubAPI.restful.repositories.listRepositories()
+            ? gitHubAPI.restful.repositories
+                .listRepositories(sort: 'updated_at', direction: 'desc')
             : gitHubAPI.restful.repositories.listUserRepositories(owner))
         .toList();
   }
