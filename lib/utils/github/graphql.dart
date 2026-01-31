@@ -6,6 +6,32 @@ import 'package:http/http.dart' as http;
 
 import 'cache_github.dart';
 
+/// 分页信息，按规则传递。比如：
+/// 每页10个
+/// 从前往后选择的
+/// first: 10, after: "$endCursor"
+///
+/// 从后往前选择
+/// last: 10, before: "$startCursor "
+class QLPageInfo {
+  QLPageInfo({
+    required this.startCursor,
+    required this.endCursor,
+    required this.hasNextPage,
+    required this.hasPreviousPage,
+  });
+  final String startCursor;
+  final String endCursor;
+  final bool hasNextPage;
+  final bool hasPreviousPage;
+
+  QLPageInfo.fromJson(Map<String, dynamic> input)
+      : startCursor = input['startCursor'] ?? '',
+        endCursor = input['endCursor'] ?? '',
+        hasNextPage = input['hasNextPage'] ?? false,
+        hasPreviousPage = input['hasPreviousPage'] ?? false;
+}
+
 /// 仓库的主语言
 class QLPrimaryLanguage {
   const QLPrimaryLanguage({
@@ -319,6 +345,16 @@ class QLUser extends User {
     );
   }
 
+  @override
+  Map<String, dynamic> toJson() => {};
+}
+
+/// Issue
+class QLIssue extends Issue {
+  QLIssue();
+  factory QLIssue.fromJson(Map<String, dynamic> input) {
+    return QLIssue();
+  }
   @override
   Map<String, dynamic> toJson() => {};
 }

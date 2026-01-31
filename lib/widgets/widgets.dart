@@ -251,3 +251,18 @@ class WindowButtons extends StatelessWidget {
     );
   }
 }
+
+/// 分页按钮，嗯，先放着
+class PaginationBar extends StatefulWidget {
+  const PaginationBar({super.key});
+
+  @override
+  State<PaginationBar> createState() => _PaginationBarState();
+}
+
+class _PaginationBarState extends State<PaginationBar> {
+  @override
+  Widget build(BuildContext context) {
+    return const Placeholder();
+  }
+}

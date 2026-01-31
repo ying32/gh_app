@@ -109,6 +109,7 @@ class GithubCache {
     return gitHubAPI.restful.users.listCurrentUserFollowing().toList();
   }
 
+  /// 指定用户信息
   //Future<User?> userInfo(String name) => gitHubAPI.restful.users.getUser(name);
   Future<QLUser?> userInfo(String name) => gitHubAPI.graphql
       .query(QLQueries.queryUser(name), convert: QLUser.fromJson);
@@ -128,6 +129,7 @@ class GithubCache {
     return List.from(res).map((e) => QLRepository.fromJson(e)).toList();
   }
 
+  /// 用户信息
   // Future<Repository?> userRepo(String owner, String name) async {
   //   final slug = RepositorySlug(owner, name);
   //
@@ -138,10 +140,12 @@ class GithubCache {
         convert: QLRepository.fromJson);
   }
 
+  /// 仓库分支列表
   Future<List<Branch>?> repoBranches(Repository repo) async {
     return gitHubAPI.restful.repositories.listBranches(repo.slug()).toList();
   }
 
+  /// 当前仓库releases
   // Future<List<Release>?> repoReleases(Repository repo) async {
   //   final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
   //
@@ -156,13 +160,15 @@ class GithubCache {
     return List.from(res).map((e) => QLRelease.fromJson(e)).toList();
   }
 
+  /// 仓库issues
   Future<List<Issue>?> repoIssues(Repository repo, {bool isOpen = true}) async {
     //open, closed, all
     return gitHubAPI.restful.issues
-        .listByRepo(repo.slug(), state: isOpen ? 'open' : 'closed')
+        .listByRepo(repo.slug(), state: isOpen ? 'open' : 'closed', perPage: 1)
         .toList();
   }
 
+  /// 仓库pullRequests
   Future<List<PullRequest>?> repoPullRequests(Repository repo,
       {bool isOpen = true}) async {
     //open, closed, all

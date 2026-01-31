@@ -20,6 +20,9 @@
 ///       }
 ///     }
 ///```
+/// 分页 https://docs.github.com/zh/graphql/guides/using-pagination-in-the-graphql-api
+///
+///
 class QLQueries {
   /// 查询用户信息
   ///
@@ -216,6 +219,12 @@ class QLQueries {
     return '''  repository(owner:"$owner", name:"$name") {
       releases(first:$count, orderBy: {direction: DESC, field: CREATED_AT}) {
         totalCount 
+        pageInfo {
+          endCursor
+          startCursor
+          hasNextPage
+          hasPreviousPage
+        }
         nodes {
           author { 
             login 
@@ -269,6 +278,12 @@ class QLQueries {
     return '''  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {
     repositories(first:$count, orderBy: {direction: $sortDirection, field: $sortField}) {
       totalCount
+      pageInfo {
+        endCursor
+        startCursor
+        hasNextPage
+        hasPreviousPage
+      }
       nodes {
           name
           owner {
@@ -340,6 +355,12 @@ class QLQueries {
     return '''  repository(owner:"$owner", name:"$name") {
           ${isIssues ? 'issues' : 'pullRequests'}(last: $count, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
              totalCount
+             pageInfo {
+              endCursor
+              startCursor
+              hasNextPage
+              hasPreviousPage
+             }
              nodes {
                 number 
                 ${isIssues ? 'isPinned' : ''} 
@@ -380,6 +401,78 @@ class QLQueries {
              }
           }
     }      
+''';
+  }
+
+  /// 查询文件
+  ///
+  ///   repository(owner: "ying32", name: "govcl") {
+  //     object(expression: "master:") {
+  //         ... on Tree {
+  //
+  //            entries {
+  //               oid
+  //               extension
+  //               language { name }
+  //               isGenerated
+  //               lineCount
+  //               name
+  //               path
+  //               size
+  //               type
+  //            }
+  //         }
+  //        ... on Blob {
+  //            byteSize
+  //            isBinary
+  //            isTruncated
+  //            text
+  //         }
+  //
+  //        ... on Commit {
+  //            additions
+  //        }
+  //
+  //        ... on Tag {
+  //
+  //            message name oid
+  //        }
+  //     }
+  //   }
+  static String queryObject(String owner, String name,
+      {String expression = ""}) {
+    // 不能获得二进制文件，可以使用REST API来获取，headers中添加 "Accept": "application/vnd.github.v3.raw"
+    // 核心 REST 接口：GET /repos/{owner}/{repo}/contents/{path}（推荐）
+    // 备选 REST 接口：GET /repos/{owner}/{repo}/git/blobs/{oid}（通过哈希 ID）
+
+    // 根目录
+    // expression: "master:"
+    // 查询指定的
+    // expression: "master:README.zh-CN.md"
+    return '''
+  repository(owner: "$owner", name: "$name") {
+    object(expression: "master:$expression") {
+        ... on Tree {
+           entries {
+              extension 
+              language { name }
+              isGenerated 
+              lineCount 
+              name 
+              path 
+              size 
+              type 
+           }
+        }
+       ... on Blob {
+           oid
+           byteSize 
+           isBinary 
+           isTruncated 
+           text 
+        }
+    }
+  }    
 ''';
   }
 }
