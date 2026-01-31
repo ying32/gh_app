@@ -8,9 +8,6 @@ class FollowersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasFluentTheme(context));
-    final theme = FluentTheme.of(context);
-
     return ScaffoldPage(
       header: const PageHeader(
         title: Text('关注我的人'),

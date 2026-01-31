@@ -1,7 +1,7 @@
 part of '../repo.dart';
 
 class _PullRequestItem extends StatelessWidget {
-  const _PullRequestItem(this.data, {super.key});
+  const _PullRequestItem(this.data);
 
   final PullRequest data;
 

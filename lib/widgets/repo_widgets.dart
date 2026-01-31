@@ -47,6 +47,9 @@ class RepoListItem extends StatelessWidget {
   final Repository repo;
   final bool isPinStyle;
 
+  String get _title =>
+      isPinStyle ? repo.name : "${repo.owner?.login ?? ''}/${repo.name}";
+
   @override
   Widget build(BuildContext context) {
     const padding = EdgeInsets.symmetric(horizontal: 6);
@@ -76,28 +79,18 @@ class RepoListItem extends StatelessWidget {
                   child: Icon(Remix.git_repository_line),
                 ),
               LinkStyleButton(
-                onPressed: () {
-                  RepoPage.createNewTab(context, repo);
+                  onPressed: () {
+                    RepoPage.createNewTab(context, repo);
 
-                  //pushRoute(context, RouterTable.repo, extra: repo);
-                },
-                text: !isPinStyle
-                    ? Text(
-                        "${repo.owner?.login ?? ''}/${repo.name}",
-                        style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16.0),
-                      )
-                    : Text(
-                        repo.name,
-                        style: TextStyle(
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16.0,
-                        ),
-                      ),
-              ),
+                    //pushRoute(context, RouterTable.repo, extra: repo);
+                  },
+                  text: Text(
+                    _title,
+                    style: TextStyle(
+                        color: Colors.blue,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16.0),
+                  )),
 
               const SizedBox(width: 8.0),
               // 公开或者私有

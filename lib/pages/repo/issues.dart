@@ -1,7 +1,7 @@
 part of '../repo.dart';
 
 class _IssueItem extends StatelessWidget {
-  const _IssueItem(this.issue, {super.key});
+  const _IssueItem(this.issue);
 
   final Issue issue;
 

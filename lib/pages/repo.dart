@@ -27,7 +27,7 @@ part 'repo/pull_request.dart';
 part 'repo/wiki.dart';
 
 class _TabPages extends StatefulWidget {
-  const _TabPages({super.key});
+  const _TabPages();
 
   @override
   State<_TabPages> createState() => _TabPagesState();

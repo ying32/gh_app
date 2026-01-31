@@ -10,6 +10,7 @@ import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql_querys.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
+import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -49,256 +50,8 @@ class _GraphQLTestState extends State<GraphQLTest> {
 
   final _controller = TextEditingController();
   String _bodyText = "";
-  Map _json = {};
   bool _loading = false;
-
-  // 只查询user的仓库信息
-  final String _apiRepos = '''query {
-  viewer {
-    repositories(first:1) {
-      nodes {
-        ... on Repository {
-          name
-          owner {
-            login
-            avatarUrl
-          }
-          description
-          primaryLanguage {
-            color
-            name
-          }
-          archivedAt
-          updatedAt
-          url
-          diskUsage
-          forkCount
-          forkingAllowed
-          stargazerCount
-          hasIssuesEnabled
-          hasProjectsEnabled
-          hasSponsorshipsEnabled
-          hasWikiEnabled
-          homepageUrl
-          isArchived
-          isBlankIssuesEnabled
-          isDisabled
-          isEmpty
-          isFork
-          isInOrganization
-          isLocked
-          isMirror
-          isPrivate
-          isTemplate
-          isSecurityPolicyEnabled
-          pushedAt
-          viewerCanSubscribe 
-          viewerHasStarred 
-          languages(first: 10) {
-            nodes {
-              ...on Language {
-                color
-                name
-              }
-            }
-          }
-          defaultBranchRef {
-            name
-          }
-          issues {
-            totalCount
-          }
-          pullRequests {
-            totalCount
-          }
-          licenseInfo {
-             name 
-          }
-          latestRelease {
-            author {
-               login
-               name
-            }
-            createdAt
-            isDraft
-            isLatest
-            isPrerelease
-          }
-          refs(refPrefix: "refs/heads/") {
-            totalCount  
-          }
-          releases {
-            totalCount 
-          }
-          repositoryTopics(first: 10) {
-             nodes {
-                ... on RepositoryTopic {
-                   topic {
-                     name
-                   }
-                }
-             }
-          }
-        }
-      } 
-    }
-  }
-}''';
-
-  // 查询一个仓库信息
-  final String _apiRepoInfo = '''query {
- 
-    repository(owner:"ying32", name:"govcl") {
- 
-          name
-          owner {
-            login
-            avatarUrl
-          }
-          description
-          primaryLanguage {
-            color
-            name
-          }
-          archivedAt
-          updatedAt
-          url
-          diskUsage
-          forkCount
-          forkingAllowed
-          stargazerCount
-          hasIssuesEnabled
-          hasProjectsEnabled
-          hasSponsorshipsEnabled
-          hasWikiEnabled
-          homepageUrl
-          isArchived
-          isBlankIssuesEnabled
-          isDisabled
-          isEmpty
-          isFork
-          isInOrganization
-          isLocked
-          isMirror
-          isPrivate
-          isTemplate
-          isSecurityPolicyEnabled
-          pushedAt
-          viewerCanSubscribe 
-          viewerHasStarred 
-          mirrorUrl
-          languages(first: 10) {
-            nodes {
-              ...on Language {
-                color
-                name
-              }
-            }
-          }
-          defaultBranchRef {
-            name
-          }
-          issues(states:OPEN) {
-            totalCount
-          }
-          pullRequests(states:OPEN) {
-            totalCount
-          }
-          licenseInfo {
-             name 
-          }
-          latestRelease {
-            author {
-               login
-               name
-            }
-            name 
-            tagName 
-            updatedAt 
-            url 
-            createdAt
-            isDraft
-            isLatest
-            isPrerelease
-          }
-          refs(refPrefix: "refs/heads/") {
-            totalCount  
-          }
-          releases {
-            totalCount 
-          }
-          repositoryTopics(first: 20) {
-             nodes {
-                ... on RepositoryTopic {
-                   topic {
-                     name
-                   }
-                }
-             }
-          }
-        }
- 
-}''';
-
-  // 查询一个仓库的issues信息
-  //                   timeline(after: 10) {
-  //                        totalCount
-  //                        nodes {
-  //                           ... on IssueTimelineItem {
-  //
-  //                           }
-  //                        }
-  //                     }
-  final _apiRepoIssues = '''query {
-
-    repository(owner:"ying32", name:"govcl") {
-          issues(first: 1, states:OPEN) {
-             totalCount
-             nodes {
-                 ... on Issue {
-                    number 
-                    isPinned 
-                    author {
-                       login avatarUrl
-                    }
-                    title 
-                    body
-                    closed
-                    closedAt
-                    createdAt
-                    editor {
-                      login avatarUrl
-                    }
-                    labels(first: 20) {
-                       totalCount 
-                       nodes {
-                         ... on Label {
-                           name 
-                           color 
-                           description 
-                           isDefault 
-                         }
-                       }
-                    }
-                    lastEditedAt 
-                    locked 
-             
-                    milestone {
-                      closed 
-                      closedAt 
-                      description 
-                    }
-                    state 
- 
-                    updatedAt 
-                    viewerCanClose 
-                    viewerCanDelete 
-                    viewerCanReopen 
-                 }
-              }
-          }
-    }      
-}''';
+  final _treeNodes = <TreeViewItem>[];
 
   @override
   void initState() {
@@ -315,33 +68,29 @@ class _GraphQLTestState extends State<GraphQLTest> {
     setState(() {
       _loading = true;
       _bodyText = '';
-      _json = {};
+      _treeNodes.clear();
     });
     if (_controller.text.isEmpty) {
       setState(() {
         _loading = false;
       });
+      showInfoDialog('GraphQL语句不能为空',
+          context: context, severity: InfoBarSeverity.error);
       return;
     }
-    gitHubAPI.graphql.query(_controller.text, statusCode: 200).then((e) {
+    gitHubAPI.graphql.query(_controller.text).then((e) {
       if (e is Map) {
-        // print("返回结果=状态=$e");
         setState(() {
-          _json = e;
+          _treeNodes.addAll(_buildTreeViewItems(e));
           _bodyText = const JsonEncoder.withIndent('\t').convert(e);
         });
       } else {
-        // print("返回结果=状态=${e.statusCode}, ${e.body}");
         setState(() {
-          _json = {};
           _bodyText = "${e.body}";
         });
       }
     }).onError((e, s) {
-      //print("错误=$e");
-
       setState(() {
-        _json = {};
         _bodyText = "$e";
       });
     }).whenComplete(() {
@@ -409,27 +158,45 @@ class _GraphQLTestState extends State<GraphQLTest> {
                         }),
                     const Spacer(),
                     DropDownButton(
-                      title: const Text('API选择'),
+                      title: const Text('选择查询语句'),
                       items: [
                         MenuFlyoutItem(
                             text: const Text('当前用户信息'),
                             onPressed: () {
-                              _controller.text = qlQueryUser;
+                              _controller.text = QLQueries.queryUser();
                             }),
                         MenuFlyoutItem(
                             text: const Text('当前用户仓库列表'),
                             onPressed: () {
-                              _controller.text = _apiRepos;
+                              _controller.text = QLQueries.queryRepos();
+                            }),
+                        const MenuFlyoutSeparator(),
+                        MenuFlyoutItem(
+                            text: const Text('其他用户信息'),
+                            onPressed: () {
+                              _controller.text = QLQueries.queryUser('ying32');
                             }),
                         MenuFlyoutItem(
                             text: const Text('仓库信息'),
                             onPressed: () {
-                              _controller.text = _apiRepoInfo;
+                              _controller.text =
+                                  QLQueries.queryRepo('ying32', 'govcl');
                             }),
+                        const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('仓库Issues信息'),
                             onPressed: () {
-                              _controller.text = _apiRepoIssues;
+                              _controller.text =
+                                  QLQueries.queryRepoIssuesOrPullRequests(
+                                      'ying32', 'govcl');
+                            }),
+                        MenuFlyoutItem(
+                            text: const Text('仓库PullRequests信息'),
+                            onPressed: () {
+                              _controller.text =
+                                  QLQueries.queryRepoIssuesOrPullRequests(
+                                      'ying32', 'govcl',
+                                      isIssues: false);
                             }),
                       ],
                     )
@@ -440,6 +207,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
                 child: TextBox(
                   controller: _controller,
                   maxLines: null,
+                  selectionHeightStyle: ui.BoxHeightStyle.max,
                 ),
               ),
               Padding(
@@ -457,7 +225,10 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             ))
                         : const Text('结果:'),
                     const Spacer(),
-                    Button(onPressed: _doTest, child: const Text('GraphQL测试')),
+                    Button(
+                        onPressed: _loading ? null : _doTest,
+                        child: const IconText(
+                            icon: Remix.send_plane_line, text: Text('发送'))),
                   ],
                 ),
               ),
@@ -479,7 +250,11 @@ class _GraphQLTestState extends State<GraphQLTest> {
           child: SizedBox(
             width: 350,
             height: double.infinity,
-            child: Card(child: TreeView(items: _buildTreeViewItems(_json))),
+            child: Card(
+                // TreeView是有bug么？，当items被清后他还显示也不更新了
+                child: _treeNodes.isEmpty
+                    ? const SizedBox.shrink()
+                    : TreeView(items: _treeNodes)),
           ),
         ),
       ],

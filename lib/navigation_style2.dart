@@ -153,10 +153,7 @@ class _NavigationStyle2PageState extends State<NavigationStyle2Page>
 
   @override
   Widget build(BuildContext context) {
-    final localizations = FluentLocalizations.of(context);
-
     final appTheme = context.watch<AppTheme>();
-    final theme = FluentTheme.of(context);
     if (widget.shellContext != null) {
       if (router.canPop() == false) {
         setState(() {});

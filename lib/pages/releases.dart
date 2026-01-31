@@ -105,14 +105,6 @@ class ReleasesPage extends StatelessWidget {
               )),
             ],
           );
-
-          return Card(
-            child: ListTile(
-              title: Text(item.name ?? ''),
-              subtitle: Text(
-                  "${item.description ?? ''}, ${item.tagName} ${item.body}"),
-            ),
-          );
         },
         separatorBuilder: (BuildContext context, int index) =>
             const SizedBox(height: 30));

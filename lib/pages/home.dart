@@ -47,13 +47,12 @@ class _HomePageState extends State<HomePage> {
                           if (user == null) return const SizedBox.shrink();
                           print(
                               "user.pinnedItems=${user.pinnedItems?.firstOrNull?.name}");
-                          return Row(
-                            mainAxisSize: MainAxisSize.max,
+                          return Wrap(
                             children: [
                               UserInfoPanel(user),
                               if (user.pinnedItems?.isNotEmpty ?? false)
                                 SizedBox(
-                                  width: 500,
+                                  width: 300,
                                   height: 500,
                                   child: Column(
                                     children: user.pinnedItems!

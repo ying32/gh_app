@@ -91,7 +91,7 @@ class GithubCache {
       _currentUser ??= (gitHubAPI.auth.isAnonymous
           ? null
           : await gitHubAPI.graphql
-              .query(qlQueryUser, convert: QLUser.fromJson, statusCode: 200));
+              .query(QLQueries.queryUser(), convert: QLUser.fromJson));
 
   Future<List<Notification>?> get currentUserNotifications async {
     return gitHubAPI.restful.activity.listNotifications().toList();

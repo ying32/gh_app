@@ -1,5 +1,7 @@
 import 'dart:io';
 
+// ignore_for_file: depend_on_referenced_packages
+
 import 'package:csslib/parser.dart' as css;
 import 'package:csslib/visitor.dart';
 import 'package:path/path.dart' as p;

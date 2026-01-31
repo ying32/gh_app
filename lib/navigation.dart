@@ -37,7 +37,7 @@ class _NavItem {
 }
 
 class _NavItemIconButton extends StatelessWidget {
-  const _NavItemIconButton(this.item, {super.key});
+  const _NavItemIconButton(this.item);
 
   final _NavItem item;
 
@@ -79,7 +79,7 @@ class WrapNavigationPage extends StatelessWidget {
 }
 
 class _LeftNav extends StatelessWidget {
-  _LeftNav({super.key});
+  _LeftNav();
 
   final List<_NavItem> originalItems = [
     _NavItem(
