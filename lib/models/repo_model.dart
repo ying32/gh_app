@@ -25,15 +25,24 @@ class PathModel extends ChangeNotifier {
   set path(String value) {
     if (value != _path) {
       _path = value;
+      _segmentedPaths.clear();
+      if (_path.isEmpty || _path == "/") {
+        _segmentedPaths.add('');
+        //_segmentedPaths = [''];
+      } else {
+        _segmentedPaths.addAll("/$_path".split("/"));
+        // _segmentedPaths = "/$_path".split("/");
+      }
       notifyListeners();
     }
   }
 
-  List<String> get segmentedPaths {
-    if (_path.isEmpty || _path == "/") return [""];
-    final arr = "/$_path".split("/");
-    return arr;
-  }
+  /// 不可用final，因为selector会判断对象是否一致，如果不同他则不会更新的
+  /// 如果使用Consumer来监听就不可以使用final了
+  final List<String> _segmentedPaths = [""];
+
+  /// 已分割的路径
+  List<String> get segmentedPaths => _segmentedPaths;
 }
 
 class ReadMeModel extends ChangeNotifier {
