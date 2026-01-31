@@ -61,7 +61,7 @@ class _RepoBranches extends StatelessWidget {
             HyperlinkButton(
               onPressed: () {},
               child:
-                  const IconText(icon: Remix.price_tag_line, text: Text("0")),
+                  const IconText(icon: Remix.price_tag_3_line, text: Text("0")),
             ),
           ],
         );

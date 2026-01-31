@@ -28,7 +28,7 @@ class RepoReleases extends StatelessWidget {
               const SizedBox(height: 10),
               // Text('${}'),
               IconText(
-                icon: Remix.price_tag_line,
+                icon: Remix.price_tag_3_line,
                 iconColor: Colors.green,
                 text: Text(
                   releases.last.name ?? '',

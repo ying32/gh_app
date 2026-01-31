@@ -56,11 +56,13 @@ class TagLabel extends StatelessWidget {
     this.color = Colors.black,
     required this.text,
     this.padding,
+    this.radius,
   });
 
   final Color color;
   final Widget text;
   final EdgeInsetsGeometry? padding;
+  final double? radius;
 
   @override
   Widget build(BuildContext context) {
@@ -73,30 +75,33 @@ class TagLabel extends StatelessWidget {
         border: Border.all(
           color: color.withOpacity(0.1),
         ),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(radius ?? 10.0),
       ),
       child: text,
     );
   }
 
-  const TagLabel.archived({super.key, this.padding})
+  const TagLabel.archived({super.key, this.padding, this.radius})
       : color = m.Colors.orange,
         text = const Text('已归档 ',
             style: TextStyle(fontSize: 11, color: m.Colors.orange));
 
-  const TagLabel.private({super.key, this.padding})
+  const TagLabel.private({super.key, this.padding, this.radius})
       : color = m.Colors.black,
         text = const Text('私有 ', style: TextStyle(fontSize: 11));
 
-  const TagLabel.public({super.key, this.padding})
+  const TagLabel.public({super.key, this.padding, this.radius})
       : color = m.Colors.black,
         text = const Text('公开 ', style: TextStyle(fontSize: 11));
 
   factory TagLabel.other(String text,
-          {Color color = m.Colors.black, EdgeInsetsGeometry? padding}) =>
+          {Color color = m.Colors.black,
+          EdgeInsetsGeometry? padding,
+          double? radius}) =>
       TagLabel(
           color: color,
           padding: padding,
+          radius: radius,
           text: Text(text, style: TextStyle(fontSize: 11, color: color)));
 }
 

@@ -48,12 +48,15 @@ class _TabPagesState extends State<_TabPages> {
           closeIcon: null,
           body: RepoCodePage(repo),
         ),
-        Tab(
-          text: Text('问题 ${repo.openIssues ?? 0}'),
-          icon: const Icon(Remix.issues_line),
-          closeIcon: null,
-          body: RepoIssuesPage(repo),
-        ),
+        // issues
+        if (repo.hasIssues)
+          Tab(
+            text: Text('问题 ${repo.openIssues ?? 0}'),
+            icon: const Icon(Remix.issues_line),
+            closeIcon: null,
+            body: RepoIssuesPage(repo),
+          ),
+
         Tab(
           text: const Text('合并请求 ${0}'),
           icon: const Icon(Remix.git_pull_request_line),
@@ -66,12 +69,13 @@ class _TabPagesState extends State<_TabPages> {
           closeIcon: null,
           body: RepoActionPage(repo),
         ),
-        Tab(
-          text: const Text('Wiki'),
-          icon: const Icon(Remix.book_open_line),
-          closeIcon: null,
-          body: RepoWikiPage(repo),
-        ),
+        if (repo.hasWiki)
+          Tab(
+            text: const Text('Wiki'),
+            icon: const Icon(Remix.book_open_line),
+            closeIcon: null,
+            body: RepoWikiPage(repo),
+          ),
       ],
       onChanged: (index) {
         setState(() => currentIndex = index);
