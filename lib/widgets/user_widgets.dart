@@ -242,12 +242,15 @@ class UserInfoPanel extends StatelessWidget {
       // mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            UserHeadImage(user?.avatarUrl, imageSize: 64),
-            const SizedBox(width: 10.0),
-            UserNameWidget(user),
-          ],
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              UserHeadImage(user?.avatarUrl, imageSize: 60),
+              const SizedBox(width: 10.0),
+              UserNameWidget(user),
+            ],
+          ),
         ),
 
         UserLineInfo(icon: null, value: user?.bio),

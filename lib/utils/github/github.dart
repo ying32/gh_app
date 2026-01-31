@@ -93,9 +93,9 @@ class GithubCache {
           : await gitHubAPI.graphql
               .query(QLQueries.queryUser(), convert: QLUser.fromJson));
 
-  Future<List<Notification>?> get currentUserNotifications async {
-    return gitHubAPI.restful.activity.listNotifications().toList();
-  }
+  // Future<List<Notification>?> get currentUserNotifications async {
+  //   return gitHubAPI.restful.activity.listNotifications().toList();
+  // }
 
   ///
   Future<List<User>?> userFollowers([String owner = '']) async {
@@ -109,7 +109,9 @@ class GithubCache {
     return gitHubAPI.restful.users.listCurrentUserFollowing().toList();
   }
 
-  Future<User?> userInfo(String name) => gitHubAPI.restful.users.getUser(name);
+  //Future<User?> userInfo(String name) => gitHubAPI.restful.users.getUser(name);
+  Future<QLUser?> userInfo(String name) => gitHubAPI.graphql
+      .query(QLQueries.queryUser(name), convert: QLUser.fromJson);
 
   /// 获取仓库列表信息
   // Future<List<Repository>?> userRepos(String owner) async {
@@ -137,9 +139,7 @@ class GithubCache {
   }
 
   Future<List<Branch>?> repoBranches(Repository repo) async {
-    final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-
-    return gitHubAPI.restful.repositories.listBranches(slug).toList();
+    return gitHubAPI.restful.repositories.listBranches(repo.slug()).toList();
   }
 
   // Future<List<Release>?> repoReleases(Repository repo) async {
@@ -148,7 +148,6 @@ class GithubCache {
   //   return gitHubAPI.restful.repositories.listReleases(slug).toList();
   // }
   Future<List<QLRelease>?> repoReleases(Repository repo) async {
-    //final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
     var res = await gitHubAPI.graphql
         .query(QLQueries.queryRepoRelease(repo.owner!.login, repo.name));
     if (res == null || res is! Map) return null;
@@ -158,34 +157,31 @@ class GithubCache {
   }
 
   Future<List<Issue>?> repoIssues(Repository repo, {bool isOpen = true}) async {
-    final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-    //final state = isOpen ? 'OPEN' : 'CLOSED';
-    final state = isOpen ? 'open' : 'closed'; //open, closed, all
-
-    return gitHubAPI.restful.issues.listByRepo(slug, state: state).toList();
+    //open, closed, all
+    return gitHubAPI.restful.issues
+        .listByRepo(repo.slug(), state: isOpen ? 'open' : 'closed')
+        .toList();
   }
 
   Future<List<PullRequest>?> repoPullRequests(Repository repo,
       {bool isOpen = true}) async {
-    final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-    final state = isOpen ? 'open' : 'closed'; //open, closed, all
-
-    return gitHubAPI.restful.pullRequests.list(slug, state: state).toList();
+    //open, closed, all
+    return gitHubAPI.restful.pullRequests
+        .list(repo.slug(), state: isOpen ? 'open' : 'closed')
+        .toList();
   }
 
   /// README缓存
   Future<String?> repoReadMe(Repository repo, {String? ref}) async {
-    final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-
-    return (await gitHubAPI.restful.repositories.getReadme(slug, ref: ref))
+    return (await gitHubAPI.restful.repositories
+            .getReadme(repo.slug(), ref: ref))
         .text;
   }
 
   /// 目录内容缓存
   Future<RepositoryContents?> repoContents(Repository repo, String path,
       {String? ref}) async {
-    final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-
-    return gitHubAPI.restful.repositories.getContents(slug, path, ref: ref);
+    return gitHubAPI.restful.repositories
+        .getContents(repo.slug(), path, ref: ref);
   }
 }

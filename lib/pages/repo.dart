@@ -147,6 +147,8 @@ class _InternalRepoPage extends StatelessWidget {
                     icon: UserHeadImage(repo.owner?.avatarUrl, imageSize: 50),
                     onPressed: () {
                       // UserInfoPage.createNewTab(context, repo.owner!);
+                      print("type=${(repo as QLRepository).isInOrganization}");
+                      // print("type=${(repo as QLRepository).owner.id}");
                     },
                   ),
                 ),

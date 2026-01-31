@@ -176,6 +176,14 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             onPressed: () {
                               _controller.text = QLQueries.queryUser('ying32');
                             }),
+                        const MenuFlyoutSeparator(),
+                        MenuFlyoutItem(
+                            text: const Text('查询组织信息'),
+                            onPressed: () {
+                              _controller.text =
+                                  QLQueries.queryOrganization('zed-industries');
+                            }),
+                        const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('仓库信息'),
                             onPressed: () {

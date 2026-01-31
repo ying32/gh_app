@@ -82,7 +82,7 @@ class _RepoReleaseItem extends StatelessWidget {
               _buildLeftLabel(item.author?.name ?? item.author?.login,
                   icon: Remix.github_fill),
               _buildLeftLabel(item.tagName, icon: Remix.price_tag_2_line),
-              //TODO: 这个后面图标其实应该根据状态显示，rest api中有，但是graphql貌似没发现相关的
+              //TODO: 这个后面图标其实应该根据状态显示，但是graphql貌似没发现相关的
               _buildLeftLabel(item.abbreviatedOid,
                   icon: Remix.git_commit_line,
                   trailing: Icon(Remix.verified_badge_line,

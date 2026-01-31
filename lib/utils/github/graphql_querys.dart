@@ -67,6 +67,40 @@ class QLQueries {
 ''';
   }
 
+  /// 查询一个组织信息
+  static String queryOrganization(String name) {
+    //return '''  ${name.isEmpty ? 'viewer' : 'organization(login:"$name")'} {
+    return '''  organization(login:"$name") {
+    login
+    name
+    avatarUrl
+    email
+    location
+    url
+    websiteUrl
+    pinnedItems(first: 6, types:REPOSITORY) {
+      nodes {
+        ... on Repository {
+          name
+          forkCount
+          stargazerCount
+          isPrivate
+          description
+          owner {
+            login
+            avatarUrl
+          }
+          primaryLanguage {
+            color
+            name
+          }
+        }
+      } 
+    }
+  }
+''';
+  }
+
   /// 查询一个仓库信息
   /// [owner] 仓库所有者，User字段中的`login`
   ///
