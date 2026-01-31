@@ -46,7 +46,11 @@ class RuleSetVisitor extends Visitor {
         if (propValue == "" || propValue == "#") {
           final color = HexColor();
           declaration.expression?.visit(HexColorVisitor(color));
-          propValue = color.text;
+          if (color.value > 0xFF000000) {
+            propValue = color.value.toRadixString(16);
+          } else {
+            propValue = (0xFF000000 + color.value).toRadixString(16);
+          }
         }
         //print("selector=$selectorText, name=$propName, value=$propValue");
         props[propName] = propValue;
@@ -58,8 +62,9 @@ class RuleSetVisitor extends Visitor {
       for (final selector in node.selectorGroup!.selectors) {
         final names =
             selector.simpleSelectorSequences.map((e) => e.simpleSelector.name);
-        if (names.firstOrNull == "token" && names.length >= 2) {
-          final className = names.elementAt(1);
+        // 可能有多个选择的组， token selector token id，所以从最后开始取值
+        if (names.length >= 2 && names.elementAt(names.length - 2) == "token") {
+          final className = names.last;
           // 已经保存了的
           if (classNames.containsKey(className)) {
             final pSrc = classNames[className];
@@ -77,7 +82,7 @@ class RuleSetVisitor extends Visitor {
             classNames[className] = props;
           }
           // print(
-          //     "============================ ${selector.simpleSelectorSequences.join(" ")}");
+          //     "==========================selector == ${selector.simpleSelectorSequences.join(" ")}, props=$props");
         }
       }
     }
@@ -146,7 +151,22 @@ void writeToFile(String fileName, RuleSetVisitor visitor) {
     "package",
     "combinator",
     "unit",
-    "this"
+    "this",
+    // "attribute",
+    "value",
+    // "class",
+    "id",
+    "rule",
+    "title",
+    "code",
+    "content",
+    "property-access",
+    "url-link",
+    "keyword-array",
+    "pseudo-class",
+    "pseudo-element",
+    "keyword-this",
+    "table-header",
   ];
 
   // 写数据
@@ -154,16 +174,39 @@ void writeToFile(String fileName, RuleSetVisitor visitor) {
     if (unsupportedProperties.contains(key)) {
       continue;
     }
-
+    // 取值
+    final value = visitor.classNames[key];
+    // 重新调整为dart能用的key
     key = key
         .split("-")
         .map((e) => e.isEmpty ? '' : e[0].toUpperCase() + e.substring(1))
         .join();
+    // "attribute",
+    // "value",
+    // "class",
     key = key[0].toLowerCase() + key.substring(1);
-    final value = visitor.classNames[key];
+
+    // 重调整
+    if (key == "class") {
+      if (visitor.classNames['class-name'] == null) {
+        key = "className";
+      } else {
+        continue;
+      }
+    } else if (key == "attribute") {
+      if (visitor.classNames['atrule'] == null) {
+        key = "atrule";
+      } else {
+        continue;
+      }
+    }
     if (value == null) continue;
     final color = value['color'] ?? '';
     var fontWeight = value['font-weight']?.toLowerCase() ?? '';
+    // 关键字强制加粗
+    if (key == 'keyword') {
+      fontWeight = 'bold';
+    }
     // 这个没有所以不管
     if (fontWeight == "inherit") {
       fontWeight = "";
@@ -172,7 +215,7 @@ void writeToFile(String fileName, RuleSetVisitor visitor) {
 
     fileBuff.write("    super.$key = const TextStyle(");
     if (color.isNotEmpty) {
-      fileBuff.write('color: Color(0xff$color)');
+      fileBuff.write('color: Color(0x$color)');
       if (fontWeight.isNotEmpty) {
         fileBuff.write(", ");
       }

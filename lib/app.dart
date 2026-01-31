@@ -18,8 +18,11 @@ class CustomMaterialScrollBehavior extends FluentScrollBehavior {
       };
 }
 
-class GithubApp extends StatelessWidget {
-  const GithubApp({super.key});
+class AppProvider extends StatelessWidget {
+  const AppProvider({super.key, this.child, this.builder});
+
+  final Widget? child;
+  final TransitionBuilder? builder;
 
   @override
   Widget build(BuildContext context) {
@@ -28,69 +31,81 @@ class GithubApp extends StatelessWidget {
         ChangeNotifierProvider<CurrentUserModel>(
           create: (_) => CurrentUserModel(null),
         ),
+        ChangeNotifierProvider<AppTheme>(
+          create: (_) => appTheme,
+        ),
       ],
-      child: ChangeNotifierProvider.value(
-        value: appTheme,
-        builder: (context, child) {
-          final appTheme = context.watch<AppTheme>();
-          //return FluentApp.router(
-          return FluentApp(
-            title: appTitle,
-            themeMode: appTheme.mode,
-            debugShowCheckedModeBanner: false,
-            color: appTheme.color,
-            darkTheme: FluentThemeData(
-              fontFamily: appTheme.fontFamily,
-              brightness: Brightness.dark,
-              accentColor: appTheme.color,
-              visualDensity: VisualDensity.standard,
-              selectionColor: Colors.blue.lightest.withOpacity(0.5),
-              focusTheme: FocusThemeData(
-                glowFactor: is10footScreen(context) ? 2.0 : 0.0,
-              ),
-              resources: const ResourceDictionary.dark(
-                  // cardBackgroundFillColorDefault: Color(0xd2000000),
-                  ),
+      builder: builder,
+      child: child,
+    );
+  }
+}
+
+class GithubApp extends StatelessWidget {
+  const GithubApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppProvider(
+      builder: (context, child) {
+        final appTheme = context.watch<AppTheme>();
+        //return FluentApp.router(
+        return FluentApp(
+          title: appTitle,
+          themeMode: appTheme.mode,
+          debugShowCheckedModeBanner: false,
+          color: appTheme.color,
+          darkTheme: FluentThemeData(
+            fontFamily: appTheme.fontFamily,
+            brightness: Brightness.dark,
+            accentColor: appTheme.color,
+            visualDensity: VisualDensity.standard,
+            selectionColor: Colors.blue.lightest.withOpacity(0.5),
+            focusTheme: FocusThemeData(
+              glowFactor: is10footScreen(context) ? 2.0 : 0.0,
             ),
-            theme: FluentThemeData(
-              fontFamily: appTheme.fontFamily,
-              accentColor: appTheme.color,
-              visualDensity: VisualDensity.standard,
-              selectionColor: Colors.blue.lightest.withOpacity(0.5),
-              focusTheme: FocusThemeData(
-                glowFactor: is10footScreen(context) ? 2.0 : 0.0,
-              ),
-              // flutter\packages\flutter\lib\src\material\desktop_text_selection_toolbar.dart
-              // _defaultToolbarBuilder, 发现他上下文菜单使用了card的背景色，过于透明，效果反而不好
-              resources: const ResourceDictionary.light(
-                  // cardBackgroundFillColorDefault: Color(0xd2ffffff),
-                  ),
-            ),
-            locale: appTheme.locale,
-            builder: (context, child) {
-              return Directionality(
-                textDirection: appTheme.textDirection,
-                child: NavigationPaneTheme(
-                  data: NavigationPaneThemeData(
-                    backgroundColor: appTheme.windowEffect !=
-                            flutter_acrylic.WindowEffect.disabled
-                        ? Colors.transparent
-                        : null,
-                  ),
-                  child: child!,
+            resources: const ResourceDictionary.dark(
+                // cardBackgroundFillColorDefault: Color(0xd2000000),
                 ),
-              );
-            },
-            scrollBehavior: CustomMaterialScrollBehavior(),
-            // 非router模式，这里会使用tab模式的
-            home: const WrapNavigationPage(),
-            // 使用路由模式的
-            // routeInformationParser: router.routeInformationParser,
-            // routerDelegate: router.routerDelegate,
-            // routeInformationProvider: router.routeInformationProvider,
-          );
-        },
-      ),
+          ),
+          theme: FluentThemeData(
+            fontFamily: appTheme.fontFamily,
+            accentColor: appTheme.color,
+            visualDensity: VisualDensity.standard,
+            selectionColor: Colors.blue.lightest.withOpacity(0.5),
+            focusTheme: FocusThemeData(
+              glowFactor: is10footScreen(context) ? 2.0 : 0.0,
+            ),
+            // flutter\packages\flutter\lib\src\material\desktop_text_selection_toolbar.dart
+            // _defaultToolbarBuilder, 发现他上下文菜单使用了card的背景色，过于透明，效果反而不好
+            resources: const ResourceDictionary.light(
+                // cardBackgroundFillColorDefault: Color(0xd2ffffff),
+                ),
+          ),
+          locale: appTheme.locale,
+          builder: (context, child) {
+            return Directionality(
+              textDirection: appTheme.textDirection,
+              child: NavigationPaneTheme(
+                data: NavigationPaneThemeData(
+                  backgroundColor: appTheme.windowEffect !=
+                          flutter_acrylic.WindowEffect.disabled
+                      ? Colors.transparent
+                      : null,
+                ),
+                child: child!,
+              ),
+            );
+          },
+          scrollBehavior: CustomMaterialScrollBehavior(),
+          // 非router模式，这里会使用tab模式的
+          home: const NavigationPage(),
+          // 使用路由模式的
+          // routeInformationParser: router.routeInformationParser,
+          // routerDelegate: router.routerDelegate,
+          // routeInformationProvider: router.routeInformationProvider,
+        );
+      },
     );
   }
 }

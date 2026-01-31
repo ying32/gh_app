@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/graphql_test.dart';
@@ -58,8 +59,8 @@ class _NavItemIconButton extends StatelessWidget {
   }
 }
 
-class WrapNavigationPage extends StatelessWidget {
-  const WrapNavigationPage({super.key});
+class NavigationPage extends StatelessWidget {
+  const NavigationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +75,7 @@ class WrapNavigationPage extends StatelessWidget {
                   closeIcon: FluentIcons.emoji,
                   onClosed: null)
             ]),
-        child: const NavigationPage());
+        child: const _InternalNavigationPage());
   }
 }
 
@@ -215,17 +216,19 @@ class _MainTabView extends StatelessWidget {
   }
 }
 
-class NavigationPage extends StatefulWidget {
-  const NavigationPage({
-    super.key,
-  });
+class _InternalNavigationPage extends StatefulWidget {
+  const _InternalNavigationPage();
 
   @override
-  State<NavigationPage> createState() => _NavigationPageState();
+  State<_InternalNavigationPage> createState() =>
+      _InternalNavigationPageState();
 }
 
-class _NavigationPageState extends State<NavigationPage> with WindowListener {
+class _InternalNavigationPageState extends State<_InternalNavigationPage>
+    with WindowListener {
   final viewKey = GlobalKey(debugLabel: 'Navigation View Key');
+
+  String? _lastClipboardText;
 
   @override
   void initState() {
@@ -315,5 +318,18 @@ class _NavigationPageState extends State<NavigationPage> with WindowListener {
   @override
   void onWindowClose() {
     ExitAppDialog.show(context, mounted);
+  }
+
+  @override
+  void onWindowFocus() {
+    Clipboard.getData('text/plain').then((e) {
+      if (_lastClipboardText != e?.text) {
+        _lastClipboardText = e?.text;
+        // TODO: 待写。这里检测，当解析出来的是github链接，弹出跳转提示
+        if (kDebugMode) {
+          print("_lastClipboardText=$_lastClipboardText");
+        }
+      }
+    });
   }
 }
