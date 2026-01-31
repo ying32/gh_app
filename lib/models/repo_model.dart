@@ -10,6 +10,7 @@ class RepoModel extends ChangeNotifier {
   Repository get repo => _repo;
   set repo(Repository value) {
     if (value != _repo) {
+      print("==========更新仓库信息");
       _repo = value;
       notifyListeners();
     }

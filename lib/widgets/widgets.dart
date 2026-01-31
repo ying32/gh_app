@@ -190,7 +190,7 @@ class WrapInit extends StatefulWidget {
   });
 
   final Widget child;
-  final VoidCallback onInit;
+  final ValueChanged<BuildContext> onInit;
 
   @override
   State<WrapInit> createState() => _WrapInitState();
@@ -200,7 +200,7 @@ class _WrapInitState extends State<WrapInit> {
   @override
   void initState() {
     super.initState();
-    widget.onInit.call();
+    widget.onInit.call(context);
   }
 
   @override

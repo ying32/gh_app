@@ -47,8 +47,7 @@ class RepoListItem extends StatelessWidget {
   final Repository repo;
   final bool isPinStyle;
 
-  String get _title =>
-      isPinStyle ? repo.name : "${repo.owner?.login ?? ''}/${repo.name}";
+  String get _title => isPinStyle ? repo.name : repo.fullName;
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +186,7 @@ class RepoListItem extends StatelessWidget {
                 // 最后更新时间
                 Padding(
                   padding: padding,
-                  child: Text(timeToLabel(repo.updatedAt),
+                  child: Text(repo.pushedAt?.toLabel ?? '',
                       style: TextStyle(color: appTheme.color.lightest)),
                 ),
             ],

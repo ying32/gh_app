@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/pages/releases.dart';
@@ -7,6 +6,7 @@ import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/issues_widgets.dart';
@@ -38,51 +38,55 @@ class _TabPagesState extends State<_TabPages> {
 
   @override
   Widget build(BuildContext context) {
-    final repo = context.read<RepoModel>().repo;
-    return TabView(
-      currentIndex: currentIndex,
-      tabs: [
-        Tab(
-          text: const Text('代码'),
-          icon: const Icon(Remix.code_line),
-          closeIcon: null,
-          body: RepoCodePage(repo),
-        ),
-        // issues
-        if (repo.hasIssues)
-          Tab(
-            text: Text('问题 ${repo.openIssues ?? 0}'),
-            icon: const Icon(Remix.issues_line),
-            closeIcon: null,
-            body: RepoIssuesPage(repo),
-          ),
+    //final repo = context.read()<RepoModel>().repo;
+    return Selector<RepoModel, Repository>(
+        selector: (_, model) => model.repo,
+        builder: (_, repo, __) {
+          return TabView(
+            currentIndex: currentIndex,
+            tabs: [
+              Tab(
+                text: const Text('代码'),
+                icon: const Icon(Remix.code_line),
+                closeIcon: null,
+                body: RepoCodePage(repo),
+              ),
+              // issues
+              if (repo.hasIssues)
+                Tab(
+                  text: Text('问题 ${repo.openIssuesCount}'),
+                  icon: const Icon(Remix.issues_line),
+                  closeIcon: null,
+                  body: RepoIssuesPage(repo),
+                ),
 
-        Tab(
-          text: const Text('合并请求 ${0}'),
-          icon: const Icon(Remix.git_pull_request_line),
-          closeIcon: null,
-          body: RepoPullRequestPage(repo),
-        ),
-        Tab(
-          text: const Text('Actions'),
-          icon: const Icon(Remix.play_circle_line),
-          closeIcon: null,
-          body: RepoActionPage(repo),
-        ),
-        if (repo.hasWiki)
-          Tab(
-            text: const Text('Wiki'),
-            icon: const Icon(Remix.book_open_line),
-            closeIcon: null,
-            body: RepoWikiPage(repo),
-          ),
-      ],
-      onChanged: (index) {
-        setState(() => currentIndex = index);
-      },
-      tabWidthBehavior: TabWidthBehavior.sizeToContent,
-      closeButtonVisibility: CloseButtonVisibilityMode.never,
-    );
+              Tab(
+                text: Text('合并请求 ${(repo as QLRepository).openPullRequests}'),
+                icon: const Icon(Remix.git_pull_request_line),
+                closeIcon: null,
+                body: RepoPullRequestPage(repo),
+              ),
+              Tab(
+                text: const Text('Actions'),
+                icon: const Icon(Remix.play_circle_line),
+                closeIcon: null,
+                body: RepoActionPage(repo),
+              ),
+              if (repo.hasWiki)
+                Tab(
+                  text: const Text('Wiki'),
+                  icon: const Icon(Remix.book_open_line),
+                  closeIcon: null,
+                  body: RepoWikiPage(repo),
+                ),
+            ],
+            onChanged: (index) {
+              setState(() => currentIndex = index);
+            },
+            tabWidthBehavior: TabWidthBehavior.sizeToContent,
+            closeButtonVisibility: CloseButtonVisibilityMode.never,
+          );
+        });
   }
 }
 
@@ -93,12 +97,26 @@ class RepoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(providers: [
-      ChangeNotifierProvider<RepoModel>(
-          create: (_) => RepoModel(repo), child: const _InternalRepoPage()),
-      ChangeNotifierProvider<PathModel>(create: (_) => PathModel()),
-      ChangeNotifierProvider<RepoBranchModel>(create: (_) => RepoBranchModel()),
-    ], child: const _InternalRepoPage());
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider<RepoModel>(
+              create: (_) => RepoModel(repo), child: const _InternalRepoPage()),
+          ChangeNotifierProvider<PathModel>(create: (_) => PathModel()),
+          ChangeNotifierProvider<RepoBranchModel>(
+              create: (_) => RepoBranchModel()),
+        ],
+        child: WrapInit(
+            onInit: (context) {
+              GithubCache.instance
+                  .userRepo(repo.owner!.login, repo.name)
+                  .then((e) {
+                context.read<RepoModel>().repo = e!;
+                print("加载数据更新完成");
+
+                //
+              });
+            },
+            child: const _InternalRepoPage()));
   }
 
   /// 创建一个仓库页
@@ -116,59 +134,52 @@ class _InternalRepoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WrapInit(
-      onInit: () {
-        if (kDebugMode) {
-          print("初始");
-        }
+    return Selector<RepoModel, Repository>(
+      selector: (_, model) => model.repo,
+      builder: (_, repo, __) {
+        return ScaffoldPage(
+          header: PageHeader(
+            title: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: IconButton(
+                    icon: UserHeadImage(repo.owner?.avatarUrl, imageSize: 50),
+                    onPressed: () {
+                      // UserInfoPage.createNewTab(context, repo.owner!);
+                    },
+                  ),
+                ),
+                Text(repo.fullName),
+                if (repo.isPrivate)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: Icon(Remix.git_repository_private_line),
+                  ),
+                if (repo.archived)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: TagLabel.archived(),
+                  ),
+                const Spacer(),
+                LinkAction(
+                  icon: const Icon(FluentIcons.open_source, size: 18),
+                  link: repo.htmlUrl,
+                  message: '在浏览器中打开',
+                ),
+              ],
+            ),
+          ),
+          content: Padding(
+            padding: EdgeInsetsDirectional.only(
+              bottom: kPageDefaultVerticalPadding,
+              // start: PageHeader.horizontalPadding(context),
+              end: PageHeader.horizontalPadding(context),
+            ),
+            child: const _TabPages(),
+          ),
+        );
       },
-      child: Selector<RepoModel, Repository>(
-        selector: (_, model) => model.repo,
-        builder: (_, repo, __) {
-          return ScaffoldPage(
-            header: PageHeader(
-              title: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: IconButton(
-                      icon: UserHeadImage(repo.owner?.avatarUrl, imageSize: 50),
-                      onPressed: () {
-                        // UserInfoPage.createNewTab(context, repo.owner!);
-                      },
-                    ),
-                  ),
-                  Text(repo.fullName),
-                  if (repo.isPrivate)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: Icon(Remix.git_repository_private_line),
-                    ),
-                  if (repo.archived)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4),
-                      child: TagLabel.archived(),
-                    ),
-                  const Spacer(),
-                  LinkAction(
-                    icon: const Icon(FluentIcons.open_source, size: 18),
-                    link: repo.htmlUrl,
-                    message: '在浏览器中打开',
-                  ),
-                ],
-              ),
-            ),
-            content: Padding(
-              padding: EdgeInsetsDirectional.only(
-                bottom: kPageDefaultVerticalPadding,
-                // start: PageHeader.horizontalPadding(context),
-                end: PageHeader.horizontalPadding(context),
-              ),
-              child: const _TabPages(),
-            ),
-          );
-        },
-      ),
     );
   }
 }

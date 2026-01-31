@@ -185,7 +185,7 @@ class _MainTabView extends StatelessWidget {
               showScrollButtons: false,
               onNewPressed: () {
                 GoGithubDialog.show(context, onSuccess: (data) {
-                  if (data is Repository) {
+                  if (data is QLRepository) {
                     RepoPage.createNewTab(context, data);
                   } else if (data is User) {
                     // 创建User页面

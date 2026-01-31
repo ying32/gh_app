@@ -198,6 +198,13 @@ class _GraphQLTestState extends State<GraphQLTest> {
                                       'ying32', 'govcl',
                                       isIssues: false);
                             }),
+                        const MenuFlyoutSeparator(),
+                        MenuFlyoutItem(
+                            text: const Text('仓库Releases'),
+                            onPressed: () {
+                              _controller.text =
+                                  QLQueries.queryRepoRelease('ying32', 'govcl');
+                            }),
                       ],
                     )
                   ],

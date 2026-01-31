@@ -130,6 +130,9 @@ class QLQueries {
       pullRequests(states:OPEN) {
         totalCount
       }
+      watchers {
+        totalCount
+      }
       licenseInfo {
          name 
       }
@@ -164,10 +167,58 @@ class QLQueries {
 ''';
   }
 
-  /// 查询User的仓库列表
+  /// 查询一个仓库信息
   /// [owner] 仓库所有者，User字段中的`login`
   ///
-  /// [refs] 取值为 `refs/heads/` 或 `refs/tags/`
+  /// [name] 仓库名称
+  ///
+  /// https://docs.github.com/zh/graphql/reference/objects#releaseconnection
+  ///
+  /// https://docs.github.com/zh/graphql/reference/objects#release
+  ///
+  /// `CREATED_AT`和`NAME`
+  static String queryRepoRelease(String owner, String name, {int count = 20}) {
+    // 应该要按更新时间排，但是没有相应的值可选
+    return '''  repository(owner:"$owner", name:"$name") {
+      releases(first:$count, orderBy: {direction: DESC, field: CREATED_AT}) {
+        totalCount 
+        nodes {
+          author { 
+            login 
+            name 
+            avatarUrl
+          }
+          name
+          tagName
+          updatedAt
+          url
+          createdAt
+          isDraft
+          isLatest
+          isPrerelease
+          description
+          tagCommit { 
+            abbreviatedOid
+          }
+          releaseAssets(first: 50) {   
+            totalCount 
+            nodes {
+              contentType
+              createdAt
+              downloadCount
+              downloadUrl
+              name
+              size
+              updatedAt
+            }
+          }
+        }
+      }
+    }''';
+  }
+
+  /// 查询User的仓库列表，只列出少量信息，具体到时候使用[queryRepo]来查询详细信息
+  /// [owner] 仓库所有者，User字段中的`login`
   ///
   /// [count] 取条数
   ///
@@ -176,14 +227,14 @@ class QLQueries {
   /// [sortField] 排序，可取值`CREATED_AT`、`NAME`、`PUSHED_AT`、`STARGAZERS`、`UPDATED_AT`
   static String queryRepos({
     String owner = '',
-    String refs = 'refs/heads/',
-    int count = 30,
+    int count = 50,
     String sortDirection = "DESC",
     String sortField = "CREATED_AT",
   }) {
     // 只查询user的仓库信息
-    return '''  viewer {
+    return '''  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {
     repositories(first:$count, orderBy: {direction: $sortDirection, field: $sortField}) {
+      totalCount
       nodes {
           name
           owner {
@@ -195,67 +246,18 @@ class QLQueries {
             color
             name
           }
-          archivedAt
           updatedAt
           url
-          diskUsage
           forkCount
-          forkingAllowed
           stargazerCount
-          hasIssuesEnabled
-          hasProjectsEnabled
-          hasSponsorshipsEnabled
-          hasWikiEnabled
-          homepageUrl
           isArchived
-          isBlankIssuesEnabled
-          isDisabled
-          isEmpty
-          isFork
-          isInOrganization
-          isLocked
-          isMirror
           isPrivate
-          isTemplate
-          isSecurityPolicyEnabled
           pushedAt
-          viewerCanSubscribe 
-          viewerHasStarred 
-          languages(first: 20) {
-            nodes {
-              color
-              name
-            }
-          }
-          defaultBranchRef {
-            name
-          }
-          issues {
-            totalCount
-          }
-          pullRequests {
-            totalCount
-          }
           licenseInfo {
              name 
           }
-          latestRelease {
-            author {
-               login
-               name
-            }
-            createdAt
-            isDraft
-            isLatest
-            isPrerelease
-          }
-          refs(refPrefix: "$refs") {
-            totalCount  
-          }
-          releases {
-            totalCount 
-          }
           repositoryTopics(first: 20) {
+             totalCount
              nodes {
                topic {
                  name

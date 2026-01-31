@@ -1,22 +1,23 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/tabview_model.dart';
+import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
+import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
+import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
+import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:github/github.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class _RepoReleaseItem extends StatelessWidget {
-  const _RepoReleaseItem(
-    this.item, {
-    this.isLast = false,
-  });
+  const _RepoReleaseItem(this.item);
 
-  final Release item;
-  final bool isLast;
+  final QLRelease item;
 
   Widget _buildLinkButton(String title, String link, {int? size}) {
     final style = TextStyle(color: Colors.blue, fontWeight: FontWeight.w500);
@@ -39,10 +40,17 @@ class _RepoReleaseItem extends StatelessWidget {
     );
   }
 
-  Widget _buildLeftLabel(String? text) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+  Widget _buildLeftLabel(String? text, {IconData? icon, Widget? trailing}) =>
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
         child: (text?.isNotEmpty ?? false)
-            ? Text(text ?? '')
+            ? icon != null
+                ? IconText(
+                    iconSize: 18,
+                    icon: icon,
+                    text: Text(text ?? '', overflow: TextOverflow.ellipsis),
+                    trailing: trailing)
+                : Text(text ?? '', overflow: TextOverflow.ellipsis)
             : const SizedBox.shrink(),
       );
 
@@ -57,18 +65,28 @@ class _RepoReleaseItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 150,
+          // width: 150,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 15.0),
               if (item.createdAt != null)
                 _buildLeftLabel(
                     '${item.createdAt!.year}年${item.createdAt!.month}月${item.createdAt!.day}日'),
-              _buildLeftLabel(item.author?.name ?? item.author?.login),
-              _buildLeftLabel(item.tagName),
-              _buildLeftLabel(item.targetCommitish),
+              //TODO: 这里实际为发布者的头像，但这里懒得弄了
+              _buildLeftLabel(item.author?.name ?? item.author?.login,
+                  icon: Remix.github_fill),
+              _buildLeftLabel(item.tagName, icon: Remix.price_tag_2_line),
+              //TODO: 这个后面图标其实应该根据状态显示，rest api中有，但是graphql貌似没发现相关的
+              _buildLeftLabel(item.abbreviatedOid,
+                  icon: Remix.git_commit_line,
+                  trailing: Icon(Remix.verified_badge_line,
+                      color: Colors.green, size: 18)),
             ],
           ),
         ),
@@ -95,15 +113,15 @@ class _RepoReleaseItem extends StatelessWidget {
                       child: TagLabel.other('草稿', color: Colors.yellow),
                     ),
                   //TODO: 这个要获取是否为最后一个，restapi貌似没有哈，得用graphql的才有
-                  if (isLast)
+                  if (item.isLatest)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: TagLabel.other('Latest', color: Colors.green),
                     ),
                 ],
               ),
-              if (item.description?.isNotEmpty ?? false)
-                Text(item.description ?? ''),
+              //if (item.description?.isNotEmpty ?? false)
+              //  Text(item.description ?? ''),
               if (item.body?.isNotEmpty ?? false)
                 MarkdownBlockPlus(
                   data: item.body!,
@@ -114,29 +132,35 @@ class _RepoReleaseItem extends StatelessWidget {
                 ),
               // item.assets
               const SizedBox(height: 10),
-              Expander(
-                header: Row(
-                  children: [
-                    _buildTitle('Assets '),
-                    TagLabel.other("${2 + (item.assets?.length ?? 0)}",
-                        radius: 15.0),
-                  ],
-                ),
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (item.zipballUrl != null)
-                      _buildLinkButton('Source code (zip)', item.zipballUrl!),
-                    if (item.tarballUrl != null)
-                      _buildLinkButton(
-                          'Source code (tar.gz)', item.tarballUrl!),
-                    if (item.assets?.isNotEmpty ?? false)
+              if (item.assets?.isNotEmpty ?? false)
+                Expander(
+                  headerBackgroundColor: ButtonState.all(Colors.transparent),
+                  // contentBackgroundColor: Colors.transparent,
+                  header: Row(
+                    children: [
+                      _buildTitle('Assets '),
+                      TagLabel.other(
+                          "${item.assets?.length ?? 0}", // 没有发现2个默认的url的啊
+                          //TagLabel.other("${2 + (item.assets?.length ?? 0)}",
+                          radius: 15.0,
+                          color: context.isDark ? Colors.white : Colors.black),
+                    ],
+                  ),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (item.zipballUrl != null)
+                        _buildLinkButton('Source code (zip)', item.zipballUrl!),
+                      if (item.tarballUrl != null)
+                        _buildLinkButton(
+                            'Source code (tar.gz)', item.tarballUrl!),
+                      // if (item.assets?.isNotEmpty ?? false)
                       ...item.assets!.map((e) => _buildLinkButton(
                           '${e.name}', e.browserDownloadUrl!,
                           size: e.size)),
-                  ],
-                ),
-              )
+                    ],
+                  ),
+                )
             ],
           ),
         )),
@@ -145,40 +169,50 @@ class _RepoReleaseItem extends StatelessWidget {
   }
 }
 
-class ReleasesPage extends StatelessWidget {
+class ReleasesPage extends StatelessWidget with PageMixin {
   const ReleasesPage({
     super.key,
     required this.repo,
-    required this.releases,
   });
 
   final Repository repo;
-  final List<Release> releases;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-        itemCount: releases.length,
-        // controller: scrollController,
-        padding: EdgeInsetsDirectional.only(
-          bottom: kPageDefaultVerticalPadding,
-          // start: PageHeader.horizontalPadding(context),
-          end: PageHeader.horizontalPadding(context),
-        ),
-        itemBuilder: (context, index) =>
-            _RepoReleaseItem(releases[index], isLast: index == 0),
-        separatorBuilder: (BuildContext context, int index) =>
-            const SizedBox(height: 30));
+    return FutureBuilder(
+        future: GithubCache.instance.repoReleases(repo),
+        builder: (_, snapshot) {
+          if (!snapshotIsOk(snapshot, false, false)) {
+            return const Center(
+              child: ProgressRing(),
+            );
+          }
+          if (snapshot.hasError) {
+            return errorDescription(snapshot.error);
+          }
+          final releases = snapshot.data ?? [];
+          if (releases.isEmpty) {
+            return const Center(
+              child: Text('没有数据'),
+            );
+          }
+          return ListView.separated(
+              itemCount: releases.length,
+              padding: EdgeInsetsDirectional.only(
+                bottom: kPageDefaultVerticalPadding,
+                // start: PageHeader.horizontalPadding(context),
+                end: PageHeader.horizontalPadding(context),
+              ),
+              itemBuilder: (context, index) =>
+                  _RepoReleaseItem(releases[index]),
+              separatorBuilder: (BuildContext context, int index) =>
+                  const SizedBox(height: 30));
+        });
   }
 
-  static void createNewTab(
-      BuildContext context, Repository repo, List<Release> releases) {
+  static void createNewTab(BuildContext context, Repository repo) {
     context.read<TabviewModel>().addTab(
-          // ChangeNotifierProvider<RepoModel>(
-          //   create: (_) => RepoModel(repo),
-          //   child: const RepoPage(),
-          // ),
-          ReleasesPage(repo: repo, releases: releases),
+          ReleasesPage(repo: repo),
           key: ValueKey("${RouterTable.release}/${repo.fullName}"),
           title: '${repo.fullName} Releases',
           icon: Remix.price_tag_3_line,

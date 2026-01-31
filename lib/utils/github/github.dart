@@ -112,18 +112,28 @@ class GithubCache {
   Future<User?> userInfo(String name) => gitHubAPI.restful.users.getUser(name);
 
   /// 获取仓库列表信息
-  Future<List<Repository>?> userRepos(String owner) async {
-    return (owner.isEmpty
-            ? gitHubAPI.restful.repositories
-                .listRepositories(sort: 'updated_at', direction: 'desc')
-            : gitHubAPI.restful.repositories.listUserRepositories(owner))
-        .toList();
+  // Future<List<Repository>?> userRepos(String owner) async {
+  //   return (owner.isEmpty
+  //           ? gitHubAPI.restful.repositories
+  //               .listRepositories(sort: 'updated_at', direction: 'desc')
+  //           : gitHubAPI.restful.repositories.listUserRepositories(owner))
+  //       .toList();
+  // }
+  Future<List<QLRepository>?> userRepos(String owner) async {
+    var res = await gitHubAPI.graphql.query(QLQueries.queryRepos(owner: owner));
+    if (res == null || res is! Map) return null;
+    res = (res['viewer'] ?? res['user'])?['repositories']?['nodes'];
+    return List.from(res).map((e) => QLRepository.fromJson(e)).toList();
   }
 
-  Future<Repository?> userRepo(String owner, String name) async {
-    final slug = RepositorySlug(owner, name);
-
-    return gitHubAPI.restful.repositories.getRepository(slug);
+  // Future<Repository?> userRepo(String owner, String name) async {
+  //   final slug = RepositorySlug(owner, name);
+  //
+  //   return gitHubAPI.restful.repositories.getRepository(slug);
+  // }
+  Future<QLRepository?> userRepo(String owner, String name) async {
+    return gitHubAPI.graphql.query(QLQueries.queryRepo(owner, name),
+        convert: QLRepository.fromJson);
   }
 
   Future<List<Branch>?> repoBranches(Repository repo) async {
@@ -132,10 +142,19 @@ class GithubCache {
     return gitHubAPI.restful.repositories.listBranches(slug).toList();
   }
 
-  Future<List<Release>?> repoReleases(Repository repo) async {
-    final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-
-    return gitHubAPI.restful.repositories.listReleases(slug).toList();
+  // Future<List<Release>?> repoReleases(Repository repo) async {
+  //   final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
+  //
+  //   return gitHubAPI.restful.repositories.listReleases(slug).toList();
+  // }
+  Future<List<QLRelease>?> repoReleases(Repository repo) async {
+    //final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
+    var res = await gitHubAPI.graphql
+        .query(QLQueries.queryRepoRelease(repo.owner!.login, repo.name));
+    if (res == null || res is! Map) return null;
+    res = res['repository']?['releases']?['nodes'];
+    if (res == null || res is! List) return null;
+    return List.from(res).map((e) => QLRelease.fromJson(e)).toList();
   }
 
   Future<List<Issue>?> repoIssues(Repository repo, {bool isOpen = true}) async {

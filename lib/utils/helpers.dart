@@ -35,3 +35,31 @@ extension IntHelper on int {
   String toKiloString() =>
       this < 1000 ? "$this" : "${(this / 1000.0).toStringAsFixed(1)}k";
 }
+
+/// 时间扩展
+extension DateTimeHelper on DateTime {
+  /// 时间转易读的标签
+  String get toLabel {
+    const minute = 60;
+    const hour = 60 * minute;
+    const day = 24 * hour;
+    // const week = 7 * day;
+    const month = 30 * day;
+    const year = 12 * month;
+
+    final seconds = DateTime.now().millisecondsSinceEpoch ~/ 1000 -
+        millisecondsSinceEpoch ~/ 1000;
+
+    return switch (seconds) {
+      0 => '刚刚',
+      < minute => '$seconds秒前',
+      < hour => '${seconds ~/ minute}分钟前',
+      < day => '${seconds ~/ hour}小时前',
+      // < week => '${seconds ~/ week}周前',
+      < month => '${seconds ~/ day}天前',
+      < year => '${seconds ~/ month}个月前',
+      >= year => '${seconds ~/ year}年前',
+      _ => "",
+    };
+  }
+}

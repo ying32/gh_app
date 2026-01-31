@@ -20,6 +20,7 @@ class QLPrimaryLanguage {
         name = input['name'] ?? '';
 }
 
+/// 仓库所有者
 class QLRepositoryOwner extends UserInformation {
   QLRepositoryOwner({
     required String login,
@@ -33,6 +34,108 @@ class QLRepositoryOwner extends UserInformation {
   Map<String, dynamic> toJson() => {};
 }
 
+/// 许可协议
+class QLLicenseKind extends LicenseKind {
+  QLLicenseKind({super.name}) : super();
+
+  QLLicenseKind.fromJson(Map<String, dynamic> json) : super(name: json['name']);
+
+  @override
+  Map<String, dynamic> toJson() => {};
+}
+
+class QLReleaseAsset extends ReleaseAsset {
+  QLReleaseAsset({
+    super.name,
+    super.contentType,
+    super.size,
+    super.downloadCount,
+    super.browserDownloadUrl,
+    super.createdAt,
+    super.updatedAt,
+  });
+
+  factory QLReleaseAsset.fromJson(Map<String, dynamic> input) {
+    input = input['nodes'] ?? input;
+    return QLReleaseAsset(
+      name: input['name'],
+      contentType: input['contentType'],
+      downloadCount: input['downloadCount'],
+      browserDownloadUrl: input['downloadUrl'],
+      size: input['size'],
+      createdAt: input['createdAt'] == null
+          ? null
+          : DateTime.parse(input['createdAt'] as String),
+      updatedAt: input['updatedAt'] == null
+          ? null
+          : DateTime.parse(input['updatedAt'] as String),
+    );
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {};
+}
+
+class QLRelease extends Release {
+  QLRelease({
+    super.name,
+    super.author,
+    super.tagName,
+    super.url,
+    super.createdAt,
+    super.isDraft,
+    super.isPrerelease,
+    super.publishedAt,
+    super.description,
+    super.assets,
+    this.isLatest = false,
+    this.abbreviatedOid = '',
+  }) : super(
+          // 发现这个graphql的将release note放在description里面了？
+          body: description,
+        );
+  //latestRelease
+
+  final bool isLatest;
+
+  /// tagCommit.abbreviatedOid
+  final String abbreviatedOid;
+
+  factory QLRelease.fromJson(Map<String, dynamic> input) {
+    return QLRelease(
+      name: input['name'],
+      tagName: input['tagName'],
+      url: input['url'],
+      publishedAt: input['updatedAt'] == null
+          ? null
+          : DateTime.parse(input['updatedAt']),
+      createdAt: input['createdAt'] == null
+          ? null
+          : DateTime.parse(input['createdAt']),
+      isDraft: input['isDraft'],
+      isPrerelease: input['isPrerelease'],
+      description: input['description'],
+      isLatest: input['isLatest'] ?? false,
+      abbreviatedOid: input['tagCommit']?['abbreviatedOid'] ?? '',
+      author: QLUser.fromJson(input['author']),
+      assets: input['releaseAssets']?['nodes'] == null
+          ? null
+          : List.from(input['releaseAssets']?['nodes'])
+              .map((e) => QLReleaseAsset.fromJson(e))
+              .toList(),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson() => {};
+}
+
+// class QLBranch extends Branch {
+//   QLBranch(super.name, super.commit);
+//
+//   @override
+//   Map<String, dynamic> toJson() => {};
+// }
+
 /// 仓库信息
 class QLRepository extends Repository {
   QLRepository({
@@ -43,12 +146,65 @@ class QLRepository extends Repository {
     super.isPrivate,
     super.description,
     super.owner,
-    this.primaryLanguage,
-  }) : super(language: primaryLanguage?.name ?? '');
+    super.archived,
+    super.updatedAt,
+    super.pushedAt,
+    super.htmlUrl,
+    super.openIssues,
+    super.license,
+    super.topics,
+    super.disabled,
+    super.allowForking,
+    super.hasIssues,
+    super.hasProjects,
+    super.hasWiki,
+    super.homepage,
+    super.isFork,
+    super.isTemplate,
+    super.mirrorUrl,
+    super.defaultBranch,
+    super.watchers,
+    this.primaryLanguage = const QLPrimaryLanguage(),
+    this.isInOrganization = false,
+    this.openPullRequests = 0,
+    this.archivedAt,
+    this.diskUsage = 0,
+    this.hasSponsorshipsEnabled = false,
+    this.isBlankIssuesEnabled = false,
+    this.isEmpty = false,
+    this.isLocked = false,
+    this.isMirror = false,
+    this.viewerCanSubscribe = false,
+    this.viewerHasStarred = false,
+    this.releasesCount = 0,
+    this.latestRelease,
+    this.refsCount = 0,
+  }) : super(
+          language: primaryLanguage.name,
+          openIssuesCount: openIssues ?? 0,
+          fullName: "${owner?.login}/$name",
+          watchersCount: watchers ?? 0,
+        );
 
-  final QLPrimaryLanguage? primaryLanguage;
+  final QLPrimaryLanguage primaryLanguage;
+  final bool isInOrganization;
+  final int openPullRequests;
+  final DateTime? archivedAt;
+  final int diskUsage;
+  final bool hasSponsorshipsEnabled;
+  final bool isBlankIssuesEnabled;
+  final bool isEmpty;
+  final bool isLocked;
+  final bool isMirror;
+  final bool viewerCanSubscribe;
+  final bool viewerHasStarred;
+  final int releasesCount;
+  final QLRelease? latestRelease;
+  final int refsCount;
 
   factory QLRepository.fromJson(Map<String, dynamic> input) {
+    input = input['repository'] ?? input;
+    //print("===========解析仓库=$input");
     return QLRepository(
       name: input['name'] ?? '',
       forksCount: input['forkCount'] ?? 0,
@@ -56,12 +212,60 @@ class QLRepository extends Repository {
       stargazersCount: input['stargazerCount'] ?? 0,
       isPrivate: input['isPrivate'] ?? false,
       description: input['description'] ?? '',
+      archived: input['isArchived'] ?? false,
+      htmlUrl: input['url'] ?? '',
+      openIssues: input['issues']?['totalCount'],
+      isInOrganization: input['isInOrganization'] ?? false,
+      diskUsage: input['diskUsage'] ?? 0,
+      allowForking: input['forkingAllowed'] ?? false,
+      hasIssues: input['hasIssuesEnabled'] ?? false,
+      hasProjects: input['hasProjectsEnabled'] ?? false,
+      disabled: input['isDisabled'] ?? false,
+      hasSponsorshipsEnabled: input['hasSponsorshipsEnabled'] ?? false,
+      hasWiki: input['hasWikiEnabled'] ?? false,
+      homepage: input['homepageUrl'] ?? '',
+      isBlankIssuesEnabled: input['isBlankIssuesEnabled'] ?? false,
+      isEmpty: input['isEmpty'] ?? false,
+      isFork: input['isFork'] ?? false,
+      isLocked: input['isLocked'] ?? false,
+      isMirror: input['isMirror'] ?? false,
+      isTemplate: input['isTemplate'],
+      viewerCanSubscribe: input['viewerCanSubscribe'] ?? false,
+      viewerHasStarred: input['viewerHasStarred'] ?? false,
+      openPullRequests: input['pullRequests']?['totalCount'] ?? 0,
+      watchers: input['watchers']?['totalCount'],
+      mirrorUrl: input['mirrorUrl'],
+      // languages 字段，暂时不要了哈
+      defaultBranch: input['defaultBranchRef']?['name'] ?? '',
+      releasesCount: input['releases']?['totalCount'] ?? 0,
+      refsCount: input['refs']?['totalCount'] ?? 0,
+
+      latestRelease: input['latestRelease'] == null
+          ? null
+          : QLRelease.fromJson(input['latestRelease']),
+
+      updatedAt: input['updatedAt'] == null
+          ? null
+          : DateTime.parse(input['updatedAt']),
+      archivedAt: input['archivedAt'] == null
+          ? null
+          : DateTime.parse(input['updatedAt']),
+      pushedAt:
+          input['pushedAt'] == null ? null : DateTime.parse(input['pushedAt']),
       primaryLanguage: input['primaryLanguage'] != null
           ? QLPrimaryLanguage.fromJson(input['primaryLanguage'])
-          : null,
+          : const QLPrimaryLanguage(),
       owner: input['owner'] != null
           ? QLRepositoryOwner.fromJson(input['owner'])
           : null,
+      license: input['licenseInfo'] == null
+          ? null
+          : QLLicenseKind.fromJson(input['licenseInfo']),
+      topics: input['repositoryTopics']?['nodes'] == null
+          ? null
+          : List.of(input['repositoryTopics']?['nodes'])
+              .map((e) => "${e['topic']?['name'] ?? ''}")
+              .toList(),
     );
   }
 
@@ -84,17 +288,16 @@ class QLUser extends User {
     super.followersCount,
     super.followingCount,
     this.pinnedItems,
-    String? twUserName,
-  }) : _twUserName = twUserName {
-    super.twitterUsername = _twUserName;
+    String? twitterUsername,
+  }) {
+    super.twitterUsername = twitterUsername;
   }
 
   /// 置顶项目
   final List<QLRepository>? pinnedItems;
-  final String? _twUserName;
 
   factory QLUser.fromJson(Map<String, dynamic> input) {
-    input = input['viewer'] ?? input['user'];
+    input = input['viewer'] ?? input['user'] ?? input;
     return QLUser(
       login: input['login'],
       name: input['name'],
@@ -103,7 +306,7 @@ class QLUser extends User {
       bio: input['bio'],
       email: input['email'],
       location: input['location'],
-      twUserName: input['twitterUsername'],
+      twitterUsername: input['twitterUsername'],
       htmlUrl: input['url'],
       blog: input['websiteUrl'],
       followersCount: input['followers']?['totalCount'],

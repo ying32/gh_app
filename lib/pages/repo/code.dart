@@ -7,6 +7,7 @@ class _RepoBranches extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = context.read<RepoModel>().repo;
+
     return FutureBuilder(
       future: GithubCache.instance.repoBranches(repo),
       builder: (_, snapshot) {
@@ -26,29 +27,35 @@ class _RepoBranches extends StatelessWidget {
         final branches = (snapshot.data ?? [Branch(repo.defaultBranch, null)]);
         return Row(
           children: [
-            Selector<RepoBranchModel, String?>(
-              selector: (_, model) => model.selectedBranch,
-              builder: (_, branch, __) => DropDownButton(
-                  title: IconText(
-                      icon: Remix.git_branch_line,
-                      text: Text(branch ?? repo.defaultBranch)),
-                  items: branches
-                      .map((e) => MenuFlyoutItem(
-                          leading: e.name == (branch ?? repo.defaultBranch)
-                              ? const Icon(Remix.check_line)
-                              : null,
-                          text: Text(e.name ?? ''),
-                          trailing: e.name == repo.defaultBranch
-                              ? TagLabel.other('默认',
-                                  color: context.isDark
-                                      ? Colors.white
-                                      : Colors.black)
-                              : null,
-                          onPressed: () {
-                            context.read<RepoBranchModel>().selectedBranch =
-                                e.name == repo.defaultBranch ? null : e.name;
-                          }))
-                      .toList()),
+            Selector2<RepoModel, RepoBranchModel, (Repository, String?)>(
+              selector: (_, model, model2) =>
+                  (model.repo, model2.selectedBranch),
+              builder: (_, model, __) {
+                final defaultBranch = model.$1.defaultBranch;
+                final selectedBranch = model.$2;
+
+                return DropDownButton(
+                    title: IconText(
+                        icon: Remix.git_branch_line,
+                        text: Text(selectedBranch ?? defaultBranch)),
+                    items: branches
+                        .map((e) => MenuFlyoutItem(
+                            leading: e.name == (selectedBranch ?? defaultBranch)
+                                ? const Icon(Remix.check_line)
+                                : null,
+                            text: Text(e.name ?? ''),
+                            trailing: e.name == defaultBranch
+                                ? TagLabel.other('默认',
+                                    color: context.isDark
+                                        ? Colors.white
+                                        : Colors.black)
+                                : null,
+                            onPressed: () {
+                              context.read<RepoBranchModel>().selectedBranch =
+                                  e.name == defaultBranch ? null : e.name;
+                            }))
+                        .toList());
+              },
             ),
             const SizedBox(width: 10.0),
             HyperlinkButton(
@@ -84,9 +91,7 @@ class _TopBar1 extends StatelessWidget {
 
   void _onWatch() {}
 
-  @override
-  Widget build(BuildContext context) {
-    final repo = context.read<RepoModel>().repo;
+  Widget _buildChild(Repository repo) {
     Widget child = Row(
       children: [
         // Title(
@@ -139,6 +144,14 @@ class _TopBar1 extends StatelessWidget {
       child = Card(child: child);
     }
     return child;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<RepoModel, Repository>(
+      selector: (_, model) => model.repo,
+      builder: (_, repo, __) => _buildChild(repo),
+    );
   }
 }
 
@@ -209,6 +222,7 @@ class RepoCodePage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Card(
+                            // 这里可以使用Selector2来替代
                             child: RepoContentsListView(
                               path: context.watch<PathModel>().path,
                               ref: context

@@ -32,7 +32,7 @@ class _PullRequestItem extends StatelessWidget {
         children: [
           Text('#${data.number}'),
           Text(' · ${data.user?.login ?? ''}'),
-          Text(' · opened on ${timeToLabel(data.createdAt)}')
+          Text(' · opened on ${data.createdAt?.toLabel ?? ''}')
         ],
       ),
       trailing: data.commentsCount == 0
