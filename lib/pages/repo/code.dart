@@ -9,7 +9,7 @@ class _RepoBranches extends StatelessWidget {
     final repo = context.read<RepoModel>().repo;
 
     return FutureBuilder(
-      future: APIWrap.instance.repoBranches(repo),
+      future: APIWrap.instance.repoRefs(repo),
       builder: (_, snapshot) {
         // if (!snapshotIsOk(snapshot, false, false)) {
         //   return DropDownButton(
@@ -24,8 +24,8 @@ class _RepoBranches extends StatelessWidget {
         //     ],
         //   );
         // }
-        final branches =
-            (snapshot.data ?? [Branch(repo.defaultBranchRef.name, null)]);
+        final refs =
+            (snapshot.data?.data ?? [QLRef(name: repo.defaultBranchRef.name)]);
         return Row(
           children: [
             Selector2<RepoModel, RepoBranchModel, (QLRepository, String?)>(
@@ -39,7 +39,7 @@ class _RepoBranches extends StatelessWidget {
                     title: IconText(
                         icon: Remix.git_branch_line,
                         text: Text(selectedBranch ?? defaultBranch)),
-                    items: branches
+                    items: refs
                         .map((e) => MenuFlyoutItem(
                             leading: e.name == (selectedBranch ?? defaultBranch)
                                 ? const Icon(Remix.check_line)
@@ -62,8 +62,7 @@ class _RepoBranches extends StatelessWidget {
             HyperlinkButton(
               onPressed: () {},
               child: IconText(
-                  icon: Remix.git_branch_line,
-                  text: Text("${branches.length}")),
+                  icon: Remix.git_branch_line, text: Text("${refs.length}")),
             ),
             const SizedBox(width: 10.0),
             HyperlinkButton(

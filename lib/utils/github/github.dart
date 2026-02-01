@@ -127,9 +127,21 @@ class APIWrap {
   /// 当前仓库releases
   Future<QLList<QLRelease>> repoReleases(QLRepository repo) async {
     final res = await gitHubAPI.graphql.query(
-        QLQuery(QLQueries.queryRepoRelease(repo.owner!.login, repo.name)));
+        QLQuery(QLQueries.queryRepoReleases(repo.owner!.login, repo.name)));
     if (res == null) return const QLList.empty();
     return QLList.fromJson(res['repository']?['releases'], QLRelease.fromJson);
+  }
+
+  /// 指定release的Assets文件列表
+  Future<QLList<QLReleaseAsset>> repoReleaseAssets(
+      QLRepository repo, QLRelease release) async {
+    final res = await gitHubAPI.graphql.query(QLQuery(
+        QLQueries.queryRepoReleaseAssets(repo.owner!.login, repo.name,
+            tagName: release.tagName)));
+    if (res == null) return const QLList.empty();
+    final obj = res['repository']?['release']?['releaseAssets'];
+    if (obj == null) return const QLList.empty();
+    return QLList.fromJson(obj, QLReleaseAsset.fromJson);
   }
 
   /// 搜索
@@ -139,13 +151,19 @@ class APIWrap {
     return QLList.fromJson(res['search'], QLRepository.fromJson);
   }
 
-  /// 目录内容缓存
-  // Future<RepositoryContents?> repoContents(QLRepository repo, String path,
-  //     {String? ref}) async {
-  //   return gitHubAPI.restful.repositories
-  //       .getContents(_getSlug(repo), path, ref: ref);
-  // }
+  /// 分支列表
+  Future<QLList<QLRef>> repoRefs(QLRepository repo,
+      {String refPrefix = 'refs/heads/'}) async {
+    final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.queryRepoRefs(
+        repo.owner!.login, repo.name,
+        refPrefix: refPrefix)));
+    if (res == null) return const QLList.empty();
+    final refs = res['repository']?['refs'];
+    if (refs == null) return const QLList.empty();
+    return QLList.fromJson(refs, QLRef.fromJson);
+  }
 
+  /// 目录内容缓存
   Future<QLObject?> repoContents(QLRepository repo, String path,
       {String? ref}) async {
     final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.queryObject(
@@ -158,11 +176,6 @@ class APIWrap {
   }
 
   ///================================== REST API ===============================
-
-  /// 仓库分支列表
-  Future<List<Branch>?> repoBranches(QLRepository repo) async {
-    return gitHubAPI.restful.repositories.listBranches(_getSlug(repo)).toList();
-  }
 
   /// 仓库issues
   Future<List<Issue>?> repoIssues(QLRepository repo,

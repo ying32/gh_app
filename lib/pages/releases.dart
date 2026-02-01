@@ -133,34 +133,41 @@ class _RepoReleaseItem extends StatelessWidget {
                 ),
               // item.assets
               const SizedBox(height: 10),
-              if (item.assets?.isNotEmpty ?? false)
+              if (item.assetsCount > 0)
                 Expander(
                   headerBackgroundColor: ButtonState.all(Colors.transparent),
                   // contentBackgroundColor: Colors.transparent,
                   header: Row(
                     children: [
                       _buildTitle('Assets '),
-                      TagLabel.other(
-                          "${item.assets?.length ?? 0}", // 没有发现2个默认的url的啊
+                      TagLabel.other("${item.assetsCount}", // 没有发现2个默认的url的啊
                           //TagLabel.other("${2 + (item.assets?.length ?? 0)}",
                           radius: 15.0,
                           color: context.isDark ? Colors.white : Colors.black),
                     ],
                   ),
-                  content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // if (item.zipballUrl != null)
-                      //   _buildLinkButton('Source code (zip)', item.zipballUrl!),
-                      // if (item.tarballUrl != null)
-                      //   _buildLinkButton(
-                      //       'Source code (tar.gz)', item.tarballUrl!),
-                      // if (item.assets?.isNotEmpty ?? false)
-                      ...item.assets!.map((e) => _buildLinkButton(
-                          e.name, e.downloadUrl,
-                          size: e.size)),
-                    ],
+                  //TODO: 后面补上
+                  content: const Center(
+                    child:
+                        SizedBox(width: 20, height: 20, child: ProgressRing()),
                   ),
+                  onStateChanged: (value) {
+                    print("Expander state = $value");
+                  },
+                  // content: Column(
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   children: [
+                  //     // if (item.zipballUrl != null)
+                  //     //   _buildLinkButton('Source code (zip)', item.zipballUrl!),
+                  //     // if (item.tarballUrl != null)
+                  //     //   _buildLinkButton(
+                  //     //       'Source code (tar.gz)', item.tarballUrl!),
+                  //     // if (item.assets?.isNotEmpty ?? false)
+                  //     ...item.assets!.map((e) => _buildLinkButton(
+                  //         e.name, e.downloadUrl,
+                  //         size: e.size)),
+                  //   ],
+                  // ),
                 )
             ],
           ),

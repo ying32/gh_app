@@ -200,7 +200,8 @@ class QLRelease {
     this.isLatest = false,
     this.description = '',
     this.abbreviatedOid = '',
-    this.assets,
+    //this.assets,
+    this.assetsCount = 0,
     this.createdAt,
     this.publishedAt,
   });
@@ -234,7 +235,10 @@ class QLRelease {
   final String abbreviatedOid;
 
   /// 文件附件
-  final List<QLReleaseAsset>? assets;
+  ///final List<QLReleaseAsset>? assets;
+
+  /// 附件总数，这里不再查询全部的了
+  final int assetsCount;
 
   /// 创建时间
   final DateTime? createdAt;
@@ -254,23 +258,32 @@ class QLRelease {
         abbreviatedOid = input['tagCommit']?['abbreviatedOid'] ?? '',
         publishedAt = _parseDateTime(input['updatedAt']),
         createdAt = _parseDateTime(input['createdAt']),
-        assets = input['releaseAssets']?['nodes'] == null
-            ? null
-            : List.from(input['releaseAssets']?['nodes'])
-                .map((e) => QLReleaseAsset.fromJson(e))
-                .toList();
+        assetsCount = input['releaseAssets']?['totalCount'] ?? 0;
+  // assets = input['releaseAssets']?['nodes'] == null
+  //     ? null
+  //     : List.from(input['releaseAssets']?['nodes'])
+  //         .map((e) => QLReleaseAsset.fromJson(e))
+  //         .toList();
 }
 
 /// 分支
 ///
 /// TODO: 这默认是用啥呢main?或者master？这个HEAD应该能用吧？
 class QLRef {
-  const QLRef({this.name = 'HEAD'});
+  const QLRef({
+    this.name = 'HEAD',
+    this.prefix = 'refs/heads/',
+  });
 
   /// 分支或者tag名
   final String name;
 
-  QLRef.fromJson(Map<String, dynamic> json) : name = json['name'] ?? 'HEAD';
+  /// The ref's prefix, such as refs/heads/ or refs/tags/.
+  final String prefix;
+
+  QLRef.fromJson(Map<String, dynamic> json)
+      : name = json['name'] ?? 'HEAD',
+        prefix = json['prefix'] ?? 'refs/heads/';
 }
 
 /// 仓库信息

@@ -205,7 +205,7 @@ class QLQueries {
 ''';
   }
 
-  /// 查询一个仓库信息
+  /// 查询一个仓库信息的releases
   /// [owner] 仓库所有者，User字段中的`login`
   ///
   /// [name] 仓库名称
@@ -215,7 +215,7 @@ class QLQueries {
   /// https://docs.github.com/zh/graphql/reference/objects#release
   ///
   /// `CREATED_AT`和`NAME`
-  static String queryRepoRelease(String owner, String name, {int count = 20}) {
+  static String queryRepoReleases(String owner, String name, {int count = 20}) {
     // 应该要按更新时间排，但是没有相应的值可选
     return '''  repository(owner:"$owner", name:"$name") {
       releases(first:$count, orderBy: {direction: DESC, field: CREATED_AT}) {
@@ -244,17 +244,33 @@ class QLQueries {
           tagCommit { 
             abbreviatedOid
           }
-          releaseAssets(first: 50) {   
+          releaseAssets {   
             totalCount 
-            nodes {
-              contentType
-              createdAt
-              downloadCount
-              downloadUrl
-              name
-              size
-              updatedAt
-            }
+          }
+        }
+      }
+    }''';
+  }
+
+  /// 查询仓库指定Release的Assets
+  ///
+  /// https://docs.github.com/zh/graphql/reference/objects#repository
+  static String queryRepoReleaseAssets(String owner, String name,
+      {required String tagName, int count = 30}) {
+    // 应该要按更新时间排，但是没有相应的值可选
+    return '''
+    repository(owner:"$owner", name:"$name") {
+      release(tagName:"$tagName") {
+        releaseAssets(first:$count) {   
+          totalCount 
+          nodes {
+            contentType
+            createdAt
+            downloadCount
+            downloadUrl
+            name
+            size
+            updatedAt
           }
         }
       }
@@ -529,7 +545,7 @@ class QLQueries {
     /// wikiCount
     return '''
   search(first: $count, query: "$query", type: $type) {
-      pageInfo {
+    pageInfo {
       endCursor
       startCursor
       hasNextPage
@@ -556,6 +572,30 @@ class QLQueries {
           }
         }
       }
+''';
+  }
+
+  /// 查询仓库指定Release的Assets
+  ///
+  /// https://docs.github.com/zh/graphql/reference/objects#repository
+  ///
+  /// [refPrefix] 可取值： `refs/heads/`, `refs/tags/`
+  static String queryRepoRefs(String owner, String name,
+      {int count = 30, String refPrefix = 'refs/heads/'}) {
+    // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
+    return '''
+    repository(owner:"$owner", name:"$name") {
+       refs(first: $count, refPrefix: "$refPrefix", orderBy: {direction : DESC, field: TAG_COMMIT_DATE}) {
+          totalCount 
+          pageInfo {
+            endCursor
+            startCursor
+            hasNextPage
+            hasPreviousPage
+          }
+          nodes  { name prefix }
+       }
+    }
 ''';
   }
 }

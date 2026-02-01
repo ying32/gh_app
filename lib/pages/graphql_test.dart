@@ -211,8 +211,16 @@ class _GraphQLTestState extends State<GraphQLTest> {
                         MenuFlyoutItem(
                             text: const Text('仓库Releases'),
                             onPressed: () {
+                              _controller.text = QLQueries.queryRepoReleases(
+                                  'ying32', 'govcl');
+                            }),
+                        MenuFlyoutItem(
+                            text: const Text('仓库Releases Assets'),
+                            onPressed: () {
                               _controller.text =
-                                  QLQueries.queryRepoRelease('ying32', 'govcl');
+                                  QLQueries.queryRepoReleaseAssets(
+                                      'ying32', 'govcl',
+                                      tagName: 'v2.2.3');
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
@@ -221,6 +229,12 @@ class _GraphQLTestState extends State<GraphQLTest> {
                               _controller.text = QLQueries.queryObject(
                                   'ying32', 'govcl',
                                   path: "", ref: "HEAD");
+                            }),
+                        MenuFlyoutItem(
+                            text: const Text('仓库分支信息'),
+                            onPressed: () {
+                              _controller.text =
+                                  QLQueries.queryRepoRefs('ying32', 'govcl');
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
