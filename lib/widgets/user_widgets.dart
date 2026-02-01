@@ -19,12 +19,15 @@ class UserHeadImage extends StatelessWidget {
     return avatarUrl == null
         ? const SizedBox.shrink()
         : ClipOval(
-            child: CachedNetworkImage(
-              imageUrl: avatarUrl!,
-              fit: BoxFit.cover,
-              width: imageSize,
-              errorWidget: (_, __, ___) =>
-                  Icon(Remix.github_fill, size: imageSize),
+            child: Container(
+              color: Colors.black.withOpacity(0.08),
+              child: CachedNetworkImage(
+                imageUrl: avatarUrl!,
+                fit: BoxFit.cover,
+                width: imageSize,
+                errorWidget: (_, __, ___) =>
+                    Icon(Remix.github_fill, size: imageSize),
+              ),
             ),
           );
   }
@@ -238,8 +241,6 @@ class UserInfoPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      // mainAxisAlignment: MainAxisAlignment.start,
-      // mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
@@ -252,7 +253,6 @@ class UserInfoPanel extends StatelessWidget {
             ],
           ),
         ),
-
         UserLineInfo(icon: null, value: user?.bio),
         UserLineInfo(
           icon: Remix.group_line,
@@ -271,33 +271,6 @@ class UserInfoPanel extends StatelessWidget {
                 },
                 child: Text("${user?.followingCount ?? 0}个关注"),
               ),
-
-              // m.RichText(
-              //   text: m.TextSpan(
-              //     children: [
-              //       const m.WidgetSpan(
-              //           child: Icon(Remix.group_line, size: 16)),
-              //       m.TextSpan(
-              //         text:
-              //             "${_currentUser?.followersCount ?? 0}个关注者",
-              //         recognizer: TapGestureRecognizer()
-              //           ..onTap = () {
-              //             debugPrint("单击");
-              //           },
-              //       ),
-              //       const m.TextSpan(text: '·'),
-              //       m.TextSpan(
-              //         text:
-              //             "${_currentUser?.followingCount ?? 0}个关注",
-              //         recognizer: TapGestureRecognizer()
-              //           ..onTap = () {
-              //             debugPrint("单击");
-              //           },
-              //       ),
-              //     ],
-              //   ),
-              // ),
-
               // 这里要用RichText来弄
               // m.TextButton.icon(
               //     label: Text(
@@ -322,20 +295,6 @@ class UserInfoPanel extends StatelessWidget {
             isEmail: true),
         UserLineInfo(
             icon: Remix.links_line, value: user?.websiteUrl, isLink: true),
-        // if (user?.blog != null && user!.blog!.isNotEmpty)
-        //   UserLineInfo(
-        //       icon: Remix.links_line,
-        //       value: Link(
-        //         uri: Uri.parse(user!.blog!),
-        //         builder: (context, open) => Semantics(
-        //           link: true,
-        //           child: TextButton(
-        //               onPressed: open,
-        //               child: Text(
-        //                 user!.blog!,
-        //               )),
-        //         ),
-        //       )),
         //UserLineDiskUseInfo(value: user?.diskUsage),
         const SizedBox(height: 8.0),
       ],
