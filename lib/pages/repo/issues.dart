@@ -3,14 +3,14 @@ part of '../repo.dart';
 class _IssueItem extends StatelessWidget {
   const _IssueItem(this.issue);
 
-  final Issue issue;
+  final QLIssue issue;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(
         Remix.issues_line,
-        color: issue.state == "open" ? Colors.green : Colors.red,
+        color: issue.isOpen ? Colors.green : Colors.red,
       ),
       title: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
@@ -21,17 +21,18 @@ class _IssueItem extends StatelessWidget {
               issue.title,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: IssueLabels(labels: issue.labels),
-            ),
+            if (issue.labels.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: IssueLabels(labels: issue.labels),
+              ),
           ],
         ),
       ),
       subtitle: Row(
         children: [
           Text('#${issue.number}'),
-          Text(' $dotChar ${issue.user?.login ?? ''}'),
+          Text(' $dotChar ${issue.author?.login ?? ''}'),
           Text(' $dotChar 打开于 ${issue.createdAt?.toLabel ?? ''}')
         ],
       ),
@@ -45,13 +46,14 @@ class _IssueItem extends StatelessWidget {
               ),
             ),
       onPressed: () {
-        //
+        IssueDetailsPage.createNewTab(
+            context, context.read<RepoModel>().repo, issue);
       },
     );
   }
 }
 
-class RepoIssuesPage extends StatelessWidget {
+class RepoIssuesPage extends StatelessWidget with PageMixin {
   const RepoIssuesPage(this.repo, {super.key});
 
   final QLRepository repo;
@@ -63,6 +65,9 @@ class RepoIssuesPage extends StatelessWidget {
       builder: (context, snapshot) {
         if (!snapshotIsOk(snapshot, false, false)) {
           return const Center(child: ProgressRing());
+        }
+        if (snapshot.hasError) {
+          return errorDescription(snapshot.error);
         }
         if (snapshot.data == null || snapshot.data!.isEmpty) {
           return const Center(child: Text('没有数据'));

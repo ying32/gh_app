@@ -87,8 +87,7 @@ class APIWrap {
 
   QLUser? _currentUser;
 
-  RepositorySlug _getSlug(QLRepository repo) =>
-      RepositorySlug(repo.owner?.login ?? '', repo.name);
+  ///================================== GRAPHQL API ===============================
 
   /// 当前user信息
   Future<QLUser?> get currentUser async =>
@@ -205,28 +204,62 @@ class APIWrap {
   Future<QLList<QLUser>> userFollowing([String name = '']) =>
       _userFollower(name: name, isFollowers: false, count: 20);
 
-  ///================================== REST API ===============================
+  /// 后面再根据需求去弄
+  Future<QLList<T>> _repoIssuesOrPullRequests<T>(
+    QLRepository repo, {
+    required bool isOpen,
+    required bool isIssues,
+    bool isMerged = false,
+    required T Function(Map<String, dynamic>) convert,
+  }) async {
+    //open, closed, all
+    final res = await gitHubAPI.graphql.query(QLQuery(
+        QLQueries.queryRepoIssuesOrPullRequests(repo.owner!.login, repo.name,
+            states: isMerged
+                ? 'MERGED'
+                : isOpen
+                    ? 'OPEN'
+                    : 'CLOSED',
+            isIssues: isIssues)));
+
+    if (res == null) return const QLList.empty();
+    final input = res['repository']?[isIssues ? 'issues' : 'pullRequests'];
+    if (input == null) return const QLList.empty();
+    return QLList<T>.fromJson(input, convert);
+  }
 
   /// 仓库issues
-  Future<List<Issue>?> repoIssues(QLRepository repo,
-      {bool isOpen = true}) async {
-    //open, closed, all
-    return gitHubAPI.restful.issues
-        .listByRepo(_getSlug(repo),
-            state: isOpen ? 'open' : 'closed', perPage: 1)
-        .toList();
-  }
+  Future<QLList<QLIssue>> repoIssues(QLRepository repo, {bool isOpen = true}) =>
+      _repoIssuesOrPullRequests(repo,
+          isOpen: isOpen,
+          isIssues: true,
+          isMerged: false,
+          convert: QLIssue.fromJson);
 
   /// 仓库pullRequests
-  Future<List<PullRequest>?> repoPullRequests(QLRepository repo,
-      {bool isOpen = true}) async {
-    //open, closed, all
-    return gitHubAPI.restful.pullRequests
-        .list(_getSlug(repo), state: isOpen ? 'open' : 'closed')
-        .toList();
+  Future<QLList<QLPullRequest>> repoPullRequests(QLRepository repo,
+          {bool isOpen = true, bool isMerged = false}) =>
+      _repoIssuesOrPullRequests(repo,
+          isOpen: isOpen,
+          isIssues: false,
+          isMerged: isMerged,
+          convert: QLPullRequest.fromJson);
+
+  /// 查询issue或者pull的评论
+  Future<QLList<QLComment>> repoIssueOrPullRequestComments<T>(
+    QLRepository repo, {
+    required int number,
+    bool isIssues = true,
+  }) async {
+    final res = await gitHubAPI.graphql.query(QLQuery(
+        QLQueries.queryIssueComments(repo.owner!.login, repo.name, number,
+            isIssues: isIssues)));
+    if (res == null) return const QLList.empty();
+    final input =
+        res['repository']?[isIssues ? 'issue' : 'pullRequest']?['comments'];
+    if (input == null) return const QLList.empty();
+    return QLList.fromJson(input, QLComment.fromJson);
   }
 
-// Future<List<Notification>?> get currentUserNotifications async {
-//   return gitHubAPI.restful.activity.listNotifications().toList();
-// }
+  ///================================== REST API ===============================
 }

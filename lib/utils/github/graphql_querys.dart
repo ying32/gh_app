@@ -456,6 +456,14 @@ class QLQueries {
     //                           }
     //                        }
     //                     }
+    // ${isIssues ? 'isPinned' : ''}
+    // ${isIssues ? 'viewerCanDelete' : ''}
+    //                milestone {
+    //                   closed
+    //                   closedAt
+    //                   description
+    //                 }
+    //                 closed
     return '''query { repository(owner:"$owner", name:"$name") {
           ${isIssues ? 'issues' : 'pullRequests'}(last: $count, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
              totalCount
@@ -467,20 +475,18 @@ class QLQueries {
              }
              nodes {
                 number 
-                ${isIssues ? 'isPinned' : ''} 
                 author {
                    login avatarUrl
                 }
                 title 
                 body
-                closed
+                comments { totalCount }
                 closedAt
                 createdAt
                 editor {
                   login avatarUrl
                 }
                 labels(first: 20) {
-                   totalCount 
                    nodes {
                      name 
                      color 
@@ -490,17 +496,9 @@ class QLQueries {
                 }
                 lastEditedAt 
                 locked 
-         
-                milestone {
-                  closed 
-                  closedAt 
-                  description 
-                }
                 state 
-
                 updatedAt 
                 viewerCanClose 
-                ${isIssues ? 'viewerCanDelete' : ''} 
                 viewerCanReopen 
              }
           }
@@ -685,4 +683,47 @@ class QLQueries {
     }
 }''';
   }
+
+  //// 提交的评论
+  // // , orderBy : {direction : DESC, field: UPDATED_AT}
+  // // https://docs.github.com/zh/graphql/reference/objects#issue
+  static String queryIssueComments(String owner, String name, int number,
+      {int count = 30, bool isIssues = true}) {
+    // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
+    return '''query { 
+   repository(owner:"$owner", name:"$name") {
+       ${isIssues ? 'issue' : 'pullRequest'}(number: $number) {
+          comments  (first:$count) {
+               totalCount
+               nodes {
+                  author { login avatarUrl }
+                  body
+                  createdAt 
+                  editor { login avatarUrl  }
+                  lastEditedAt 
+                  publishedAt 
+                  updatedAt 
+                   url 
+                   viewerCanDelete
+                   viewerCanUpdate 
+                   viewerDidAuthor 
+                }
+          }   
+       }
+     }
+}''';
+  }
 }
+
+/// 查询指定issue
+/// query {
+//    repository(owner:"ying32", name:"govcl") {
+//           issue(number: 212 ) {
+//                 number
+//                 author {
+//                    login avatarUrl
+//                 }
+//                 title  body
+//           }
+//      }
+// }

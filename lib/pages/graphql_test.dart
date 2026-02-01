@@ -212,6 +212,13 @@ class _GraphQLTestState extends State<GraphQLTest> {
                                       'ying32', 'govcl');
                             }),
                         MenuFlyoutItem(
+                            text: const Text('仓库指定Issue评论'),
+                            onPressed: () {
+                              _controller.text = QLQueries.queryIssueComments(
+                                  'ying32', 'govcl', 212);
+                            }),
+                        const MenuFlyoutSeparator(),
+                        MenuFlyoutItem(
                             text: const Text('仓库PullRequests信息'),
                             onPressed: () {
                               _controller.text =

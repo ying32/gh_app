@@ -1,8 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/page.dart';
 
-class FollowingPage extends StatelessWidget {
+class FollowingPage extends StatelessWidget with PageMixin {
   const FollowingPage({super.key});
 
   @override
@@ -16,9 +17,10 @@ class FollowingPage extends StatelessWidget {
         future: APIWrap.instance.userFollowing(),
         builder: (_, snapshot) {
           if (!snapshotIsOk(snapshot, false, false)) {
-            return const Center(
-              child: ProgressRing(),
-            );
+            return const Center(child: ProgressRing());
+          }
+          if (snapshot.hasError) {
+            return errorDescription(snapshot.error);
           }
           if (snapshot.data == null || snapshot.data!.isEmpty) {
             return const Center(

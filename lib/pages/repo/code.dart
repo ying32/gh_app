@@ -44,7 +44,7 @@ class _RepoBranches extends StatelessWidget {
                             leading: e.name == (selectedBranch ?? defaultBranch)
                                 ? const Icon(Remix.check_line)
                                 : null,
-                            text: Text(e.name ?? ''),
+                            text: Text(e.name),
                             trailing: e.name == defaultBranch
                                 ? TagLabel.other('默认',
                                     color: context.isDark

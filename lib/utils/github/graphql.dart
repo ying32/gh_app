@@ -128,6 +128,24 @@ class QLRepositoryOwner extends QLUserBase {
         );
 }
 
+class QLActor extends QLUserBase {
+  const QLActor({
+    required super.login,
+    super.avatarUrl,
+    this.url = '',
+  });
+
+  /// 用户或者组织的html url
+  final String url;
+
+  QLActor.fromJson(Map<String, dynamic> input)
+      : url = input['url'] ?? '',
+        super(
+          login: input['login'] ?? '',
+          avatarUrl: input['avatarUrl'] ?? '',
+        );
+}
+
 /// 许可协议
 class QLLicenseKind {
   const QLLicenseKind({this.name = ''});
@@ -618,14 +636,248 @@ class QLUser extends QLUserBase {
   }
 }
 
-/// Issue
-class QLIssue extends Issue {
-  QLIssue();
-  factory QLIssue.fromJson(Map<String, dynamic> input) {
-    return QLIssue();
-  }
-  @override
-  Map<String, dynamic> toJson() => {};
+/// 标签
+class QLLabel {
+  const QLLabel({
+    this.name = '',
+    this.color = '',
+    this.description = '',
+    this.isDefault = false,
+  });
+  final String name;
+  final String color;
+  final String description;
+  final bool isDefault;
+
+  QLLabel.fromJson(Map<String, dynamic> input)
+      : name = input['name'] ?? '',
+        color = input['color'] ?? '',
+        description = input['description'] ?? '',
+        isDefault = input['isDefault'] ?? false;
+}
+
+/// Issues pullRequest Comment 基类
+class QLIssueOrPullRequestOrCommentBase {
+  const QLIssueOrPullRequestOrCommentBase({
+    this.author,
+    this.body = '',
+    this.createdAt,
+    this.editor,
+    this.lastEditedAt,
+    this.updatedAt,
+  });
+
+  /// 创建的作者信息
+  final QLActor? author;
+
+  /// 内容
+  final String body;
+
+  /// 创建时间
+  final DateTime? createdAt;
+
+  /// 编辑人的信息
+  final QLActor? editor;
+
+  /// 最后一次编辑时间
+  final DateTime? lastEditedAt;
+
+  /// 更新的时间
+  final DateTime? updatedAt;
+}
+
+/// Issues or PullRequest
+class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
+  const QLIssueOrPullRequest({
+    super.author,
+    super.body,
+    super.createdAt,
+    super.editor,
+    super.lastEditedAt,
+    super.updatedAt,
+    this.number = -1,
+    this.title = '',
+    this.closedAt,
+    this.labels = const [],
+    this.commentsCount = 0,
+    this.locked = false,
+    this.state,
+    this.viewerCanClose = false,
+    this.viewerCanReopen = true,
+  });
+
+  /// issue或者pullRequest的编号
+  final int number;
+
+  /// 标题
+  final String title;
+
+  /// 关闭时间
+  final DateTime? closedAt;
+
+  /// 标签列表
+  final List<QLLabel> labels;
+
+  /// 评论总数
+  final int commentsCount;
+
+  /// 是否已锁定
+  final bool locked;
+  // final milestone;
+  /// 状态 取值 `OPEN` 和 `CLOSED`，如果QLPullRequest时可多取值`MERGED`
+  final String? state;
+
+  /// 当前用户是否能关闭
+  final bool viewerCanClose;
+
+  /// 当前用户是否能重新打开
+  final bool viewerCanReopen;
+
+  /// 是否打开状态
+  bool get isOpen => state == "OPEN";
+
+  /// 是否已关闭
+  bool get isClosed => state == "CLOSED";
+}
+
+/// issue
+class QLIssue extends QLIssueOrPullRequest {
+  const QLIssue({
+    super.number,
+    super.author,
+    super.title,
+    super.body,
+    super.closedAt,
+    super.createdAt,
+    super.editor,
+    super.labels,
+    super.lastEditedAt,
+    super.commentsCount,
+    super.locked,
+    super.state,
+    super.updatedAt,
+    super.viewerCanClose,
+    super.viewerCanReopen,
+  });
+
+  QLIssue.fromJson(Map<String, dynamic> input)
+      : super(
+          number: input['number'] ?? 0,
+          author: input['author'] == null
+              ? null
+              : QLActor.fromJson(input['author']),
+          title: input['title'] ?? '',
+          body: input['body'] ?? '',
+          closedAt: _parseDateTime(input['closedAt']),
+          createdAt: _parseDateTime(input['createdAt']),
+          editor: input['editor'] == null
+              ? null
+              : QLActor.fromJson(input['editor']),
+          labels: input['labels']?['nodes'] == null
+              ? const []
+              : List.from(input['labels']?['nodes'])
+                  .map((e) => QLLabel.fromJson(e))
+                  .toList(),
+          lastEditedAt: _parseDateTime(input['lastEditedAt']),
+          locked: input['locked'] ?? false,
+          commentsCount: input['comments']?['totalCount'] ?? 0,
+          state: input['state'],
+          updatedAt: _parseDateTime(input['updatedAt']),
+          viewerCanClose: input['viewerCanClose'] ?? false,
+          viewerCanReopen: input['viewerCanReopen'] ?? false,
+        );
+}
+
+/// pullRequest
+class QLPullRequest extends QLIssueOrPullRequest {
+  const QLPullRequest({
+    super.number,
+    super.author,
+    super.title,
+    super.body,
+    super.closedAt,
+    super.createdAt,
+    super.editor,
+    super.labels,
+    super.lastEditedAt,
+    super.commentsCount,
+    super.locked,
+    super.state,
+    super.updatedAt,
+    super.viewerCanClose,
+    super.viewerCanReopen,
+  });
+
+  /// 是否已经合并
+  bool get isMerged => state == 'MERGED';
+
+  QLPullRequest.fromJson(Map<String, dynamic> input)
+      : super(
+          number: input['number'] ?? 0,
+          author: input['author'] == null
+              ? null
+              : QLActor.fromJson(input['author']),
+          title: input['title'] ?? '',
+          body: input['body'] ?? '',
+          closedAt: _parseDateTime(input['closedAt']),
+          createdAt: _parseDateTime(input['createdAt']),
+          editor: input['editor'] == null
+              ? null
+              : QLActor.fromJson(input['editor']),
+          labels: input['labels']?['nodes'] == null
+              ? const []
+              : List.from(input['labels']?['nodes'])
+                  .map((e) => QLLabel.fromJson(e))
+                  .toList(),
+          lastEditedAt: _parseDateTime(input['lastEditedAt']),
+          locked: input['locked'] ?? false,
+          state: input['state'],
+          updatedAt: _parseDateTime(input['updatedAt']),
+          viewerCanClose: input['viewerCanClose'] ?? false,
+          viewerCanReopen: input['viewerCanReopen'] ?? false,
+        );
+}
+
+/// 评论
+class QLComment extends QLIssueOrPullRequestOrCommentBase {
+  const QLComment({
+    super.author,
+    super.body,
+    super.createdAt,
+    super.editor,
+    super.lastEditedAt,
+    this.publishedAt,
+    super.updatedAt,
+    this.url = '',
+    this.viewerCanDelete = false,
+    this.viewerCanUpdate = false,
+    this.viewerDidAuthor = false,
+  });
+
+  final DateTime? publishedAt;
+  final String url;
+  final bool viewerCanDelete;
+  final bool viewerCanUpdate;
+  final bool viewerDidAuthor;
+
+  QLComment.fromJson(Map<String, dynamic> input)
+      : url = input['url'] ?? '',
+        publishedAt = _parseDateTime(input['publishedAt']),
+        viewerCanDelete = input['viewerCanDelete'] ?? false,
+        viewerCanUpdate = input['viewerCanUpdate'] ?? false,
+        viewerDidAuthor = input['viewerDidAuthor'] ?? false,
+        super(
+          author: input['author'] == null
+              ? null
+              : QLActor.fromJson(input['author']),
+          body: input['body'] ?? '',
+          createdAt: _parseDateTime(input['createdAt']),
+          editor: input['editor'] == null
+              ? null
+              : QLActor.fromJson(input['editor']),
+          lastEditedAt: _parseDateTime(input['lastEditedAt']),
+          updatedAt: _parseDateTime(input['updatedAt']),
+        );
 }
 
 /// 内容树，包含目录和文件列表

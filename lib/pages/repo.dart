@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
+import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/releases.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
@@ -12,11 +13,13 @@ import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/issues_widgets.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
+import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:github/github.dart';
 import 'package:provider/provider.dart';
+
+import 'pull_request_details.dart';
 
 part 'repo/action.dart';
 part 'repo/code.dart';

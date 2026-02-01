@@ -1,57 +1,58 @@
 part of '../repo.dart';
 
 class _PullRequestItem extends StatelessWidget {
-  const _PullRequestItem(this.data);
+  const _PullRequestItem(this.pull, {required this.repo});
 
-  final PullRequest data;
+  final QLPullRequest pull;
+  final QLRepository repo;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(
         Remix.issues_line,
-        color: data.state == "open" ? Colors.green : Colors.red,
+        color: pull.isOpen ? Colors.green : Colors.red,
       ),
       title: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
         child: Row(
           children: [
             Text(
-              data.title ?? '',
+              pull.title,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            if (data.labels != null && data.labels!.isNotEmpty)
+            if (pull.labels.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: IssueLabels(labels: data.labels!),
+                child: IssueLabels(labels: pull.labels),
               ),
           ],
         ),
       ),
       subtitle: Row(
         children: [
-          Text('#${data.number}'),
-          Text(' $dotChar ${data.user?.login ?? ''}'),
-          Text(' $dotChar 打开于 ${data.createdAt?.toLabel ?? ''}')
+          Text('#${pull.number}'),
+          Text(' $dotChar ${pull.author?.login ?? ''}'),
+          Text(' $dotChar 打开于 ${pull.createdAt?.toLabel ?? ''}')
         ],
       ),
-      trailing: data.commentsCount == 0
+      trailing: pull.commentsCount == 0
           ? null
           : SizedBox(
               width: 60,
               child: IconText(
                 icon: Remix.chat_2_line,
-                text: Text('${data.commentsCount}'),
+                text: Text('${pull.commentsCount}'),
               ),
             ),
       onPressed: () {
-        //
+        PullRequestDetails.createNewTab(context, repo, pull);
       },
     );
   }
 }
 
-class RepoPullRequestPage extends StatelessWidget {
+class RepoPullRequestPage extends StatelessWidget with PageMixin {
   const RepoPullRequestPage(this.repo, {super.key});
 
   final QLRepository repo;
@@ -64,6 +65,9 @@ class RepoPullRequestPage extends StatelessWidget {
         if (!snapshotIsOk(snapshot, false, false)) {
           return const Center(child: ProgressRing());
         }
+        if (snapshot.hasError) {
+          return errorDescription(snapshot.error);
+        }
         if (snapshot.data == null || snapshot.data!.isEmpty) {
           return const Center(child: Text('没有数据'));
         }
@@ -72,7 +76,7 @@ class RepoPullRequestPage extends StatelessWidget {
           child: ListView.separated(
               itemCount: snapshot.data!.length,
               itemBuilder: (_, index) =>
-                  _PullRequestItem(snapshot.data![index]),
+                  _PullRequestItem(snapshot.data![index], repo: repo),
               separatorBuilder: (_, index) => const Divider(
                     size: 1,
                     direction: Axis.horizontal,

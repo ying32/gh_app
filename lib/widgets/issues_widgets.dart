@@ -1,12 +1,20 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
+import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
-import 'package:github/github.dart';
+import 'package:gh_app/widgets/page.dart';
+import 'package:gh_app/widgets/user_widgets.dart';
+import 'package:gh_app/widgets/widgets.dart';
+
+import 'markdown_plus.dart';
 
 /// issues的标签
 class IssueLabels extends StatelessWidget {
   const IssueLabels({super.key, required this.labels});
 
-  final List<IssueLabel> labels;
+  final List<QLLabel> labels;
 
   static Color _getColor(Color color) {
     if ((0.2126 * color.red + 0.7152 * color.green + 0.0722 * color.blue) /
@@ -15,7 +23,7 @@ class IssueLabels extends StatelessWidget {
     return Colors.black;
   }
 
-  Widget _build(IssueLabel label) {
+  Widget _build(QLLabel label) {
     final color = hexColorTo(label.color);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -34,4 +42,132 @@ class IssueLabels extends StatelessWidget {
         runSpacing: 5,
         children: labels.map((e) => _build(e)).toList(),
       );
+}
+
+class _IssueLine extends StatelessWidget {
+  const _IssueLine({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        child,
+        Padding(
+          padding: const EdgeInsets.only(left: 30),
+          child: Container(
+              color: const Color.fromARGB(255, 243, 243, 243),
+              height: 30,
+              width: 1,
+              child: const Divider(direction: Axis.vertical)),
+        ),
+      ],
+    );
+  }
+}
+
+class IssueCommentItem extends StatelessWidget {
+  const IssueCommentItem({
+    super.key,
+    this.item,
+    required this.owner,
+    required this.openAuthor,
+    this.isFirst = false,
+  });
+
+  final QLIssueOrPullRequestOrCommentBase? item;
+  final String? owner;
+  final String? openAuthor;
+  final bool isFirst;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 70,
+          padding: const EdgeInsets.symmetric(horizontal: 15),
+          child: UserHeadImage(item?.author?.avatarUrl, imageSize: 40),
+        ),
+        Expanded(
+          child: _IssueLine(
+            child: Card(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                        '${item?.author?.login} 打开于 ${item?.createdAt?.toLabel}'),
+                    const Spacer(),
+                    if (!isFirst)
+                      TagLabel.other(item?.author?.login == owner
+                          ? '所有者'
+                          : item?.author?.login == openAuthor
+                              ? '作者'
+                              : ''),
+                  ],
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Divider(),
+                ),
+                if (item?.body.isNotEmpty ?? false)
+                  MarkdownBlockPlus(
+                    data: item!.body,
+                    onTap: (link) {
+                      //TODO：这里要分析链接，如果是github的，就解析后跳转相应的
+                      if (kDebugMode) {
+                        print("点击了链接=$link");
+                      }
+                    },
+                  ),
+              ],
+            )),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class IssuesCommentsView extends StatelessWidget with PageMixin {
+  const IssuesCommentsView(
+    this.data, {
+    super.key,
+    required this.repo,
+  });
+
+  final QLRepository repo;
+  final QLIssueOrPullRequest data;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: APIWrap.instance.repoIssueOrPullRequestComments(repo,
+            number: data.number, isIssues: data is QLIssue),
+        builder: (_, snapshot) {
+          if (!snapshotIsOk(snapshot, false, false)) {
+            return const Center(child: ProgressRing());
+          }
+          if (snapshot.hasError) {
+            return errorDescription(snapshot.error);
+          }
+          if (!snapshot.hasData) {
+            return description(content: const Text("没有数据"));
+          }
+          return Column(
+            children: snapshot.data!.data
+                .map((e) => IssueCommentItem(
+                      item: e,
+                      owner: repo.owner?.login,
+                      openAuthor: data.author?.login,
+                    ))
+                .toList(),
+          );
+        });
+  }
 }
