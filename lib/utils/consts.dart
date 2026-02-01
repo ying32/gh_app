@@ -21,3 +21,6 @@ class RouterTable {
 
 /// 项目url
 const appRepoUrl = 'https://github.com/ying32/gh_app';
+
+/// 一个点
+const dotChar = '·';

@@ -328,6 +328,7 @@ class QLRepository {
     this.releasesCount = 0,
     this.latestRelease,
     this.refsCount = 0,
+    this.tagsCount = 0,
   });
 
   /// 仓库名
@@ -442,8 +443,11 @@ class QLRepository {
   /// 最后一次发布的信息
   final QLRelease? latestRelease;
 
-  /// 分支或者tag总数
+  /// 分支总数
   final int refsCount;
+
+  /// tags总数
+  final int tagsCount;
 
   /// 仓库全名：${owner.login}/$name
   String get fullName => "${owner?.login}/$name";
@@ -484,6 +488,7 @@ class QLRepository {
           : QLRef.fromJson(input['defaultBranchRef']),
       releasesCount: input['releases']?['totalCount'] ?? 0,
       refsCount: input['refs']?['totalCount'] ?? 0,
+      tagsCount: input['tags']?['totalCount'] ?? 0,
       latestRelease: input['latestRelease'] == null
           ? null
           : QLRelease.fromJson(input['latestRelease']),
@@ -784,7 +789,8 @@ class QLQuery {
 
   Map<String, dynamic> toJson() => {
         //TODO: mutation 是不是这样操作呢？还没测试过，到时候测试了再说吧
-        "query": isQuery ? "query {\n $body \n}" : "mutation {\rn $body \n}",
+        //"query": isQuery ? "query {\n $body \n}" : "mutation {\rn $body \n}",
+        "query": body,
         if (variables != null) "variables": variables,
         if (operationName != null) "operationName": operationName,
       };
@@ -818,7 +824,7 @@ class GitHubGraphQL {
 
   /// 一个查询
   /// ```json
-  /// viewer { login name }
+  /// query{ viewer { login name } }
   /// ```
   Future<T> query<S, T>(
     QLQuery query, {

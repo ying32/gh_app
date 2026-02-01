@@ -31,8 +31,8 @@ class _PullRequestItem extends StatelessWidget {
       subtitle: Row(
         children: [
           Text('#${data.number}'),
-          Text(' · ${data.user?.login ?? ''}'),
-          Text(' · opened on ${data.createdAt?.toLabel ?? ''}')
+          Text(' $dotChar ${data.user?.login ?? ''}'),
+          Text(' $dotChar 打开于 ${data.createdAt?.toLabel ?? ''}')
         ],
       ),
       trailing: data.commentsCount == 0

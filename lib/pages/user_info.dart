@@ -24,9 +24,7 @@ class UserInfoPage extends StatelessWidget {
               direction: Axis.vertical,
             ),
           ),
-          if (user != null &&
-              (user is QLUser) &&
-              ((user as QLUser).pinnedItems?.isNotEmpty ?? false))
+          if (user != null && (user!.pinnedItems?.isNotEmpty ?? false))
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.max,
@@ -35,7 +33,7 @@ class UserInfoPage extends StatelessWidget {
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 8.0),
                     child: Text(
-                      'Pinned',
+                      '置顶的', //Pinned
                       style:
                           TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
                     ),

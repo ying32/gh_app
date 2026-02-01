@@ -58,22 +58,40 @@ class _RepoBranches extends StatelessWidget {
                         .toList());
               },
             ),
-            const SizedBox(width: 10.0),
-            HyperlinkButton(
-              onPressed: () {},
-              child: IconText(
-                  icon: Remix.git_branch_line, text: Text("${refs.length}")),
-            ),
-            const SizedBox(width: 10.0),
-            HyperlinkButton(
-              onPressed: () {},
-              child:
-                  const IconText(icon: Remix.price_tag_3_line, text: Text("0")),
-            ),
           ],
         );
       },
     );
+  }
+}
+
+/// 分支和标签总数显示
+class _BranchAndTagsCount extends StatelessWidget {
+  const _BranchAndTagsCount();
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<RepoModel, QLRepository>(
+        selector: (_, model) => model.repo,
+        builder: (_, repo, __) {
+          return Row(
+            children: [
+              HyperlinkButton(
+                onPressed: () {},
+                child: IconText(
+                    icon: Remix.git_branch_line,
+                    text: Text("${repo.refsCount}")),
+              ),
+              const SizedBox(width: 10.0),
+              HyperlinkButton(
+                onPressed: () {},
+                child: IconText(
+                    icon: Remix.price_tag_3_line,
+                    text: Text("${repo.tagsCount}")),
+              ),
+            ],
+          );
+        });
   }
 }
 
@@ -164,6 +182,9 @@ class _TopBar2 extends StatelessWidget {
       child: Row(
         children: [
           _RepoBranches(),
+          SizedBox(width: 10.0),
+          _BranchAndTagsCount(),
+          SizedBox(width: 10.0),
           Spacer(),
           _TopBar1(useCard: false),
           SizedBox(width: 10.0),

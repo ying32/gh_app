@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/theme.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -33,6 +34,7 @@ class UserHeadImage extends StatelessWidget {
   }
 }
 
+/// 用户名
 class UserNameWidget extends StatelessWidget {
   const UserNameWidget(
     this.user, {
@@ -264,7 +266,7 @@ class UserInfoPanel extends StatelessWidget {
                 },
                 child: Text("${user?.followersCount ?? 0}个关注者"),
               ),
-              const Text('·'),
+              const Text(dotChar),
               HyperlinkButton(
                 onPressed: () {
                   //pushRoute(context, RouterTable.following);

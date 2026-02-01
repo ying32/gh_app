@@ -21,6 +21,7 @@ import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 class _NavItem {
@@ -279,10 +280,17 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
           Selector<CurrentUserModel, QLUser?>(
             selector: (_, model) => model.user,
             builder: (context, user, __) {
+              if (user == null) return const SizedBox.shrink();
               return Row(
                 children: [
-                  UserHeadImage(user?.avatarUrl, imageSize: 40),
-                  UserNameWidget(user, onlyNickName: true),
+                  UserHeadImage(user.avatarUrl, imageSize: 40),
+                  const SizedBox(width: 8.0),
+                  LinkStyleButton(
+                    text: UserNameWidget(user, onlyNickName: true),
+                    onPressed: () {
+                      launchUrl(Uri.parse(user.url));
+                    },
+                  ),
                 ],
               );
             },

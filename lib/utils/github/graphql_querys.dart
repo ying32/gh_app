@@ -30,7 +30,7 @@ class QLQueries {
   ///
   /// [name] 如果为空则查询当前登录的User信息，需要header中加入认证的
   static String queryUser([String name = '']) {
-    return '''  ${name.isEmpty ? 'viewer' : 'user(login:"$name")'} {
+    return '''query {  ${name.isEmpty ? 'viewer' : 'user(login:"$name")'} {
     login
     name
     avatarUrl
@@ -68,12 +68,12 @@ class QLQueries {
       } 
     }
   }
-''';
+}''';
   }
 
   /// 查询一个组织信息
   static String queryOrganization(String name) {
-    return '''  organization(login:"$name") {
+    return '''query { organization(login:"$name") {
     login
     name
     avatarUrl
@@ -102,7 +102,7 @@ class QLQueries {
       } 
     }
   }
-''';
+}''';
   }
 
   /// 查询一个仓库信息
@@ -113,9 +113,46 @@ class QLQueries {
   /// [refs] 取值为 `refs/heads/` 或 `refs/tags/`
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#repository
-  static String queryRepo(String owner, String name,
-      {String refs = 'refs/heads/'}) {
-    return '''  repository(owner:"$owner", name:"$name") {
+  static String queryRepo(String owner, String name) {
+    /// 默认分支的最后一个提交，方法一
+    ///      defaultBranchRef {
+    ///         name
+    ///         target {
+    ///           ... on Commit {
+    ///             history(first: 1){  edges { node { oid messageHeadline } } }
+    ///           }
+    ///         }
+    ///       }
+
+    /// 默认分支的最后一个提交，方法二
+    /// 指定某分支，则替换为 ref(qualifiedName :"refs/heads/master")，可惜不能用HEAD
+    ///       defaultBranchRef {
+    ///          target {
+    ///             ... on Commit {
+    ///                oid
+    ///                message
+    ///                authoredDate
+    ///                url
+    ///                author   {  name avatarUrl   }
+    ///             }
+    ///          }
+    ///      }
+    ///
+    /// 使用条件方式
+    /// query($incTarget: Boolean = false) {
+    ///   repository(owner: "ying32", name: "govcl") {
+    ///       defaultBranchRef {
+    ///          name
+    ///          target @include(if: $incTarget) {
+    ///             ... on Commit {
+    ///                history(first: 1){  edges { node { oid messageHeadline } } }
+    ///             }
+    ///          }
+    ///      }
+    ///   }
+    /// }
+
+    return '''query { repository(owner:"$owner", name:"$name") {
       name
       owner {
         login
@@ -161,6 +198,11 @@ class QLQueries {
       }
       defaultBranchRef {
         name
+        target {
+          ... on Commit {
+            history(first: 1){  edges { node { oid messageHeadline } } }
+          }
+        }
       }
       issues(states:OPEN) {
         totalCount
@@ -188,7 +230,10 @@ class QLQueries {
         isLatest
         isPrerelease
       }
-      refs(refPrefix: "$refs") {
+      refs(refPrefix: "refs/heads/") {
+        totalCount  
+      }
+      tags: refs(refPrefix: "refs/tags/") {
         totalCount  
       }
       releases {
@@ -202,7 +247,7 @@ class QLQueries {
          }
       }
     }
-''';
+}''';
   }
 
   /// 查询一个仓库信息的releases
@@ -217,7 +262,7 @@ class QLQueries {
   /// `CREATED_AT`和`NAME`
   static String queryRepoReleases(String owner, String name, {int count = 20}) {
     // 应该要按更新时间排，但是没有相应的值可选
-    return '''  repository(owner:"$owner", name:"$name") {
+    return '''query { repository(owner:"$owner", name:"$name") {
       releases(first:$count, orderBy: {direction: DESC, field: CREATED_AT}) {
         totalCount 
         pageInfo {
@@ -249,7 +294,8 @@ class QLQueries {
           }
         }
       }
-    }''';
+    }
+}''';
   }
 
   /// 查询仓库指定Release的Assets
@@ -258,7 +304,7 @@ class QLQueries {
   static String queryRepoReleaseAssets(String owner, String name,
       {required String tagName, int count = 30}) {
     // 应该要按更新时间排，但是没有相应的值可选
-    return '''
+    return '''query {
     repository(owner:"$owner", name:"$name") {
       release(tagName:"$tagName") {
         releaseAssets(first:$count) {   
@@ -274,7 +320,8 @@ class QLQueries {
           }
         }
       }
-    }''';
+    }
+}''';
   }
 
   /// 查询User的仓库列表，只列出少量信息，具体到时候使用[queryRepo]来查询详细信息
@@ -292,7 +339,7 @@ class QLQueries {
     String sortField = "CREATED_AT",
   }) {
     // 只查询user的仓库信息
-    return '''  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {
+    return '''query {  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {
     repositories(first:$count, orderBy: {direction: $sortDirection, field: $sortField}) {
       totalCount
       pageInfo {
@@ -333,7 +380,7 @@ class QLQueries {
         }
       } 
   }
-''';
+}''';
   }
 
   /// 查询仓库issues或者pullRequests
@@ -369,7 +416,7 @@ class QLQueries {
     //                           }
     //                        }
     //                     }
-    return '''  repository(owner:"$owner", name:"$name") {
+    return '''query { repository(owner:"$owner", name:"$name") {
           ${isIssues ? 'issues' : 'pullRequests'}(last: $count, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
              totalCount
              pageInfo {
@@ -418,7 +465,7 @@ class QLQueries {
              }
           }
     }      
-''';
+}''';
   }
 
   /// 查询文件
@@ -481,7 +528,7 @@ class QLQueries {
     //   lineCount
     // }
 
-    return '''
+    return '''query {
   repository(owner: "$owner", name: "$name") {
     object(expression: "${ref == null || ref.isEmpty ? 'HEAD' : ref}:$path") {
         ... on Tree {
@@ -502,7 +549,7 @@ class QLQueries {
         }
     }
   }    
-''';
+}''';
   }
 
   /// 搜索
@@ -543,7 +590,7 @@ class QLQueries {
     /// repositoryCount
     /// userCount
     /// wikiCount
-    return '''
+    return '''query {
   search(first: $count, query: "$query", type: $type) {
     pageInfo {
       endCursor
@@ -572,7 +619,7 @@ class QLQueries {
           }
         }
       }
-''';
+}''';
   }
 
   /// 查询仓库指定Release的Assets
@@ -583,7 +630,7 @@ class QLQueries {
   static String queryRepoRefs(String owner, String name,
       {int count = 30, String refPrefix = 'refs/heads/'}) {
     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
-    return '''
+    return '''query {
     repository(owner:"$owner", name:"$name") {
        refs(first: $count, refPrefix: "$refPrefix", orderBy: {direction : DESC, field: TAG_COMMIT_DATE}) {
           totalCount 
@@ -596,6 +643,6 @@ class QLQueries {
           nodes  { name prefix }
        }
     }
-''';
+}''';
   }
 }

@@ -31,8 +31,8 @@ class _IssueItem extends StatelessWidget {
       subtitle: Row(
         children: [
           Text('#${issue.number}'),
-          Text(' · ${issue.user?.login ?? ''}'),
-          Text(' · 打开于 ${issue.createdAt?.toLabel ?? ''}')
+          Text(' $dotChar ${issue.user?.login ?? ''}'),
+          Text(' $dotChar 打开于 ${issue.createdAt?.toLabel ?? ''}')
         ],
       ),
       trailing: issue.commentsCount == 0
