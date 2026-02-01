@@ -374,6 +374,47 @@ class RepoContentsListView extends StatelessWidget {
     );
   }
 
+  String _getReadMeFile(BuildContext context, QLObject object) {
+    if (object.isFile) return '';
+    final langCode = Localizations.localeOf(context).languageCode;
+    final regex = RegExp(
+        r'README[\.|-|_]?' + langCode + r'[\s\S]*?\.?(?:md|txt)',
+        caseSensitive: false);
+    // 优先匹配本地化的
+    var tree = object.entries!.firstWhere(
+        (e) => regex.firstMatch(e.name) != null,
+        orElse: () => const QLTree());
+    if (tree.name.isNotEmpty) {
+      return tree.name;
+    }
+    // 没有则匹配默认的
+    final regexDefault =
+        RegExp(r'README[\.|-|_]?[\s\S]*?\.?(?:md|txt)', caseSensitive: false);
+    tree = object.entries!.firstWhere(
+        (e) => regexDefault.firstMatch(e.name) != null,
+        orElse: () => const QLTree());
+    if (tree.name.isNotEmpty) {
+      return tree.name;
+    }
+    return '';
+  }
+
+  // 构建目录
+  Widget _buildTree(List<QLTree> entries) => Card(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...entries.where((e) => e.isDir).map((e) => _buildItem(e)),
+            ...entries.where((e) => e.isFile).map((e) => _buildItem(e)),
+
+            // const SizedBox(height: 8.0),
+            // readme，只有根目录下才显示README？或者文件中有就显示？
+            // const RepoReadMe(),
+          ],
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final repo = context.read<RepoModel>().repo;
@@ -408,17 +449,15 @@ class RepoContentsListView extends StatelessWidget {
           if (object.entries == null) {
             return const SizedBox.shrink();
           }
+          // 找readme文件
+          final readmeFile =
+              path.isEmpty ? _getReadMeFile(context, object) : '';
           // 返回目录结构
           return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ...object.entries!
-                  .where((e) => e.isDir)
-                  .map((e) => _buildItem(e)),
-              ...object.entries!
-                  .where((e) => e.isFile)
-                  .map((e) => _buildItem(e)),
+              _buildTree(object.entries!),
+              const SizedBox(height: 10.0),
+              RepoReadMe(repo: repo, ref: ref, filename: readmeFile),
             ],
           );
         },

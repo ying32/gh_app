@@ -175,6 +175,14 @@ class APIWrap {
     return QLObject.fromJson(object);
   }
 
+  /// README文件内容
+  Future<String> repoReadMe(QLRepository repo, String filename,
+      {String? ref}) async {
+    final res = await repoContents(repo, filename, ref: ref);
+    if (res == null || res.blob == null || res.blob!.isBinary) return '';
+    return res.blob?.text ?? '';
+  }
+
   ///================================== REST API ===============================
 
   /// 仓库issues
@@ -194,13 +202,6 @@ class APIWrap {
     return gitHubAPI.restful.pullRequests
         .list(_getSlug(repo), state: isOpen ? 'open' : 'closed')
         .toList();
-  }
-
-  /// README缓存
-  Future<String?> repoReadMe(QLRepository repo, {String? ref}) async {
-    return (await gitHubAPI.restful.repositories
-            .getReadme(_getSlug(repo), ref: ref))
-        .text;
   }
 
   /// 关注“我”的人

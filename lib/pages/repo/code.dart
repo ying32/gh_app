@@ -238,26 +238,13 @@ class RepoCodePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Card(
-                            // 这里可以使用Selector2来替代
-                            child: RepoContentsListView(
-                              path: context.watch<PathModel>().path,
-                              ref: context
-                                  .watch<RepoBranchModel>()
-                                  .selectedBranch,
-                              onPathChange: (value) {
-                                context.read<PathModel>().path = value;
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 8.0),
-                          // readme，只有根目录下才显示README？或者文件中有就显示？
-                          const RepoReadMe(),
-                        ]),
+                    child: RepoContentsListView(
+                      path: context.watch<PathModel>().path,
+                      ref: context.watch<RepoBranchModel>().selectedBranch,
+                      onPathChange: (value) {
+                        context.read<PathModel>().path = value;
+                      },
+                    ),
                   ),
                   const SizedBox(width: 8.0),
                   // 右边

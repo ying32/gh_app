@@ -87,7 +87,7 @@ class MarkdownBlockPlus extends StatelessWidget {
 class MarkdownBlockPlusDefaultAction extends StatelessWidget {
   const MarkdownBlockPlusDefaultAction(this.body, {super.key});
 
-  final String body;
+  final String? body;
 
   void onDefaultLinkAction(BuildContext context, String link) {
     final url = Uri.tryParse(link);
@@ -103,8 +103,9 @@ class MarkdownBlockPlusDefaultAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (body == null || body!.isEmpty) return const SizedBox.shrink();
     return MarkdownBlockPlus(
-      data: body,
+      data: body!,
       onTap: (link) => onDefaultLinkAction(context, link),
     );
   }
