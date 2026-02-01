@@ -448,7 +448,7 @@ class QLQueries {
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#treeentry
   static String queryObject(String owner, String name,
-      {String path = "", String ref = "HEAD"}) {
+      {String path = "", String? ref}) {
     // 不能获得二进制文件，可以使用REST API来获取，headers中添加 "Accept": "application/vnd.github.v3.raw"
     // 核心 REST 接口：GET /repos/{owner}/{repo}/contents/{path}（推荐）
     // 备选 REST 接口：GET /repos/{owner}/{repo}/git/blobs/{oid}（通过哈希 ID）
@@ -459,7 +459,7 @@ class QLQueries {
     // expression: "master:README.zh-CN.md"
     return '''
   repository(owner: "$owner", name: "$name") {
-    object(expression: "$ref:$path") {
+    object(expression: "${ref == null || ref.isEmpty ? 'HEAD' : ref}:$path") {
         ... on Tree {
            entries {
               extension 

@@ -139,6 +139,24 @@ class APIWrap {
     return QLList.fromJson(res['search'], QLRepository.fromJson);
   }
 
+  /// 目录内容缓存
+  // Future<RepositoryContents?> repoContents(QLRepository repo, String path,
+  //     {String? ref}) async {
+  //   return gitHubAPI.restful.repositories
+  //       .getContents(_getSlug(repo), path, ref: ref);
+  // }
+
+  Future<QLObject?> repoContents(QLRepository repo, String path,
+      {String? ref}) async {
+    final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.queryObject(
+        repo.owner!.login, repo.name,
+        path: path, ref: ref)));
+    if (res == null) return null;
+    final object = res['repository']?['object'];
+    if (object == null) return null;
+    return QLObject.fromJson(object);
+  }
+
   ///================================== REST API ===============================
 
   /// 仓库分支列表
@@ -170,13 +188,6 @@ class APIWrap {
     return (await gitHubAPI.restful.repositories
             .getReadme(_getSlug(repo), ref: ref))
         .text;
-  }
-
-  /// 目录内容缓存
-  Future<RepositoryContents?> repoContents(QLRepository repo, String path,
-      {String? ref}) async {
-    return gitHubAPI.restful.repositories
-        .getContents(_getSlug(repo), path, ref: ref);
   }
 
   /// 关注“我”的人

@@ -655,9 +655,27 @@ class QLTree {
   /// 类型： `blob`=文件、`tree`=目录
   final String type;
 
+  /// 是否为文件
+  bool get isFile => type == "blob";
+
+  /// 是否为目录
+  bool get isDir => type == "tree";
+
   /// submodule (Submodule)
   ///
   /// If the TreeEntry is for a directory occupied by a submodule project, this returns the corresponding submodule.
+
+  QLTree.fromJson(Map<String, dynamic> input)
+      : extension = input['extension'] ?? '',
+        language = input['language'] == null
+            ? const QLLanguage()
+            : QLLanguage.fromJson(input['language']),
+        isGenerated = input['isGenerated'] ?? false,
+        lineCount = input['lineCount'] ?? 0,
+        name = input['name'] ?? '',
+        path = input['path'] ?? '',
+        size = input['size'] ?? 0,
+        type = input['type'] ?? '';
 }
 
 /// 文件数据
@@ -685,7 +703,46 @@ class QLBlob {
   final bool isTruncated;
 
   /// 如果`binary=true`则为`null`，否则为一个UTF8文本数据
-  final String text;
+  final String? text;
+
+  QLBlob.fromJson(Map<String, dynamic> input)
+      : oid = input['oid'] ?? '',
+        byteSize = input['byteSize'] ?? 0,
+        isBinary = input['isBinary'] ?? false,
+        isTruncated = input['isTruncated'] ?? false,
+        text = input['text'];
+}
+
+/// 仓库目录或者文件
+class QLObject {
+  const QLObject({
+    this.entries,
+    this.blob,
+  }) : _hasEntries = false;
+
+  /// 目录
+  final List<QLTree>? entries;
+
+  /// 文件内容
+  final QLBlob? blob;
+
+  /// 通过查询是否有`entries`节点来判断
+  final bool _hasEntries;
+
+  /// 是否为目录
+  bool get isDir => _hasEntries;
+
+  /// 是否为文件
+  bool get isFile => !_hasEntries;
+
+  QLObject.fromJson(Map<String, dynamic> input)
+      : _hasEntries = input['entries'] != null,
+        blob = input['entries'] != null ? null : QLBlob.fromJson(input),
+        entries = input['entries'] == null
+            ? null
+            : List.from(input['entries'])
+                .map((e) => QLTree.fromJson(e))
+                .toList();
 }
 
 ///=============================================================================

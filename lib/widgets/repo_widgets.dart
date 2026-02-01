@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:file_icon/file_icon.dart';
@@ -13,7 +12,6 @@ import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:github/github.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
@@ -273,11 +271,16 @@ class RepoBreadcrumbBar extends StatelessWidget {
 
 /// 内容视图
 class RepoContentView extends StatelessWidget {
-  const RepoContentView(this.file, {super.key});
+  const RepoContentView(
+    this.file, {
+    super.key,
+    required this.filename,
+  });
 
-  final GitHubFile file;
+  final QLBlob file;
+  final String filename;
 
-  bool get _canPreview => (file.size ?? 0) <= 1024 * 1024 * 1;
+  bool get _canPreview => file.byteSize <= 1024 * 1024 * 1;
 
   static const _jpegHeader = [0xFF, 0xD8, 0xFF];
   static const tiffHeader1 = [0x49, 0x49, 0x2A];
@@ -312,14 +315,19 @@ class RepoContentView extends StatelessWidget {
       return const Center(child: Text('<...文件太大...>'));
     }
     try {
-      // 解码数据
-      final data = base64Decode(file.content!.replaceAll("\n", ""));
-      if (_isImage(data)) {
-        return Image.memory(data);
+      if (file.isBinary) {
+        return const Center(child: Text('<...还没做预览二进制文件的功能...>'));
+        // 解码数据
+        // final data = base64Decode(file.content!.replaceAll("\n", ""));
+        // if (file.isBinary && _isImage(data)) {
+        //   return Image.memory(data);
+        // }
       }
-      final filename = file.name ?? '';
+
       // 这里还要处理编码
-      final body = utf8.decode(data);
+      final body = file.text ?? '';
+
+      /// utf8数据  //utf8.decode(data);
       final ext = p.extension(filename).toLowerCase();
       if (ext == ".md" || ext == ".markdown") {
         return MarkdownBlockPlusDefaultAction(body);
@@ -344,19 +352,18 @@ class RepoContentsListView extends StatelessWidget {
   final String? ref;
   final ValueChanged<String> onPathChange;
 
-  Widget _buildItem(GitHubFile file) {
-    final isFile = file.type == "file";
+  Widget _buildItem(QLTree file) {
     return ListTile(
       leading: SizedBox(
         width: 24,
-        child: isFile
-            ? FileIcon(file.name ?? '', size: 24)
+        child: file.isFile
+            ? FileIcon(file.name, size: 24)
             : Icon(Remix.folder_fill, color: Colors.blue.lighter),
       ),
-      title: Text(file.name ?? ''),
+      title: Text(file.name),
       //trailing: const SizedBox.shrink(),
       onPressed: () {
-        onPathChange.call(file.path ?? '');
+        onPathChange.call(file.path);
       },
     );
   }
@@ -372,19 +379,27 @@ class RepoContentsListView extends StatelessWidget {
           if (!snapshotIsOk(snapshot, false)) {
             return const Center(child: ProgressRing());
           }
-          final contents = snapshot.data;
-          if (contents == null) {
+          final object = snapshot.data;
+          if (object == null) {
             return const SizedBox.shrink();
           }
           // 如果数据是文件，则显示内容
-          if (contents.isFile) {
+          if (object.isFile) {
             if (kDebugMode) {
-              print(
-                  "file encoding=${contents.file?.encoding}, type=${contents.file?.type}");
+              print("file isBinary =${object.blob?.isBinary}");
             }
-            return RepoContentView(contents.file!);
+            // blob不为null时
+            if (object.blob != null && object.blob!.text != null) {
+              return RepoContentView(
+                object.blob!,
+                filename: p.basename(path),
+              );
+            }
+            //TODO: 这里待完善
+            return const Text('还没做内容的哈');
+            //return RepoContentView(contents.file!);
           }
-          if (!contents.isDirectory || contents.tree == null) {
+          if (object.entries == null) {
             return const SizedBox.shrink();
           }
           // 返回目录结构
@@ -392,11 +407,11 @@ class RepoContentsListView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ...contents.tree!
-                  .where((e) => e.type == "dir")
+              ...object.entries!
+                  .where((e) => e.isDir)
                   .map((e) => _buildItem(e)),
-              ...contents.tree!
-                  .where((e) => e.type == "file")
+              ...object.entries!
+                  .where((e) => e.isFile)
                   .map((e) => _buildItem(e)),
             ],
           );
