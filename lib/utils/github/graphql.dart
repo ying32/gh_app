@@ -615,10 +615,10 @@ class QLIssue extends Issue {
 /// https://docs.github.com/zh/graphql/reference/objects#tree
 class QLTree {
   const QLTree({
-    this.extension = '',
-    this.language = const QLLanguage(),
+    //this.extension = '',
+    //this.language = const QLLanguage(),
     this.isGenerated = false,
-    this.lineCount = 0,
+    //this.lineCount = 0,
     this.name = '',
     this.path = '',
     this.size = 0,
@@ -626,16 +626,16 @@ class QLTree {
   });
 
   /// 文件扩展名
-  final String extension;
+  //final String extension;
 
   /// 本文件所用的编程语言
-  final QLLanguage language;
+  //final QLLanguage language;
 
-  /// 是否生成此树状条目
+  /// 是否已生成此树状条目
   final bool isGenerated;
 
   /// 文件行数
-  final int lineCount;
+  //final int lineCount;
 
   /// 文件名
   final String name;
@@ -666,12 +666,12 @@ class QLTree {
   /// If the TreeEntry is for a directory occupied by a submodule project, this returns the corresponding submodule.
 
   QLTree.fromJson(Map<String, dynamic> input)
-      : extension = input['extension'] ?? '',
-        language = input['language'] == null
-            ? const QLLanguage()
-            : QLLanguage.fromJson(input['language']),
+      : //extension = input['extension'] ?? '',
+        //language = input['language'] == null
+        //    ? const QLLanguage()
+        //    : QLLanguage.fromJson(input['language']),
         isGenerated = input['isGenerated'] ?? false,
-        lineCount = input['lineCount'] ?? 0,
+        //lineCount = input['lineCount'] ?? 0,
         name = input['name'] ?? '',
         path = input['path'] ?? '',
         size = input['size'] ?? 0,

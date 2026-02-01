@@ -454,18 +454,23 @@ class QLQueries {
     // 备选 REST 接口：GET /repos/{owner}/{repo}/git/blobs/{oid}（通过哈希 ID）
 
     // 根目录
-    // expression: "master:"
+    // expression: "master:" expression: "HEAD:"
     // 查询指定的
     // expression: "master:README.zh-CN.md"
+    // entries
+    // 用不上
+    // entries {
+    //   extension
+    //   language { name }
+    //   lineCount
+    // }
+
     return '''
   repository(owner: "$owner", name: "$name") {
     object(expression: "${ref == null || ref.isEmpty ? 'HEAD' : ref}:$path") {
         ... on Tree {
-           entries {
-              extension 
-              language { name }
+           entries { 
               isGenerated 
-              lineCount 
               name 
               path 
               size 

@@ -57,7 +57,7 @@ class HighlightViewPlus extends StatelessWidget {
   static final _xmlStartPattern = RegExp(r'\<\?xml|\<.+?xmlns\=\"');
 
   /// 查询语法高亮
-  String _getLang(String data) {
+  String get _getLang {
     // 根据文件名查询语法
     final shortName = path_lib.basename(fileName);
 
@@ -77,12 +77,12 @@ class HighlightViewPlus extends StatelessWidget {
     // 这个只是临时的，想要好的，还得做内容识别
     // 匹配扩展名
     for (final key in _extHighlights.keys) {
-      if (_extHighlights[key]?.contains(shortName) ?? false) {
+      if (_extHighlights[key]?.contains(ext) ?? false) {
         return key;
       }
     }
     // 根据文件内容判断，这里判断为xml格式的
-    if (data.startsWith(_xmlStartPattern)) {
+    if (source.startsWith(_xmlStartPattern)) {
       return "xml";
     }
     // 没有找到自定义的
@@ -106,7 +106,7 @@ class HighlightViewPlus extends StatelessWidget {
         fontSize: 16.0,
         height: 1.5);
     // 这里要优化下，先要查找语言有没有支持，有的话才继续，没有就不继续了
-    final lang = _getLang(source);
+    final lang = _getLang;
     if (kDebugMode) {
       print("highlight lang=$lang");
     }
