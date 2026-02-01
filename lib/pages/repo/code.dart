@@ -24,14 +24,15 @@ class _RepoBranches extends StatelessWidget {
         //     ],
         //   );
         // }
-        final branches = (snapshot.data ?? [Branch(repo.defaultBranch, null)]);
+        final branches =
+            (snapshot.data ?? [Branch(repo.defaultBranchRef.name, null)]);
         return Row(
           children: [
-            Selector2<RepoModel, RepoBranchModel, (Repository, String?)>(
+            Selector2<RepoModel, RepoBranchModel, (QLRepository, String?)>(
               selector: (_, model, model2) =>
                   (model.repo, model2.selectedBranch),
               builder: (_, model, __) {
-                final defaultBranch = model.$1.defaultBranch;
+                final defaultBranch = model.$1.defaultBranchRef.name;
                 final selectedBranch = model.$2;
 
                 return DropDownButton(
@@ -91,7 +92,7 @@ class _TopBar1 extends StatelessWidget {
 
   void _onWatch() {}
 
-  Widget _buildChild(Repository repo) {
+  Widget _buildChild(QLRepository repo) {
     Widget child = Row(
       children: [
         // Title(
@@ -121,7 +122,7 @@ class _TopBar1 extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Button(
             onPressed:
-                repo.allowForking == true && !repo.isFork ? _onFork : null,
+                repo.forkingAllowed == true && !repo.isFork ? _onFork : null,
             child: IconText(
               icon: Remix.git_fork_line,
               text: Text('${repo.forksCount.toKiloString()} 分叉'),
@@ -148,7 +149,7 @@ class _TopBar1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, Repository>(
+    return Selector<RepoModel, QLRepository>(
       selector: (_, model) => model.repo,
       builder: (_, repo, __) => _buildChild(repo),
     );
@@ -194,7 +195,7 @@ class _CodePageRight extends StatelessWidget {
 class RepoCodePage extends StatelessWidget {
   const RepoCodePage(this.repo, {super.key});
 
-  final Repository repo;
+  final QLRepository repo;
 
   @override
   Widget build(BuildContext context) {

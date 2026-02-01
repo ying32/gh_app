@@ -55,6 +55,7 @@ class QLQueries {
           stargazerCount
           isPrivate
           description
+          isInOrganization
           owner {
             login
             avatarUrl
@@ -89,6 +90,7 @@ class QLQueries {
           stargazerCount
           isPrivate
           description
+          isInOrganization
           owner {
             login
             avatarUrl
@@ -473,6 +475,76 @@ class QLQueries {
         }
     }
   }    
+''';
+  }
+
+  /// 搜索
+  ///
+  /// https://docs.github.com/zh/graphql/reference/queries#search
+  ///
+  /// 搜索结果
+  /// https://docs.github.com/zh/graphql/reference/objects#searchresultitemconnection
+  ///
+  /// 可用对象
+  /// https://docs.github.com/zh/graphql/reference/unions#searchresultitem
+  ///
+  /// [query] 查询条件，相关语法
+  /// Searching on GitHub: https://docs.github.com/search-github/searching-on-github
+  ///
+  /// Understanding the search syntax: https://docs.github.com/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax
+  ///
+  /// Sorting search results: https://docs.github.com/search-github/getting-started-with-searching-on-github/sorting-search-results
+  ///
+  /// [type] 要搜索的类型 https://docs.github.com/zh/graphql/reference/enums#searchtype
+  ///
+  ///  `DISCUSSION`、`ISSUE` `ISSUE_ADVANCED` `REPOSITORY` `USER`
+  static String search(String query,
+      {int count = 15, String type = 'REPOSITORY'}) {
+    /// ... on Discussion { }
+    /// ... on Issue { }
+    /// ... on Organization { }
+    /// ... on Repository { }
+    /// ... on User { }
+    /// ... on PullRequest { }
+    /// ... on MarketplaceListing { }
+    /// ... on App { }
+
+    /// codeCount
+    /// discussionCount
+    /// issueCount
+    /// pageInfo
+    /// repositoryCount
+    /// userCount
+    /// wikiCount
+    return '''
+  search(first: $count, query: "$query", type: $type) {
+      pageInfo {
+      endCursor
+      startCursor
+      hasNextPage
+      hasPreviousPage
+    }
+    nodes {
+       ... on Repository {
+            name
+            forkCount
+            stargazerCount
+            isPrivate
+            description
+            isInOrganization
+            url
+            owner {
+              login
+              avatarUrl
+            }
+            primaryLanguage {
+              color
+              name
+            }
+            pushedAt
+          }
+        }
+      }
 ''';
   }
 }

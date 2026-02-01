@@ -3,11 +3,13 @@ import 'dart:math' as math;
 
 import 'package:file_icon/file_icon.dart';
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/widgets.dart';
@@ -20,17 +22,17 @@ import 'markdown_plus.dart';
 
 /// 语言的圆点
 class LangCircleDot extends StatelessWidget {
-  const LangCircleDot(this.lang, {super.key, this.color});
-  final String lang;
-  final String? color;
+  const LangCircleDot(this.lang, {super.key});
+  final QLLanguage lang;
+
   @override
   Widget build(BuildContext context) {
-    if (lang.isEmpty) return const SizedBox.shrink();
+    if (lang.name.isEmpty) return const SizedBox.shrink();
     return ClipOval(
       child: Container(
         width: 10.0,
         height: 10.0,
-        color: hexColorTo(color ?? languageColors[lang] ?? ''),
+        color: hexColorTo(lang.color),
       ),
     );
   }
@@ -42,10 +44,12 @@ class RepoListItem extends StatelessWidget {
     this.repo, {
     super.key,
     this.isPinStyle = false,
+    this.showOpenIssues = true,
   });
 
-  final Repository repo;
+  final QLRepository repo;
   final bool isPinStyle;
+  final bool showOpenIssues;
 
   String get _title => isPinStyle ? repo.name : repo.fullName;
 
@@ -97,7 +101,7 @@ class RepoListItem extends StatelessWidget {
               if (isPinStyle && !repo.isPrivate) const TagLabel.public(),
 
               // 是否归档
-              if (repo.archived)
+              if (repo.isArchived)
                 const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 8),
                     child: TagLabel.archived()),
@@ -106,7 +110,7 @@ class RepoListItem extends StatelessWidget {
               if (!isPinStyle)
                 LinkAction(
                   icon: const Icon(FluentIcons.open_source, size: 18),
-                  link: repo.htmlUrl,
+                  link: repo.url,
                 ),
             ],
           ),
@@ -141,20 +145,20 @@ class RepoListItem extends StatelessWidget {
           Row(
             children: [
               // 语言的一个圆，颜色还要待弄下哈
-              LangCircleDot(repo.language),
+              LangCircleDot(repo.primaryLanguage),
 
               // 语言
               Padding(
                   padding: padding,
-                  child: Text(repo.language,
+                  child: Text(repo.primaryLanguage.name,
                       style: TextStyle(color: appTheme.color.lightest))),
               // 授权协议
-              if (!isPinStyle && repo.license?.name != null) ...[
+              if (!isPinStyle && repo.license.name.isNotEmpty) ...[
                 IconText(
                     icon: Remix.scales_line,
                     padding: padding,
                     iconColor: appTheme.color.lightest,
-                    text: Text(repo.license!.name!,
+                    text: Text(repo.license.name,
                         style: TextStyle(color: appTheme.color.lightest))),
               ],
               // fork数
@@ -163,7 +167,7 @@ class RepoListItem extends StatelessWidget {
                 child: IconText(
                     icon: Remix.git_fork_line,
                     // padding: padding,
-                    text: Text((repo.forks ?? 0).toKiloString())),
+                    text: Text(repo.forksCount.toKiloString())),
               ),
               // 关注数
               HyperlinkButton(
@@ -173,7 +177,7 @@ class RepoListItem extends StatelessWidget {
                     // padding: padding,
                     text: Text(repo.stargazersCount.toKiloString())),
               ),
-              if (!isPinStyle)
+              if (!isPinStyle && showOpenIssues)
                 // 当前打开的issue数，这里貌似包含pull requests的数量
                 HyperlinkButton(
                   onPressed: () {},
@@ -203,9 +207,11 @@ class RepoListView extends StatelessWidget {
   const RepoListView({
     super.key,
     required this.repos,
+    this.showOpenIssues = true,
   });
 
-  final List<Repository> repos;
+  final List<QLRepository> repos;
+  final bool showOpenIssues;
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +227,7 @@ class RepoListView extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final repo = repos[index];
-        return RepoListItem(repo);
+        return RepoListItem(repo, showOpenIssues: showOpenIssues);
       },
       separatorBuilder: (BuildContext context, int index) => const SizedBox(
           height: 8), // Divider(size: 1, direction: Axis.horizontal),
@@ -233,7 +239,7 @@ class RepoListView extends StatelessWidget {
 class RepoBreadcrumbBar extends StatelessWidget {
   const RepoBreadcrumbBar({super.key, this.repo});
 
-  final Repository? repo;
+  final QLRepository? repo;
 
   @override
   Widget build(BuildContext context) {
@@ -372,8 +378,10 @@ class RepoContentsListView extends StatelessWidget {
           }
           // 如果数据是文件，则显示内容
           if (contents.isFile) {
-            print(
-                "file encoding=${contents.file?.encoding}, type=${contents.file?.type}");
+            if (kDebugMode) {
+              print(
+                  "file encoding=${contents.file?.encoding}, type=${contents.file?.type}");
+            }
             return RepoContentView(contents.file!);
           }
           if (!contents.isDirectory || contents.tree == null) {

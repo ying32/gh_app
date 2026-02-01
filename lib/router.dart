@@ -10,7 +10,7 @@ import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:go_router/go_router.dart';
 
 import 'navigation_style2.dart';
@@ -88,7 +88,7 @@ final router = GoRouter(navigatorKey: rootNavigatorKey, routes: [
       GoRoute(
         path: RouterTable.repo,
         //builder: (context, state) => RepoPage(repo: state.extra as Repository),
-        builder: (context, state) => RepoPage(state.extra as Repository),
+        builder: (context, state) => RepoPage(state.extra as QLRepository),
         // builder: (context, state) => MultiProvider(
         //   providers: [
         //     ChangeNotifierProvider<RepoModel>(

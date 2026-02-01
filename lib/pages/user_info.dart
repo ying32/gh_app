@@ -5,13 +5,12 @@ import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
-import 'package:github/github.dart';
 import 'package:provider/provider.dart';
 
 class UserInfoPage extends StatelessWidget {
   const UserInfoPage(this.user, {super.key});
 
-  final User? user;
+  final QLUser? user;
 
   @override
   Widget build(BuildContext context) {
@@ -68,11 +67,11 @@ class UserInfoPage extends StatelessWidget {
     );
   }
 
-  static void createNewTab(BuildContext context, User user) {
+  static void createNewTab(BuildContext context, QLUser user) {
     context.read<TabviewModel>().addTab(
           UserInfoPage(user),
-          key: ValueKey("${RouterTable.user}/${user.login ?? ''}"),
-          title: user.name ?? user.login ?? '未知',
+          key: ValueKey("${RouterTable.user}/${user.login}"),
+          title: user.name,
           icon: Remix.user_line,
         );
   }

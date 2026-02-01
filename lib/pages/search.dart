@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
-import 'package:github/github.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -18,7 +18,7 @@ class _SearchPageState extends State<SearchPage>
   bool _searching = false;
 
   final List<String> _suggests = ['搜索仓库', '搜索作者', '搜索组织'];
-  final List<Repository> _repos = [];
+  final List<QLRepository> _repos = [];
 
   @override
   void dispose() {
@@ -31,20 +31,14 @@ class _SearchPageState extends State<SearchPage>
       _showInfo('请输入一个要搜索的关键字', severity: InfoBarSeverity.info);
       return;
     }
-    // StreamBuilder
     _repos.clear();
     setState(() {
       _searching = true;
     });
-    gitHubAPI.restful.search.repositories(text, pages: 1).listen((data) {
-      _repos.add(data);
-    }, onDone: _doUpdate);
-    // gitHubAPI.restful.search.users(query)
-    // gitHubAPI.restful.search.issues(query)query)
-    // gitHubAPI.restful.search.code(query)query)
-    // setState(() {
-    //
-    // });
+    GithubCache.instance.searchRepo(text).then((data) {
+      if (data == null || data.isEmpty) return;
+      _repos.addAll(data);
+    }).whenComplete(_doUpdate);
   }
 
   void _doUpdate() {
@@ -82,7 +76,7 @@ class _SearchPageState extends State<SearchPage>
       Expanded(
           child: _searching
               ? const Center(child: ProgressRing())
-              : RepoListView(repos: _repos)),
+              : RepoListView(repos: _repos, showOpenIssues: false)),
       // AutoSuggestBox(
       //   placeholder: '输入要搜索的',
       //   onChanged: (val, reason) {

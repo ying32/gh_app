@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:github/github.dart';
 import 'package:url_launcher/link.dart';
 
 /// 用户头像
@@ -37,7 +37,7 @@ class UserNameWidget extends StatelessWidget {
     this.onlyNickName = false,
   });
 
-  final User? user;
+  final QLUser? user;
   final bool onlyNickName;
 
   String get _displayName {
@@ -233,7 +233,7 @@ class UserInfoPanel extends StatelessWidget {
     super.key,
   });
 
-  final User? user;
+  final QLUser? user;
 
   @override
   Widget build(BuildContext context) {
@@ -320,7 +320,8 @@ class UserInfoPanel extends StatelessWidget {
             value: user?.email,
             isLink: true,
             isEmail: true),
-        UserLineInfo(icon: Remix.links_line, value: user?.blog, isLink: true),
+        UserLineInfo(
+            icon: Remix.links_line, value: user?.websiteUrl, isLink: true),
         // if (user?.blog != null && user!.blog!.isNotEmpty)
         //   UserLineInfo(
         //       icon: Remix.links_line,

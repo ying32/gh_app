@@ -33,117 +33,146 @@ class QLPageInfo {
 }
 
 /// 仓库的主语言
-class QLPrimaryLanguage {
-  const QLPrimaryLanguage({
+class QLLanguage {
+  const QLLanguage({
     this.color = '',
     this.name = '',
   });
   final String color;
   final String name;
 
-  QLPrimaryLanguage.fromJson(Map<String, dynamic> input)
+  QLLanguage.fromJson(Map<String, dynamic> input)
       : color = input['color'] ?? '',
         name = input['name'] ?? '';
 }
 
+/// 用户信息基础类，包含用户和组织
+class QLUserBase {
+  const QLUserBase({
+    required this.login,
+    this.avatarUrl = '',
+  });
+
+  /// 所有者用户名
+  final String login;
+
+  /// 头像
+  final String avatarUrl;
+}
+
 /// 仓库所有者
-class QLRepositoryOwner extends UserInformation {
-  QLRepositoryOwner({
-    required String login,
-    String avatarUrl = '',
-  }) : super(login, 0, avatarUrl, '');
+class QLRepositoryOwner extends QLUserBase {
+  const QLRepositoryOwner({
+    required super.login,
+    super.avatarUrl,
+    this.url = '',
+  });
 
-  factory QLRepositoryOwner.fromJson(Map<String, dynamic> input) =>
-      QLRepositoryOwner(login: input['login'], avatarUrl: input['avatarUrl']);
+  /// 链接
+  final String url;
 
-  @override
-  Map<String, dynamic> toJson() => {};
+  QLRepositoryOwner.fromJson(Map<String, dynamic> input)
+      : url = input['url'] ?? '',
+        super(
+          login: input['login'] ?? '',
+          avatarUrl: input['avatarUrl'] ?? '',
+        );
 }
 
 /// 许可协议
-class QLLicenseKind extends LicenseKind {
-  QLLicenseKind({super.name}) : super();
+class QLLicenseKind {
+  const QLLicenseKind({this.name = ''});
 
-  QLLicenseKind.fromJson(Map<String, dynamic> json) : super(name: json['name']);
+  final String name;
 
-  @override
-  Map<String, dynamic> toJson() => {};
+  QLLicenseKind.fromJson(Map<String, dynamic> json) : name = json['name'] ?? '';
 }
 
-class QLReleaseAsset extends ReleaseAsset {
-  QLReleaseAsset({
-    super.name,
-    super.contentType,
-    super.size,
-    super.downloadCount,
-    super.browserDownloadUrl,
-    super.createdAt,
-    super.updatedAt,
+DateTime? _parseDateTime(String? value) =>
+    value == null ? null : DateTime.parse(value);
+
+/// Release文件
+class QLReleaseAsset {
+  const QLReleaseAsset({
+    this.name = '',
+    this.contentType = '',
+    this.size = 0,
+    this.downloadCount = 0,
+    this.downloadUrl = '',
+    this.createdAt,
+    this.updatedAt,
   });
+
+  final String name;
+  final String contentType;
+  final int size;
+  final int downloadCount;
+  final String downloadUrl;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   factory QLReleaseAsset.fromJson(Map<String, dynamic> input) {
     input = input['nodes'] ?? input;
     return QLReleaseAsset(
-      name: input['name'],
-      contentType: input['contentType'],
-      downloadCount: input['downloadCount'],
-      browserDownloadUrl: input['downloadUrl'],
-      size: input['size'],
-      createdAt: input['createdAt'] == null
-          ? null
-          : DateTime.parse(input['createdAt'] as String),
-      updatedAt: input['updatedAt'] == null
-          ? null
-          : DateTime.parse(input['updatedAt'] as String),
+      name: input['name'] ?? '',
+      contentType: input['contentType'] ?? '',
+      downloadCount: input['downloadCount'] ?? 0,
+      downloadUrl: input['downloadUrl'] ?? '',
+      size: input['size'] ?? 0,
+      createdAt: _parseDateTime(input['createdAt']),
+      updatedAt: _parseDateTime(input['updatedAt']),
     );
   }
-
-  @override
-  Map<String, dynamic> toJson() => {};
 }
 
-class QLRelease extends Release {
-  QLRelease({
-    super.name,
-    super.author,
-    super.tagName,
-    super.url,
-    super.createdAt,
-    super.isDraft,
-    super.isPrerelease,
-    super.publishedAt,
-    super.description,
-    super.assets,
+/// Release项目
+class QLRelease {
+  const QLRelease({
+    this.name = '',
+    this.author,
+    this.tagName = '',
+    this.url = '',
+    this.isDraft = false,
+    this.isPrerelease = false,
     this.isLatest = false,
+    this.description = '',
     this.abbreviatedOid = '',
-  }) : super(
-          // 发现这个graphql的将release note放在description里面了？
-          body: description,
-        );
-  //latestRelease
+    this.assets,
+    this.createdAt,
+    this.publishedAt,
+  });
 
+  final String name;
+  final QLUser? author;
+  final String tagName;
+  final String url;
+
+  final bool isDraft;
+  final bool isPrerelease;
   final bool isLatest;
+
+  final String description;
 
   /// tagCommit.abbreviatedOid
   final String abbreviatedOid;
+  final List<QLReleaseAsset>? assets;
+
+  final DateTime? createdAt;
+  final DateTime? publishedAt;
 
   factory QLRelease.fromJson(Map<String, dynamic> input) {
     return QLRelease(
-      name: input['name'],
-      tagName: input['tagName'],
-      url: input['url'],
-      publishedAt: input['updatedAt'] == null
-          ? null
-          : DateTime.parse(input['updatedAt']),
-      createdAt: input['createdAt'] == null
-          ? null
-          : DateTime.parse(input['createdAt']),
-      isDraft: input['isDraft'],
-      isPrerelease: input['isPrerelease'],
-      description: input['description'],
-      isLatest: input['isLatest'] ?? false,
-      abbreviatedOid: input['tagCommit']?['abbreviatedOid'] ?? '',
+      name: input['name'] ?? '',
       author: QLUser.fromJson(input['author']),
+      tagName: input['tagName'] ?? '',
+      url: input['url'] ?? '',
+      isDraft: input['isDraft'] ?? false,
+      isPrerelease: input['isPrerelease'] ?? false,
+      isLatest: input['isLatest'] ?? false,
+      description: input['description'] ?? '',
+      abbreviatedOid: input['tagCommit']?['abbreviatedOid'] ?? '',
+      publishedAt: _parseDateTime(input['updatedAt']),
+      createdAt: _parseDateTime(input['createdAt']),
       assets: input['releaseAssets']?['nodes'] == null
           ? null
           : List.from(input['releaseAssets']?['nodes'])
@@ -151,48 +180,47 @@ class QLRelease extends Release {
               .toList(),
     );
   }
-  @override
-  Map<String, dynamic> toJson() => {};
 }
 
-// class QLBranch extends Branch {
-//   QLBranch(super.name, super.commit);
-//
-//   @override
-//   Map<String, dynamic> toJson() => {};
-// }
+/// 分支
+class QLRef {
+  const QLRef({this.name = 'main'});
+
+  final String name;
+
+  QLRef.fromJson(Map<String, dynamic> json) : name = json['name'] ?? 'main';
+}
 
 /// 仓库信息
-class QLRepository extends Repository {
+class QLRepository {
   QLRepository({
-    super.name,
-    super.forksCount,
-    super.forks,
-    super.stargazersCount,
-    super.isPrivate,
-    super.description,
-    super.owner,
-    super.archived,
-    super.updatedAt,
-    super.pushedAt,
-    super.htmlUrl,
-    super.openIssues,
-    super.license,
-    super.topics,
-    super.disabled,
-    super.allowForking,
-    super.hasIssues,
-    super.hasProjects,
-    super.hasWiki,
-    super.homepage,
-    super.isFork,
-    super.isTemplate,
-    super.mirrorUrl,
-    super.defaultBranch,
-    super.watchers,
-    this.primaryLanguage = const QLPrimaryLanguage(),
+    this.name = '',
+    this.owner,
+    this.forksCount = 0,
+    this.stargazersCount = 0,
+    this.isPrivate = false,
+    this.description = '',
+    this.isArchived = false,
+    this.updatedAt,
+    this.pushedAt,
+    this.url = '',
+    this.openIssuesCount = 0,
+    this.license = const QLLicenseKind(),
+    this.topics,
+    this.isDisabled = false,
+    this.forkingAllowed = false,
+    this.hasIssuesEnabled = false,
+    this.hasProjectsEnabled = false,
+    this.hasWikiEnabled = false,
+    this.homepageUrl = '',
+    this.isFork = false,
+    this.isTemplate = false,
+    this.mirrorUrl = '',
+    this.defaultBranchRef = const QLRef(),
+    this.watchersCount = 0,
+    this.primaryLanguage = const QLLanguage(),
     this.isInOrganization = false,
-    this.openPullRequests = 0,
+    this.openPullRequestsCount = 0,
     this.archivedAt,
     this.diskUsage = 0,
     this.hasSponsorshipsEnabled = false,
@@ -205,16 +233,36 @@ class QLRepository extends Repository {
     this.releasesCount = 0,
     this.latestRelease,
     this.refsCount = 0,
-  }) : super(
-          language: primaryLanguage.name,
-          openIssuesCount: openIssues ?? 0,
-          fullName: "${owner?.login}/$name",
-          watchersCount: watchers ?? 0,
-        );
+  });
 
-  final QLPrimaryLanguage primaryLanguage;
+  final String name;
+  final QLRepositoryOwner? owner;
+  final int forksCount;
+  final int stargazersCount;
+  final bool isPrivate;
+  final String description;
+  final bool isArchived;
+  final DateTime? updatedAt;
+  final DateTime? pushedAt;
+  final String url;
+  final int openIssuesCount;
+  final QLLicenseKind license;
+  final List<String>? topics;
+  final bool isDisabled;
+  final bool forkingAllowed;
+  final bool hasIssuesEnabled;
+  final bool hasProjectsEnabled;
+  final bool hasWikiEnabled;
+  final String homepageUrl;
+  final bool isFork;
+  final bool isTemplate;
+  final String mirrorUrl;
+  final QLRef defaultBranchRef;
+  final int watchersCount;
+
+  final QLLanguage primaryLanguage;
   final bool isInOrganization;
-  final int openPullRequests;
+  final int openPullRequestsCount;
   final DateTime? archivedAt;
   final int diskUsage;
   final bool hasSponsorshipsEnabled;
@@ -228,65 +276,59 @@ class QLRepository extends Repository {
   final QLRelease? latestRelease;
   final int refsCount;
 
+  String get fullName => "${owner?.login}/$name";
+
   factory QLRepository.fromJson(Map<String, dynamic> input) {
     input = input['repository'] ?? input;
-    //print("===========解析仓库=$input");
     return QLRepository(
       name: input['name'] ?? '',
       forksCount: input['forkCount'] ?? 0,
-      forks: input['forkCount'],
       stargazersCount: input['stargazerCount'] ?? 0,
       isPrivate: input['isPrivate'] ?? false,
       description: input['description'] ?? '',
-      archived: input['isArchived'] ?? false,
-      htmlUrl: input['url'] ?? '',
-      openIssues: input['issues']?['totalCount'],
+      isArchived: input['isArchived'] ?? false,
+      url: input['url'] ?? '',
+      openIssuesCount: input['issues']?['totalCount'] ?? 0,
       isInOrganization: input['isInOrganization'] ?? false,
       diskUsage: input['diskUsage'] ?? 0,
-      allowForking: input['forkingAllowed'] ?? false,
-      hasIssues: input['hasIssuesEnabled'] ?? false,
-      hasProjects: input['hasProjectsEnabled'] ?? false,
-      disabled: input['isDisabled'] ?? false,
+      forkingAllowed: input['forkingAllowed'] ?? false,
+      hasIssuesEnabled: input['hasIssuesEnabled'] ?? false,
+      hasProjectsEnabled: input['hasProjectsEnabled'] ?? false,
+      isDisabled: input['isDisabled'] ?? false,
       hasSponsorshipsEnabled: input['hasSponsorshipsEnabled'] ?? false,
-      hasWiki: input['hasWikiEnabled'] ?? false,
-      homepage: input['homepageUrl'] ?? '',
+      hasWikiEnabled: input['hasWikiEnabled'] ?? false,
+      homepageUrl: input['homepageUrl'] ?? '',
       isBlankIssuesEnabled: input['isBlankIssuesEnabled'] ?? false,
       isEmpty: input['isEmpty'] ?? false,
       isFork: input['isFork'] ?? false,
       isLocked: input['isLocked'] ?? false,
       isMirror: input['isMirror'] ?? false,
-      isTemplate: input['isTemplate'],
+      isTemplate: input['isTemplate'] ?? false,
       viewerCanSubscribe: input['viewerCanSubscribe'] ?? false,
       viewerHasStarred: input['viewerHasStarred'] ?? false,
-      openPullRequests: input['pullRequests']?['totalCount'] ?? 0,
-      watchers: input['watchers']?['totalCount'],
-      mirrorUrl: input['mirrorUrl'],
-      // languages 字段，暂时不要了哈
-      defaultBranch: input['defaultBranchRef']?['name'] ?? '',
+      openPullRequestsCount: input['pullRequests']?['totalCount'] ?? 0,
+      watchersCount: input['watchers']?['totalCount'] ?? 0,
+      mirrorUrl: input['mirrorUrl'] ?? '',
+      defaultBranchRef: input['defaultBranchRef'] == null
+          ? const QLRef()
+          : QLRef.fromJson(input['defaultBranchRef']),
       releasesCount: input['releases']?['totalCount'] ?? 0,
       refsCount: input['refs']?['totalCount'] ?? 0,
-
       latestRelease: input['latestRelease'] == null
           ? null
           : QLRelease.fromJson(input['latestRelease']),
-
-      updatedAt: input['updatedAt'] == null
-          ? null
-          : DateTime.parse(input['updatedAt']),
-      archivedAt: input['archivedAt'] == null
-          ? null
-          : DateTime.parse(input['updatedAt']),
-      pushedAt:
-          input['pushedAt'] == null ? null : DateTime.parse(input['pushedAt']),
+      updatedAt: _parseDateTime(input['updatedAt']),
+      archivedAt: _parseDateTime(input['archivedAt']),
+      pushedAt: _parseDateTime(input['pushedAt']),
       primaryLanguage: input['primaryLanguage'] != null
-          ? QLPrimaryLanguage.fromJson(input['primaryLanguage'])
-          : const QLPrimaryLanguage(),
+          ? QLLanguage.fromJson(input['primaryLanguage'])
+          : const QLLanguage(),
       owner: input['owner'] != null
           ? QLRepositoryOwner.fromJson(input['owner'])
           : null,
-      license: input['licenseInfo'] == null
-          ? null
-          : QLLicenseKind.fromJson(input['licenseInfo']),
+      license: input['licenseInfo'] != null
+          ? QLLicenseKind.fromJson(input['licenseInfo'])
+          : const QLLicenseKind(),
       topics: input['repositoryTopics']?['nodes'] == null
           ? null
           : List.of(input['repositoryTopics']?['nodes'])
@@ -294,30 +336,65 @@ class QLRepository extends Repository {
               .toList(),
     );
   }
-
-  @override
-  Map<String, dynamic> toJson() => {};
 }
 
-/// GraphQL查询的user
-class QLUser extends User {
-  QLUser({
-    super.login,
+/// 列表
+class QLList<T> {
+  const QLList({
+    required this.data,
+    this.pageInfo,
+  });
+  final List<T> data;
+  final QLPageInfo? pageInfo;
+
+  QLList.fromJson(
+    Map<String, dynamic> input,
+    T Function(Map<String, dynamic>) convert,
+  )   : data = input['nodes'] == null
+            ? []
+            : List.from(input['nodes'] as List)
+                .map((e) => convert(e))
+                .toList(),
+        pageInfo = input['pageInfo'] == null
+            ? null
+            : QLPageInfo.fromJson(input['pageInfo']);
+}
+
+/// 组织用户
+class QLOrganization extends QLUserBase {
+  const QLOrganization({
+    required super.login,
+  });
+}
+
+/// 个人用户
+class QLUser extends QLUserBase {
+  const QLUser({
+    required super.login,
     super.avatarUrl,
-    super.htmlUrl,
-    super.name,
-    super.company,
-    super.blog,
-    super.location,
-    super.email,
-    super.bio,
-    super.followersCount,
-    super.followingCount,
+    this.url = '',
+    this.name = '',
+    this.company = '',
+    this.websiteUrl = '',
+    this.location = '',
+    this.email = '',
+    this.bio = '',
+    this.followersCount = 0,
+    this.followingCount = 0,
+    this.twitterUsername = '',
     this.pinnedItems,
-    String? twitterUsername,
-  }) {
-    super.twitterUsername = twitterUsername;
-  }
+  });
+
+  final String url;
+  final String name;
+  final String company;
+  final String websiteUrl;
+  final String location;
+  final String email;
+  final String bio;
+  final int followersCount;
+  final int followingCount;
+  final String twitterUsername;
 
   /// 置顶项目
   final List<QLRepository>? pinnedItems;
@@ -325,18 +402,18 @@ class QLUser extends User {
   factory QLUser.fromJson(Map<String, dynamic> input) {
     input = input['viewer'] ?? input['user'] ?? input;
     return QLUser(
-      login: input['login'],
-      name: input['name'],
-      avatarUrl: input['avatarUrl'],
-      company: input['company'],
-      bio: input['bio'],
-      email: input['email'],
-      location: input['location'],
-      twitterUsername: input['twitterUsername'],
-      htmlUrl: input['url'],
-      blog: input['websiteUrl'],
-      followersCount: input['followers']?['totalCount'],
-      followingCount: input['following']?['totalCount'],
+      login: input['login'] ?? '',
+      name: input['name'] ?? '',
+      avatarUrl: input['avatarUrl'] ?? '',
+      company: input['company'] ?? '',
+      bio: input['bio'] ?? '',
+      email: input['email'] ?? '',
+      location: input['location'] ?? '',
+      twitterUsername: input['twitterUsername'] ?? '',
+      url: input['url'] ?? '',
+      websiteUrl: input['websiteUrl'] ?? '',
+      followersCount: input['followers']?['totalCount'] ?? 0,
+      followingCount: input['following']?['totalCount'] ?? 0,
       pinnedItems: input['pinnedItems']?['nodes'] != null
           ? List.of(input['pinnedItems']?['nodes'])
               .map((e) => QLRepository.fromJson(e))
@@ -344,9 +421,6 @@ class QLUser extends User {
           : null,
     );
   }
-
-  @override
-  Map<String, dynamic> toJson() => {};
 }
 
 /// Issue
@@ -360,6 +434,30 @@ class QLIssue extends Issue {
 }
 
 /// GraphQL查询
+class QLQuery {
+  const QLQuery(
+    this.body, {
+    this.variables,
+    this.operationName,
+    this.isQuery = true,
+  });
+  final String body;
+  final Map<String, String>? variables;
+  final String? operationName;
+  final bool isQuery;
+
+  /// 编码后的graphql
+  String get jsonText => jsonEncode(toJson());
+
+  Map<String, dynamic> toJson() => {
+        //TODO: mutation 是不是这样操作呢？还没测试过，到时候测试了再说吧
+        "query": isQuery ? "query {\n $body \n}" : "mutation {\rn $body \n}",
+        if (variables != null) "variables": variables,
+        if (operationName != null) "operationName": operationName,
+      };
+}
+
+/// GraphQL查询
 /// https://docs.github.com/zh/graphql/reference/queries
 ///
 /// gh命令行
@@ -367,6 +465,8 @@ class QLIssue extends Issue {
 ///
 /// GitHub GraphQL API 文档
 /// https://docs.github.com/zh/graphql
+///
+
 class GitHubGraphQL {
   GitHubGraphQL({
     this.auth = const Authentication.anonymous(),
@@ -388,63 +488,42 @@ class GitHubGraphQL {
   /// viewer { login name }
   /// ```
   Future<T> query<S, T>(
-    String body, {
-    Map<String, String>? variables,
-    String? operationName,
+    QLQuery query, {
     void Function(http.Response response)? fail,
     Map<String, String>? headers,
     Map<String, dynamic>? params,
     JSONConverter<S, T?>? convert,
   }) =>
-      _request("query {\n $body \n}",
-          variables: variables,
-          operationName: operationName,
-          fail: fail,
-          headers: headers,
-          params: params,
-          convert: convert);
+      _request(query,
+          fail: fail, headers: headers, params: params, convert: convert);
 
   //  "Content-Type: application/json",
   //   "Accept: application/vnd.github.v4.idl"
 
   /// 修改操作
   Future<T> mutation<S, T>(
-    String body, {
-    Map<String, String>? variables,
-    String? operationName,
+    QLQuery query, {
     void Function(http.Response response)? fail,
     Map<String, String>? headers,
     Map<String, dynamic>? params,
     JSONConverter<S, T?>? convert,
   }) async =>
-      _request("mutation {\rn $body \n}",
-          variables: variables,
-          operationName: operationName,
-          fail: fail,
-          headers: headers,
-          params: params,
-          convert: convert);
+      _request(query,
+          fail: fail, headers: headers, params: params, convert: convert);
 
   /// 忽略path字段，强制为[endpoint]，本可不这样做的，但是他内部的[request]方法在判断[path]时
   /// 附加了一个”/“符号，造成服务端识为这是一个rest API。
   /// 暂时不公开，之后再看吧
+  /// Accept: application/vnd.github+json.
   Future<T> _request<S, T>(
-    String body, {
-    Map<String, String>? variables,
-    String? operationName,
+    QLQuery query, {
     Map<String, String>? headers,
     Map<String, dynamic>? params,
     void Function(http.Response response)? fail,
     JSONConverter<S, T?>? convert,
   }) async {
-    // 对于[mutation]也不知道是不是这样使用query?????
-    final qlQuery = {
-      "query": body,
-      if (variables != null) "variables": variables,
-      if (operationName != null) "operationName": operationName,
-    };
     if (kDebugMode) {
-      //print("body: ${jsonEncode(qlQuery)}");
+      //print("body: ${query.jsonText}");
     }
 
     //convert ??= (input) => input as T?;
@@ -452,7 +531,7 @@ class GitHubGraphQL {
     final response = await _github.request("POST", endpoint,
         headers: headers,
         params: params,
-        body: jsonEncode(qlQuery),
+        body: query.jsonText,
         statusCode: 200,
         fail: fail,
         preview: null);

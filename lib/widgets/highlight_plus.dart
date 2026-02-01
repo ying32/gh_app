@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_prism/flutter_prism.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
@@ -88,14 +89,14 @@ class HighlightViewPlus extends StatelessWidget {
     return ext;
   }
 
-  static Widget _defaultContextMenuBuilder(
-      BuildContext context, EditableTextState editableTextState) {
-    return FluentTextSelectionToolbar.editableText(
-      editableTextState: editableTextState
-        ..contextMenuButtonItems
-            .add(ContextMenuButtonItem(label: 'ff', onPressed: () {})),
-    );
-  }
+  // static Widget _defaultContextMenuBuilder(
+  //     BuildContext context, EditableTextState editableTextState) {
+  //   return FluentTextSelectionToolbar.editableText(
+  //     editableTextState: editableTextState
+  //       ..contextMenuButtonItems
+  //           .add(ContextMenuButtonItem(label: 'ff', onPressed: () {})),
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +107,9 @@ class HighlightViewPlus extends StatelessWidget {
         height: 1.5);
     // 这里要优化下，先要查找语言有没有支持，有的话才继续，没有就不继续了
     final lang = _getLang(source);
-    print("lang=$lang");
+    if (kDebugMode) {
+      print("highlight lang=$lang");
+    }
     if (lang.isEmpty) {
       return SelectableText(
         source,

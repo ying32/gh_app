@@ -26,11 +26,11 @@ class RepoAbout extends StatelessWidget {
         ),
 
         // blog
-        if (repo.homepage.isNotEmpty)
+        if (repo.homepageUrl.isNotEmpty)
           UserLineInfo(
               textColor: Colors.blue,
               icon: Remix.links_line,
-              value: repo.homepage,
+              value: repo.homepageUrl,
               isLink: true),
         // IconText(
         //     icon: Remix.links_line,
@@ -54,12 +54,12 @@ class RepoAbout extends StatelessWidget {
 
         const IconText(
             icon: Remix.book_open_line, padding: padding, text: Text('Readme')),
-        if (repo.license?.name != null)
+        if (repo.license.name.isNotEmpty)
           IconText(
               icon: Remix.scales_line,
               padding: padding,
               text: Text(
-                repo.license!.name!,
+                repo.license.name,
                 overflow: TextOverflow.ellipsis,
               ),
               expanded: true),

@@ -7,6 +7,7 @@ import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/github/graphql_querys.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
@@ -78,7 +79,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
           context: context, severity: InfoBarSeverity.error);
       return;
     }
-    gitHubAPI.graphql.query(_controller.text).then((e) {
+    gitHubAPI.graphql.query(QLQuery(_controller.text)).then((e) {
       if (e is Map) {
         setState(() {
           _treeNodes.addAll(_buildTreeViewItems(e));
@@ -212,6 +213,12 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             onPressed: () {
                               _controller.text =
                                   QLQueries.queryRepoRelease('ying32', 'govcl');
+                            }),
+                        const MenuFlyoutSeparator(),
+                        MenuFlyoutItem(
+                            text: const Text('搜索仓库'),
+                            onPressed: () {
+                              _controller.text = QLQueries.search('govcl');
                             }),
                       ],
                     )

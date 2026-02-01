@@ -54,7 +54,7 @@ class _IssueItem extends StatelessWidget {
 class RepoIssuesPage extends StatelessWidget {
   const RepoIssuesPage(this.repo, {super.key});
 
-  final Repository repo;
+  final QLRepository repo;
 
   @override
   Widget build(BuildContext context) {

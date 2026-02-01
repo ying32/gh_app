@@ -30,11 +30,11 @@ class RepoReadMe extends StatelessWidget {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             )),
                         const SizedBox(width: 12.0),
-                        if (repo.license != null)
+                        if (repo.license.name.isNotEmpty)
                           IconText(
                               icon: Remix.scales_line,
                               text: Text(
-                                repo.license!.name ?? '',
+                                repo.license.name,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
                               )),

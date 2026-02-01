@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/pages/releases.dart';
@@ -39,7 +40,7 @@ class _TabPagesState extends State<_TabPages> {
   @override
   Widget build(BuildContext context) {
     //final repo = context.read()<RepoModel>().repo;
-    return Selector<RepoModel, Repository>(
+    return Selector<RepoModel, QLRepository>(
         selector: (_, model) => model.repo,
         builder: (_, repo, __) {
           return TabView(
@@ -52,7 +53,7 @@ class _TabPagesState extends State<_TabPages> {
                 body: RepoCodePage(repo),
               ),
               // issues
-              if (repo.hasIssues)
+              if (repo.hasIssuesEnabled)
                 Tab(
                   text: Text('问题 ${repo.openIssuesCount}'),
                   icon: const Icon(Remix.issues_line),
@@ -61,7 +62,7 @@ class _TabPagesState extends State<_TabPages> {
                 ),
 
               Tab(
-                text: Text('合并请求 ${(repo as QLRepository).openPullRequests}'),
+                text: Text('合并请求 ${repo.openPullRequestsCount}'),
                 icon: const Icon(Remix.git_pull_request_line),
                 closeIcon: null,
                 body: RepoPullRequestPage(repo),
@@ -72,7 +73,7 @@ class _TabPagesState extends State<_TabPages> {
                 closeIcon: null,
                 body: RepoActionPage(repo),
               ),
-              if (repo.hasWiki)
+              if (repo.hasWikiEnabled)
                 Tab(
                   text: const Text('Wiki'),
                   icon: const Icon(Remix.book_open_line),
@@ -93,7 +94,7 @@ class _TabPagesState extends State<_TabPages> {
 class RepoPage extends StatelessWidget {
   const RepoPage(this.repo, {super.key});
 
-  final Repository repo;
+  final QLRepository repo;
 
   @override
   Widget build(BuildContext context) {
@@ -111,16 +112,13 @@ class RepoPage extends StatelessWidget {
                   .userRepo(repo.owner!.login, repo.name)
                   .then((e) {
                 context.read<RepoModel>().repo = e!;
-                print("加载数据更新完成");
-
-                //
               });
             },
             child: const _InternalRepoPage()));
   }
 
   /// 创建一个仓库页
-  static void createNewTab(BuildContext context, Repository repo) {
+  static void createNewTab(BuildContext context, QLRepository repo) {
     context.read<TabviewModel>().addTab(
           RepoPage(repo),
           key: ValueKey("${RouterTable.repo}/${repo.fullName}"),
@@ -134,7 +132,7 @@ class _InternalRepoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, Repository>(
+    return Selector<RepoModel, QLRepository>(
       selector: (_, model) => model.repo,
       builder: (_, repo, __) {
         return ScaffoldPage(
@@ -147,8 +145,9 @@ class _InternalRepoPage extends StatelessWidget {
                     icon: UserHeadImage(repo.owner?.avatarUrl, imageSize: 50),
                     onPressed: () {
                       // UserInfoPage.createNewTab(context, repo.owner!);
-                      print("type=${(repo as QLRepository).isInOrganization}");
-                      // print("type=${(repo as QLRepository).owner.id}");
+                      if (kDebugMode) {
+                        print("type=${repo.isInOrganization}");
+                      }
                     },
                   ),
                 ),
@@ -158,7 +157,7 @@ class _InternalRepoPage extends StatelessWidget {
                     padding: EdgeInsets.symmetric(horizontal: 4),
                     child: Icon(Remix.git_repository_private_line),
                   ),
-                if (repo.archived)
+                if (repo.isArchived)
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4),
                     child: TagLabel.archived(),
@@ -166,7 +165,7 @@ class _InternalRepoPage extends StatelessWidget {
                 const Spacer(),
                 LinkAction(
                   icon: const Icon(FluentIcons.open_source, size: 18),
-                  link: repo.htmlUrl,
+                  link: repo.url,
                   message: '在浏览器中打开',
                 ),
               ],

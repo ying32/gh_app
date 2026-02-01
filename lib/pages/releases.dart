@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
@@ -10,7 +11,6 @@ import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
 import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:github/github.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -102,12 +102,12 @@ class _RepoReleaseItem extends StatelessWidget {
               Row(
                 children: [
                   _buildTitle(item.name),
-                  if (item.isPrerelease ?? false)
+                  if (item.isPrerelease)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: TagLabel.other('预览版', color: Colors.orange),
                     ),
-                  if (item.isDraft ?? false)
+                  if (item.isDraft)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
                       child: TagLabel.other('草稿', color: Colors.yellow),
@@ -120,14 +120,15 @@ class _RepoReleaseItem extends StatelessWidget {
                     ),
                 ],
               ),
-              //if (item.description?.isNotEmpty ?? false)
-              //  Text(item.description ?? ''),
-              if (item.body?.isNotEmpty ?? false)
+
+              if (item.description.isNotEmpty)
                 MarkdownBlockPlus(
-                  data: item.body!,
+                  data: item.description,
                   onTap: (link) {
                     //TODO：这里要分析链接，如果是github的，就解析后跳转相应的
-                    print("点击了链接=$link");
+                    if (kDebugMode) {
+                      print("点击了链接=$link");
+                    }
                   },
                 ),
               // item.assets
@@ -149,14 +150,14 @@ class _RepoReleaseItem extends StatelessWidget {
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (item.zipballUrl != null)
-                        _buildLinkButton('Source code (zip)', item.zipballUrl!),
-                      if (item.tarballUrl != null)
-                        _buildLinkButton(
-                            'Source code (tar.gz)', item.tarballUrl!),
+                      // if (item.zipballUrl != null)
+                      //   _buildLinkButton('Source code (zip)', item.zipballUrl!),
+                      // if (item.tarballUrl != null)
+                      //   _buildLinkButton(
+                      //       'Source code (tar.gz)', item.tarballUrl!),
                       // if (item.assets?.isNotEmpty ?? false)
                       ...item.assets!.map((e) => _buildLinkButton(
-                          '${e.name}', e.browserDownloadUrl!,
+                          e.name, e.downloadUrl,
                           size: e.size)),
                     ],
                   ),
@@ -175,7 +176,7 @@ class ReleasesPage extends StatelessWidget with PageMixin {
     required this.repo,
   });
 
-  final Repository repo;
+  final QLRepository repo;
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +211,7 @@ class ReleasesPage extends StatelessWidget with PageMixin {
         });
   }
 
-  static void createNewTab(BuildContext context, Repository repo) {
+  static void createNewTab(BuildContext context, QLRepository repo) {
     context.read<TabviewModel>().addTab(
           ReleasesPage(repo: repo),
           key: ValueKey("${RouterTable.release}/${repo.fullName}"),

@@ -54,7 +54,7 @@ class _PullRequestItem extends StatelessWidget {
 class RepoPullRequestPage extends StatelessWidget {
   const RepoPullRequestPage(this.repo, {super.key});
 
-  final Repository repo;
+  final QLRepository repo;
 
   @override
   Widget build(BuildContext context) {

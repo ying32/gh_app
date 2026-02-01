@@ -3,7 +3,7 @@ part of '../repo.dart';
 class RepoWikiPage extends StatelessWidget {
   const RepoWikiPage(this.repo, {super.key});
 
-  final Repository repo;
+  final QLRepository repo;
 
   @override
   Widget build(BuildContext context) {

@@ -20,7 +20,6 @@ import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:github/github.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -187,7 +186,7 @@ class _MainTabView extends StatelessWidget {
                 GoGithubDialog.show(context, onSuccess: (data) {
                   if (data is QLRepository) {
                     RepoPage.createNewTab(context, data);
-                  } else if (data is User) {
+                  } else if (data is QLUser) {
                     // 创建User页面
                     UserInfoPage.createNewTab(context, data);
                   }

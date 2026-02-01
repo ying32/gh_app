@@ -1,16 +1,15 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 
 /// 仓库模型
 class RepoModel extends ChangeNotifier {
   RepoModel(this._repo);
 
   /// 当前仓库信息
-  Repository _repo;
-  Repository get repo => _repo;
-  set repo(Repository value) {
+  QLRepository _repo;
+  QLRepository get repo => _repo;
+  set repo(QLRepository value) {
     if (value != _repo) {
-      print("==========更新仓库信息");
       _repo = value;
       notifyListeners();
     }
@@ -29,16 +28,13 @@ class PathModel extends ChangeNotifier {
       _segmentedPaths.clear();
       if (_path.isEmpty || _path == "/") {
         _segmentedPaths.add('');
-        //_segmentedPaths = [''];
       } else {
         _segmentedPaths.addAll("/$_path".split("/"));
-        // _segmentedPaths = "/$_path".split("/");
       }
       notifyListeners();
     }
   }
 
-  /// 不可用final，因为selector会判断对象是否一致，如果不同他则不会更新的
   /// 如果使用Consumer来监听就不可以使用final了
   final List<String> _segmentedPaths = [""];
 

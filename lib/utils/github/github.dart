@@ -86,12 +86,15 @@ class GithubCache {
 
   QLUser? _currentUser;
 
+  RepositorySlug _getSlug(QLRepository repo) =>
+      RepositorySlug(repo.owner?.login ?? '', repo.name);
+
   /// 当前user信息
   Future<QLUser?> get currentUser async =>
       _currentUser ??= (gitHubAPI.auth.isAnonymous
           ? null
           : await gitHubAPI.graphql
-              .query(QLQueries.queryUser(), convert: QLUser.fromJson));
+              .query(QLQuery(QLQueries.queryUser()), convert: QLUser.fromJson));
 
   // Future<List<Notification>?> get currentUserNotifications async {
   //   return gitHubAPI.restful.activity.listNotifications().toList();
@@ -112,7 +115,7 @@ class GithubCache {
   /// 指定用户信息
   //Future<User?> userInfo(String name) => gitHubAPI.restful.users.getUser(name);
   Future<QLUser?> userInfo(String name) => gitHubAPI.graphql
-      .query(QLQueries.queryUser(name), convert: QLUser.fromJson);
+      .query(QLQuery(QLQueries.queryUser(name)), convert: QLUser.fromJson);
 
   /// 获取仓库列表信息
   // Future<List<Repository>?> userRepos(String owner) async {
@@ -123,7 +126,8 @@ class GithubCache {
   //       .toList();
   // }
   Future<List<QLRepository>?> userRepos(String owner) async {
-    var res = await gitHubAPI.graphql.query(QLQueries.queryRepos(owner: owner));
+    var res = await gitHubAPI.graphql
+        .query(QLQuery(QLQueries.queryRepos(owner: owner)));
     if (res == null || res is! Map) return null;
     res = (res['viewer'] ?? res['user'])?['repositories']?['nodes'];
     return List.from(res).map((e) => QLRepository.fromJson(e)).toList();
@@ -136,13 +140,13 @@ class GithubCache {
   //   return gitHubAPI.restful.repositories.getRepository(slug);
   // }
   Future<QLRepository?> userRepo(String owner, String name) async {
-    return gitHubAPI.graphql.query(QLQueries.queryRepo(owner, name),
+    return gitHubAPI.graphql.query(QLQuery(QLQueries.queryRepo(owner, name)),
         convert: QLRepository.fromJson);
   }
 
   /// 仓库分支列表
-  Future<List<Branch>?> repoBranches(Repository repo) async {
-    return gitHubAPI.restful.repositories.listBranches(repo.slug()).toList();
+  Future<List<Branch>?> repoBranches(QLRepository repo) async {
+    return gitHubAPI.restful.repositories.listBranches(_getSlug(repo)).toList();
   }
 
   /// 当前仓库releases
@@ -151,9 +155,9 @@ class GithubCache {
   //
   //   return gitHubAPI.restful.repositories.listReleases(slug).toList();
   // }
-  Future<List<QLRelease>?> repoReleases(Repository repo) async {
-    var res = await gitHubAPI.graphql
-        .query(QLQueries.queryRepoRelease(repo.owner!.login, repo.name));
+  Future<List<QLRelease>?> repoReleases(QLRepository repo) async {
+    var res = await gitHubAPI.graphql.query(
+        QLQuery(QLQueries.queryRepoRelease(repo.owner!.login, repo.name)));
     if (res == null || res is! Map) return null;
     res = res['repository']?['releases']?['nodes'];
     if (res == null || res is! List) return null;
@@ -161,33 +165,49 @@ class GithubCache {
   }
 
   /// 仓库issues
-  Future<List<Issue>?> repoIssues(Repository repo, {bool isOpen = true}) async {
+  Future<List<Issue>?> repoIssues(QLRepository repo,
+      {bool isOpen = true}) async {
     //open, closed, all
     return gitHubAPI.restful.issues
-        .listByRepo(repo.slug(), state: isOpen ? 'open' : 'closed', perPage: 1)
+        .listByRepo(_getSlug(repo),
+            state: isOpen ? 'open' : 'closed', perPage: 1)
         .toList();
   }
 
   /// 仓库pullRequests
-  Future<List<PullRequest>?> repoPullRequests(Repository repo,
+  Future<List<PullRequest>?> repoPullRequests(QLRepository repo,
       {bool isOpen = true}) async {
     //open, closed, all
     return gitHubAPI.restful.pullRequests
-        .list(repo.slug(), state: isOpen ? 'open' : 'closed')
+        .list(_getSlug(repo), state: isOpen ? 'open' : 'closed')
         .toList();
   }
 
   /// README缓存
-  Future<String?> repoReadMe(Repository repo, {String? ref}) async {
+  Future<String?> repoReadMe(QLRepository repo, {String? ref}) async {
     return (await gitHubAPI.restful.repositories
-            .getReadme(repo.slug(), ref: ref))
+            .getReadme(_getSlug(repo), ref: ref))
         .text;
   }
 
   /// 目录内容缓存
-  Future<RepositoryContents?> repoContents(Repository repo, String path,
+  Future<RepositoryContents?> repoContents(QLRepository repo, String path,
       {String? ref}) async {
     return gitHubAPI.restful.repositories
-        .getContents(repo.slug(), path, ref: ref);
+        .getContents(_getSlug(repo), path, ref: ref);
+  }
+
+  /// 搜索
+  // Stream<Repository> searchRepo(String keywords,
+  //     {String? sort, int pages = 2}) {
+  //   return gitHubAPI.restful.search.repositories(keywords, pages: pages);
+  // }
+  Future<List<QLRepository>?> searchRepo(String query) async {
+    final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.search(query)));
+    if (res == null) return null;
+    // final pageInfo = res['pageInfo'];
+    final nodes = res['search']?['nodes'];
+    if (nodes == null || nodes is! List) return null;
+    return List.from(nodes).map((e) => QLRepository.fromJson(e)).toList();
   }
 }
