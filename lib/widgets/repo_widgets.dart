@@ -11,6 +11,7 @@ import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
@@ -78,6 +79,11 @@ class RepoListItem extends StatelessWidget {
                 const Padding(
                   padding: EdgeInsets.only(right: 8.0),
                   child: Icon(Remix.git_repository_line),
+                ),
+              if (!isPinStyle && repo.owner?.avatarUrl != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: UserHeadImage(repo.owner!.avatarUrl, imageSize: 35),
                 ),
               LinkStyleButton(
                   onPressed: () {
