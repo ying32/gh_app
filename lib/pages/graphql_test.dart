@@ -216,6 +216,14 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
+                            text: const Text('仓库文件列表'),
+                            onPressed: () {
+                              _controller.text = QLQueries.queryObject(
+                                  'ying32', 'govcl',
+                                  path: "", ref: "HEAD");
+                            }),
+                        const MenuFlyoutSeparator(),
+                        MenuFlyoutItem(
                             text: const Text('搜索仓库'),
                             onPressed: () {
                               _controller.text = QLQueries.search('govcl');

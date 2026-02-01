@@ -407,8 +407,8 @@ class QLQueries {
 
   /// 查询文件
   ///
-  ///   repository(owner: "ying32", name: "govcl") {
-  //     object(expression: "master:") {
+  //   repository(owner: "ying32", name: "govcl") {
+  //     object(expression: "HEAD:") {
   //         ... on Tree {
   //
   //            entries {
@@ -440,8 +440,15 @@ class QLQueries {
   //        }
   //     }
   //   }
+  /// https://docs.github.com/zh/graphql/reference/objects#repository
+  ///
+  /// https://docs.github.com/zh/graphql/reference/interfaces#gitobject
+  ///
+  /// https://docs.github.com/zh/graphql/reference/objects#tree
+  ///
+  /// https://docs.github.com/zh/graphql/reference/objects#treeentry
   static String queryObject(String owner, String name,
-      {String expression = ""}) {
+      {String path = "", String ref = "HEAD"}) {
     // 不能获得二进制文件，可以使用REST API来获取，headers中添加 "Accept": "application/vnd.github.v3.raw"
     // 核心 REST 接口：GET /repos/{owner}/{repo}/contents/{path}（推荐）
     // 备选 REST 接口：GET /repos/{owner}/{repo}/git/blobs/{oid}（通过哈希 ID）
@@ -452,7 +459,7 @@ class QLQueries {
     // expression: "master:README.zh-CN.md"
     return '''
   repository(owner: "$owner", name: "$name") {
-    object(expression: "master:$expression") {
+    object(expression: "$ref:$path") {
         ... on Tree {
            entries {
               extension 
