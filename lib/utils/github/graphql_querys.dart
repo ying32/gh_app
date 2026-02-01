@@ -73,7 +73,6 @@ class QLQueries {
 
   /// 查询一个组织信息
   static String queryOrganization(String name) {
-    //return '''  ${name.isEmpty ? 'viewer' : 'organization(login:"$name")'} {
     return '''  organization(login:"$name") {
     login
     name

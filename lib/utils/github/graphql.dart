@@ -160,26 +160,23 @@ class QLRelease {
   final DateTime? createdAt;
   final DateTime? publishedAt;
 
-  factory QLRelease.fromJson(Map<String, dynamic> input) {
-    return QLRelease(
-      name: input['name'] ?? '',
-      author: QLUser.fromJson(input['author']),
-      tagName: input['tagName'] ?? '',
-      url: input['url'] ?? '',
-      isDraft: input['isDraft'] ?? false,
-      isPrerelease: input['isPrerelease'] ?? false,
-      isLatest: input['isLatest'] ?? false,
-      description: input['description'] ?? '',
-      abbreviatedOid: input['tagCommit']?['abbreviatedOid'] ?? '',
-      publishedAt: _parseDateTime(input['updatedAt']),
-      createdAt: _parseDateTime(input['createdAt']),
-      assets: input['releaseAssets']?['nodes'] == null
-          ? null
-          : List.from(input['releaseAssets']?['nodes'])
-              .map((e) => QLReleaseAsset.fromJson(e))
-              .toList(),
-    );
-  }
+  QLRelease.fromJson(Map<String, dynamic> input)
+      : name = input['name'] ?? '',
+        author = QLUser.fromJson(input['author']),
+        tagName = input['tagName'] ?? '',
+        url = input['url'] ?? '',
+        isDraft = input['isDraft'] ?? false,
+        isPrerelease = input['isPrerelease'] ?? false,
+        isLatest = input['isLatest'] ?? false,
+        description = input['description'] ?? '',
+        abbreviatedOid = input['tagCommit']?['abbreviatedOid'] ?? '',
+        publishedAt = _parseDateTime(input['updatedAt']),
+        createdAt = _parseDateTime(input['createdAt']),
+        assets = input['releaseAssets']?['nodes'] == null
+            ? null
+            : List.from(input['releaseAssets']?['nodes'])
+                .map((e) => QLReleaseAsset.fromJson(e))
+                .toList();
 }
 
 /// 分支
@@ -341,23 +338,38 @@ class QLRepository {
 /// 列表
 class QLList<T> {
   const QLList({
-    required this.data,
+    this.totalCount = 0,
     this.pageInfo,
-  });
-  final List<T> data;
+  }) : _data = const [];
+  final List<T> _data;
+  final int totalCount;
   final QLPageInfo? pageInfo;
+
+  /// 内部数据
+  List<T> get data => _data;
+  operator [](index) => _data[index];
+  //operator []=(index, value) => data[index] = value;
+  bool get isEmpty => _data.isEmpty;
+  bool get isNotEmpty => _data.isNotEmpty;
+  int get length => _data.length;
+  //void clear() => _data.clear();
 
   QLList.fromJson(
     Map<String, dynamic> input,
     T Function(Map<String, dynamic>) convert,
-  )   : data = input['nodes'] == null
+  )   : _data = input['nodes'] == null
             ? []
-            : List.from(input['nodes'] as List)
-                .map((e) => convert(e))
-                .toList(),
+            : List.from(input['nodes'] as List).map((e) => convert(e)).toList(),
+        totalCount = input['totalCount'] ?? 0,
         pageInfo = input['pageInfo'] == null
             ? null
             : QLPageInfo.fromJson(input['pageInfo']);
+
+  /// 空数据
+  const QLList.empty()
+      : _data = const [],
+        totalCount = 0,
+        pageInfo = null;
 }
 
 /// 组织用户
@@ -365,6 +377,29 @@ class QLOrganization extends QLUserBase {
   const QLOrganization({
     required super.login,
   });
+
+  factory QLOrganization.fromJson(Map<String, dynamic> input) {
+    input = input['viewer'] ?? input['organization'] ?? input;
+    return QLOrganization(
+      login: input['login'] ?? '',
+      // name: input['name'] ?? '',
+      // avatarUrl: input['avatarUrl'] ?? '',
+      // company: input['company'] ?? '',
+      // bio: input['bio'] ?? '',
+      // email: input['email'] ?? '',
+      // location: input['location'] ?? '',
+      // twitterUsername: input['twitterUsername'] ?? '',
+      // url: input['url'] ?? '',
+      // websiteUrl: input['websiteUrl'] ?? '',
+      // followersCount: input['followers']?['totalCount'] ?? 0,
+      // followingCount: input['following']?['totalCount'] ?? 0,
+      // pinnedItems: input['pinnedItems']?['nodes'] != null
+      //     ? List.of(input['pinnedItems']?['nodes'])
+      //     .map((e) => QLRepository.fromJson(e))
+      //     .toList()
+      //     : null,
+    );
+  }
 }
 
 /// 个人用户
@@ -400,7 +435,7 @@ class QLUser extends QLUserBase {
   final List<QLRepository>? pinnedItems;
 
   factory QLUser.fromJson(Map<String, dynamic> input) {
-    input = input['viewer'] ?? input['user'] ?? input;
+    input = input['viewer'] ?? input['user'] ?? input['organization'] ?? input;
     return QLUser(
       login: input['login'] ?? '',
       name: input['name'] ?? '',

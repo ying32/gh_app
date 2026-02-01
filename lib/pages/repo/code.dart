@@ -9,7 +9,7 @@ class _RepoBranches extends StatelessWidget {
     final repo = context.read<RepoModel>().repo;
 
     return FutureBuilder(
-      future: GithubCache.instance.repoBranches(repo),
+      future: APIWrap.instance.repoBranches(repo),
       builder: (_, snapshot) {
         // if (!snapshotIsOk(snapshot, false, false)) {
         //   return DropDownButton(

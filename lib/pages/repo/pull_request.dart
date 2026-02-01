@@ -59,7 +59,7 @@ class RepoPullRequestPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: GithubCache.instance.repoPullRequests(repo),
+      future: APIWrap.instance.repoPullRequests(repo),
       builder: (context, snapshot) {
         if (!snapshotIsOk(snapshot, false, false)) {
           return const Center(child: ProgressRing());

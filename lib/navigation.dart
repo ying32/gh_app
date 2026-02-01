@@ -234,7 +234,7 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
     windowManager.addListener(this);
     super.initState();
     // 获取当前user
-    GithubCache.instance.currentUser.then((e) {
+    APIWrap.instance.currentUser.then((e) {
       context.read<CurrentUserModel>().user = e;
     });
   }

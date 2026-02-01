@@ -13,7 +13,7 @@ class FollowingPage extends StatelessWidget {
         commandBar: Row(mainAxisAlignment: MainAxisAlignment.end, children: []),
       ),
       content: FutureBuilder(
-        future: GithubCache.instance.userFollowing(),
+        future: APIWrap.instance.userFollowing(),
         builder: (_, snapshot) {
           if (!snapshotIsOk(snapshot, false, false)) {
             return const Center(

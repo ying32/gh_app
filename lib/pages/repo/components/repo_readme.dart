@@ -12,7 +12,7 @@ class RepoReadMe extends StatelessWidget {
           if (p.$1 != "") return const SizedBox.shrink();
           final repo = context.read<RepoModel>().repo;
           return FutureBuilder(
-            future: GithubCache.instance.repoReadMe(repo, ref: p.$2),
+            future: APIWrap.instance.repoReadMe(repo, ref: p.$2),
             builder: (_, snapshot) {
               if (!snapshotIsOk(snapshot, false, false)) {
                 return const SizedBox.shrink();

@@ -181,7 +181,7 @@ class ReleasesPage extends StatelessWidget with PageMixin {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: GithubCache.instance.repoReleases(repo),
+        future: APIWrap.instance.repoReleases(repo),
         builder: (_, snapshot) {
           if (!snapshotIsOk(snapshot, false, false)) {
             return const Center(
@@ -191,7 +191,7 @@ class ReleasesPage extends StatelessWidget with PageMixin {
           if (snapshot.hasError) {
             return errorDescription(snapshot.error);
           }
-          final releases = snapshot.data ?? [];
+          final releases = snapshot.data ?? const QLList.empty();
           if (releases.isEmpty) {
             return const Center(
               child: Text('没有数据'),

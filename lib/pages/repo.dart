@@ -108,9 +108,7 @@ class RepoPage extends StatelessWidget {
         ],
         child: WrapInit(
             onInit: (context) {
-              GithubCache.instance
-                  .userRepo(repo.owner!.login, repo.name)
-                  .then((e) {
+              APIWrap.instance.userRepo(repo).then((e) {
                 context.read<RepoModel>().repo = e!;
               });
             },

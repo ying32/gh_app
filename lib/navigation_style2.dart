@@ -108,7 +108,7 @@ class _NavigationStyle2PageState extends State<NavigationStyle2Page>
     windowManager.addListener(this);
     super.initState();
     // 获取当前user
-    GithubCache.instance.currentUser.then((e) {
+    APIWrap.instance.currentUser.then((e) {
       context.read<CurrentUserModel>().user = e;
       if (mounted) {}
     });

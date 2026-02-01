@@ -59,7 +59,7 @@ class RepoIssuesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: GithubCache.instance.repoIssues(repo),
+      future: APIWrap.instance.repoIssues(repo),
       builder: (context, snapshot) {
         if (!snapshotIsOk(snapshot, false, false)) {
           return const Center(child: ProgressRing());

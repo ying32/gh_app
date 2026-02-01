@@ -18,7 +18,7 @@ class _SearchPageState extends State<SearchPage>
   bool _searching = false;
 
   final List<String> _suggests = ['搜索仓库', '搜索作者', '搜索组织'];
-  final List<QLRepository> _repos = [];
+  QLList<QLRepository> _repos = const QLList.empty();
 
   @override
   void dispose() {
@@ -31,13 +31,12 @@ class _SearchPageState extends State<SearchPage>
       _showInfo('请输入一个要搜索的关键字', severity: InfoBarSeverity.info);
       return;
     }
-    _repos.clear();
+    _repos = const QLList.empty();
     setState(() {
       _searching = true;
     });
-    GithubCache.instance.searchRepo(text).then((data) {
-      if (data == null || data.isEmpty) return;
-      _repos.addAll(data);
+    APIWrap.instance.searchRepo(text).then((data) {
+      _repos = data;
     }).whenComplete(_doUpdate);
   }
 

@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> with PageMixin {
           AppConfig.instance.auth = auth;
           createGithub(auth);
           try {
-            await GithubCache.instance.currentUser;
+            await APIWrap.instance.currentUser;
             _showInfo('登录成功');
           } catch (e) {
             clearGithubInstance();

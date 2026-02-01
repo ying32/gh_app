@@ -78,11 +78,12 @@ void clearGithubInstance() {
   gitHubAPI = GitHubAPI();
 }
 
-class GithubCache {
-  GithubCache._();
+/// Github的API包装
+class APIWrap {
+  APIWrap._();
 
-  static GithubCache? _instance;
-  static GithubCache get instance => _instance ??= GithubCache._();
+  static APIWrap? _instance;
+  static APIWrap get instance => _instance ??= APIWrap._();
 
   QLUser? _currentUser;
 
@@ -96,72 +97,53 @@ class GithubCache {
           : await gitHubAPI.graphql
               .query(QLQuery(QLQueries.queryUser()), convert: QLUser.fromJson));
 
-  // Future<List<Notification>?> get currentUserNotifications async {
-  //   return gitHubAPI.restful.activity.listNotifications().toList();
-  // }
-
-  ///
-  Future<List<User>?> userFollowers([String owner = '']) async {
-    return (owner.isEmpty
-            ? gitHubAPI.restful.users.listCurrentUserFollowers()
-            : gitHubAPI.restful.users.listUserFollowers(owner))
-        .toList();
-  }
-
-  Future<List<User>?> userFollowing([String owner = '']) async {
-    return gitHubAPI.restful.users.listCurrentUserFollowing().toList();
-  }
-
   /// 指定用户信息
-  //Future<User?> userInfo(String name) => gitHubAPI.restful.users.getUser(name);
   Future<QLUser?> userInfo(String name) => gitHubAPI.graphql
       .query(QLQuery(QLQueries.queryUser(name)), convert: QLUser.fromJson);
 
+  /// 指定组织信息
+  Future<QLOrganization?> organizationInfo(String name) =>
+      gitHubAPI.graphql.query(QLQuery(QLQueries.queryOrganization(name)),
+          convert: QLOrganization.fromJson);
+
   /// 获取仓库列表信息
-  // Future<List<Repository>?> userRepos(String owner) async {
-  //   return (owner.isEmpty
-  //           ? gitHubAPI.restful.repositories
-  //               .listRepositories(sort: 'updated_at', direction: 'desc')
-  //           : gitHubAPI.restful.repositories.listUserRepositories(owner))
-  //       .toList();
-  // }
-  Future<List<QLRepository>?> userRepos(String owner) async {
-    var res = await gitHubAPI.graphql
+  /// TODO: 这里还要传个东西，判断是否为组织的
+  Future<QLList<QLRepository>> userRepos(String owner) async {
+    final res = await gitHubAPI.graphql
         .query(QLQuery(QLQueries.queryRepos(owner: owner)));
-    if (res == null || res is! Map) return null;
-    res = (res['viewer'] ?? res['user'])?['repositories']?['nodes'];
-    return List.from(res).map((e) => QLRepository.fromJson(e)).toList();
+    if (res == null) return const QLList.empty();
+    return QLList.fromJson(
+        (res['viewer'] ?? res['user'] ?? res['organization'])?['repositories'],
+        QLRepository.fromJson);
   }
 
   /// 用户信息
-  // Future<Repository?> userRepo(String owner, String name) async {
-  //   final slug = RepositorySlug(owner, name);
-  //
-  //   return gitHubAPI.restful.repositories.getRepository(slug);
-  // }
-  Future<QLRepository?> userRepo(String owner, String name) async {
-    return gitHubAPI.graphql.query(QLQuery(QLQueries.queryRepo(owner, name)),
+  Future<QLRepository?> userRepo(QLRepository repo) async {
+    return gitHubAPI.graphql.query(
+        QLQuery(QLQueries.queryRepo(repo.owner!.login, repo.name)),
         convert: QLRepository.fromJson);
   }
+
+  /// 当前仓库releases
+  Future<QLList<QLRelease>> repoReleases(QLRepository repo) async {
+    final res = await gitHubAPI.graphql.query(
+        QLQuery(QLQueries.queryRepoRelease(repo.owner!.login, repo.name)));
+    if (res == null) return const QLList.empty();
+    return QLList.fromJson(res['repository']?['releases'], QLRelease.fromJson);
+  }
+
+  /// 搜索
+  Future<QLList<QLRepository>> searchRepo(String query) async {
+    final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.search(query)));
+    if (res == null) return const QLList.empty();
+    return QLList.fromJson(res['search'], QLRepository.fromJson);
+  }
+
+  ///================================== REST API ===============================
 
   /// 仓库分支列表
   Future<List<Branch>?> repoBranches(QLRepository repo) async {
     return gitHubAPI.restful.repositories.listBranches(_getSlug(repo)).toList();
-  }
-
-  /// 当前仓库releases
-  // Future<List<Release>?> repoReleases(Repository repo) async {
-  //   final slug = repo.slug(); //RepositorySlug(repo.owner!.login, repo.name);
-  //
-  //   return gitHubAPI.restful.repositories.listReleases(slug).toList();
-  // }
-  Future<List<QLRelease>?> repoReleases(QLRepository repo) async {
-    var res = await gitHubAPI.graphql.query(
-        QLQuery(QLQueries.queryRepoRelease(repo.owner!.login, repo.name)));
-    if (res == null || res is! Map) return null;
-    res = res['repository']?['releases']?['nodes'];
-    if (res == null || res is! List) return null;
-    return List.from(res).map((e) => QLRelease.fromJson(e)).toList();
   }
 
   /// 仓库issues
@@ -197,17 +179,20 @@ class GithubCache {
         .getContents(_getSlug(repo), path, ref: ref);
   }
 
-  /// 搜索
-  // Stream<Repository> searchRepo(String keywords,
-  //     {String? sort, int pages = 2}) {
-  //   return gitHubAPI.restful.search.repositories(keywords, pages: pages);
-  // }
-  Future<List<QLRepository>?> searchRepo(String query) async {
-    final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.search(query)));
-    if (res == null) return null;
-    // final pageInfo = res['pageInfo'];
-    final nodes = res['search']?['nodes'];
-    if (nodes == null || nodes is! List) return null;
-    return List.from(nodes).map((e) => QLRepository.fromJson(e)).toList();
+  /// 关注“我”的人
+  Future<List<User>?> userFollowers([String owner = '']) async {
+    return (owner.isEmpty
+            ? gitHubAPI.restful.users.listCurrentUserFollowers()
+            : gitHubAPI.restful.users.listUserFollowers(owner))
+        .toList();
   }
+
+  /// “我”关注的人
+  Future<List<User>?> userFollowing([String owner = '']) async {
+    return gitHubAPI.restful.users.listCurrentUserFollowing().toList();
+  }
+
+// Future<List<Notification>?> get currentUserNotifications async {
+//   return gitHubAPI.restful.activity.listNotifications().toList();
+// }
 }

@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:window_manager/window_manager.dart';
 
 mixin DialogClose {}
@@ -66,8 +67,8 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
     super.dispose();
   }
 
-  void _doUserRepo(String owner, String name) {
-    GithubCache.instance.userRepo(owner, name).then((repo) {
+  void _doUserRepo(QLRepository repo) {
+    APIWrap.instance.userRepo(repo).then((repo) {
       closeDialog(context);
       if (widget.onSuccess != null) {
         widget.onSuccess!.call(repo!);
@@ -86,7 +87,7 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
   }
 
   void _doUserInfo(String name) {
-    GithubCache.instance.userInfo(name).then((user) {
+    APIWrap.instance.userInfo(name).then((user) {
       closeDialog(context);
       if (widget.onSuccess != null) {
         widget.onSuccess!.call(user!);
@@ -132,7 +133,9 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
         _doUserInfo(segments[0]);
         break;
       case 2:
-        _doUserRepo(segments[0], segments[1]);
+        //_doUserRepo(segments[0], segments[1]);
+        _doUserRepo(QLRepository(
+            name: segments[1], owner: QLRepositoryOwner(login: segments[0])));
         break;
     }
   }

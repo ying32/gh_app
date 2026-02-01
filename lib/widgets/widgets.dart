@@ -200,7 +200,8 @@ class _WrapInitState extends State<WrapInit> {
   @override
   void initState() {
     super.initState();
-    widget.onInit.call(context);
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => widget.onInit.call(context));
   }
 
   @override

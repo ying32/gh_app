@@ -210,7 +210,7 @@ class RepoListView extends StatelessWidget {
     this.showOpenIssues = true,
   });
 
-  final List<QLRepository> repos;
+  final QLList<QLRepository> repos;
   final bool showOpenIssues;
 
   @override
@@ -367,7 +367,7 @@ class RepoContentsListView extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: FutureBuilder(
-        future: GithubCache.instance.repoContents(repo, path, ref: ref),
+        future: APIWrap.instance.repoContents(repo, path, ref: ref),
         builder: (_, snapshot) {
           if (!snapshotIsOk(snapshot, false)) {
             return const Center(child: ProgressRing());
