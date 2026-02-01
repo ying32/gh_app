@@ -14,21 +14,42 @@ import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class _RepoReleaseItem extends StatelessWidget {
-  const _RepoReleaseItem(this.item);
+class _TitleText extends StatelessWidget {
+  const _TitleText(this.text);
 
-  final QLRelease item;
+  final String? text;
 
-  Widget _buildLinkButton(String title, String link, {int? size}) {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        text ?? '',
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    );
+  }
+}
+
+class _LinkButton extends StatelessWidget {
+  const _LinkButton(this.title, this.link, {this.size});
+
+  final String title;
+  final String link;
+  final int? size;
+
+  @override
+  Widget build(BuildContext context) {
     final style = TextStyle(color: Colors.blue, fontWeight: FontWeight.w500);
     Widget child = Text(title, style: style);
-    if (size != null && size > 0) {
+    if (size != null && size! > 0) {
       child = Row(children: [
         child,
         const Spacer(),
-        Text(size.toSizeString(), style: style)
+        Text(size!.toSizeString(), style: style)
       ]);
     }
+
     return Tooltip(
       message: link,
       child: LinkStyleButton(
@@ -39,6 +60,78 @@ class _RepoReleaseItem extends StatelessWidget {
       ),
     );
   }
+}
+
+class _AssetsPanel extends StatefulWidget {
+  const _AssetsPanel(this.item, this.repo);
+
+  final QLRelease item;
+  final QLRepository repo;
+
+  @override
+  State<_AssetsPanel> createState() => _AssetsPanelState();
+}
+
+class _AssetsPanelState extends State<_AssetsPanel> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expander(
+      headerBackgroundColor: ButtonState.all(Colors.transparent),
+      initiallyExpanded: false,
+      header: Row(
+        children: [
+          const _TitleText('Assets '),
+          TagLabel.other("${widget.item.assetsCount}", // 没有发现2个默认的url的啊
+              //TagLabel.other("${2 + (item.assets?.length ?? 0)}",
+              radius: 15.0,
+              color: context.isDark ? Colors.white : Colors.black),
+        ],
+      ),
+      content: !_expanded
+          ? const SizedBox.shrink()
+          : FutureBuilder(
+              future:
+                  APIWrap.instance.repoReleaseAssets(widget.repo, widget.item),
+              builder: (_, snapshot) {
+                if (!snapshotIsOk(snapshot, false, false)) {
+                  return const Center(
+                      child: SizedBox(
+                          width: 20, height: 20, child: ProgressRing()));
+                }
+                if (snapshot.hasError || (snapshot.data?.isEmpty ?? true)) {
+                  return const Center(child: Text('没有数据'));
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // if (item.zipballUrl != null)
+                    //   _buildLinkButton('Source code (zip)', item.zipballUrl!),
+                    // if (item.tarballUrl != null)
+                    //   _buildLinkButton(
+                    //       'Source code (tar.gz)', item.tarballUrl!),
+                    // if (item.assets?.isNotEmpty ?? false)
+                    ...snapshot.data!.data.map((e) =>
+                        _LinkButton(e.name, e.downloadUrl, size: e.size)),
+                  ],
+                );
+              },
+            ),
+      onStateChanged: (value) {
+        setState(() {
+          _expanded = value;
+        });
+      },
+    );
+  }
+}
+
+class _RepoReleaseItem extends StatelessWidget {
+  const _RepoReleaseItem(this.item, {required this.repo});
+
+  final QLRelease item;
+  final QLRepository repo;
 
   Widget _buildLeftLabel(String? text, {IconData? icon, Widget? trailing}) =>
       Padding(
@@ -52,14 +145,6 @@ class _RepoReleaseItem extends StatelessWidget {
                     trailing: trailing)
                 : Text(text ?? '', overflow: TextOverflow.ellipsis)
             : const SizedBox.shrink(),
-      );
-
-  Widget _buildTitle(String? text) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Text(
-          text ?? '',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
       );
 
   @override
@@ -101,7 +186,7 @@ class _RepoReleaseItem extends StatelessWidget {
               //if(item.isDraft)
               Row(
                 children: [
-                  _buildTitle(item.name),
+                  _TitleText(item.name),
                   if (item.isPrerelease)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
@@ -133,42 +218,7 @@ class _RepoReleaseItem extends StatelessWidget {
                 ),
               // item.assets
               const SizedBox(height: 10),
-              if (item.assetsCount > 0)
-                Expander(
-                  headerBackgroundColor: ButtonState.all(Colors.transparent),
-                  // contentBackgroundColor: Colors.transparent,
-                  header: Row(
-                    children: [
-                      _buildTitle('Assets '),
-                      TagLabel.other("${item.assetsCount}", // 没有发现2个默认的url的啊
-                          //TagLabel.other("${2 + (item.assets?.length ?? 0)}",
-                          radius: 15.0,
-                          color: context.isDark ? Colors.white : Colors.black),
-                    ],
-                  ),
-                  //TODO: 后面补上
-                  content: const Center(
-                    child:
-                        SizedBox(width: 20, height: 20, child: ProgressRing()),
-                  ),
-                  onStateChanged: (value) {
-                    print("Expander state = $value");
-                  },
-                  // content: Column(
-                  //   crossAxisAlignment: CrossAxisAlignment.start,
-                  //   children: [
-                  //     // if (item.zipballUrl != null)
-                  //     //   _buildLinkButton('Source code (zip)', item.zipballUrl!),
-                  //     // if (item.tarballUrl != null)
-                  //     //   _buildLinkButton(
-                  //     //       'Source code (tar.gz)', item.tarballUrl!),
-                  //     // if (item.assets?.isNotEmpty ?? false)
-                  //     ...item.assets!.map((e) => _buildLinkButton(
-                  //         e.name, e.downloadUrl,
-                  //         size: e.size)),
-                  //   ],
-                  // ),
-                )
+              if (item.assetsCount > 0) _AssetsPanel(item, repo),
             ],
           ),
         )),
@@ -212,7 +262,7 @@ class ReleasesPage extends StatelessWidget with PageMixin {
                 end: PageHeader.horizontalPadding(context),
               ),
               itemBuilder: (context, index) =>
-                  _RepoReleaseItem(releases[index]),
+                  _RepoReleaseItem(releases[index], repo: repo),
               separatorBuilder: (BuildContext context, int index) =>
                   const SizedBox(height: 30));
         });
