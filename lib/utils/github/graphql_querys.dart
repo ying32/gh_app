@@ -71,6 +71,40 @@ class QLQueries {
 }''';
   }
 
+  /// 查询“我”关注的或者关注“我”的用户信息
+  static String queryFollowerUsers(
+      {String name = '', bool isFollowers = true, int count = 20}) {
+    return '''query {  
+    viewer {
+    ${isFollowers ? 'followers' : 'following'}(first: $count) {
+      totalCount
+      pageInfo {
+        endCursor
+        startCursor
+        hasNextPage
+        hasPreviousPage
+      }
+      nodes {
+         login name avatarUrl bio
+      }
+    }
+  }
+}''';
+
+//     return '''query($isFollowers: Boolean = true) {  viewer {
+//     followers(first: 10) @include(if: $isFollowers) {
+//       totalCount
+//       nodes {
+//          login name
+//       }
+//     }
+//     following @skip(if: $isFollowers) {
+//       totalCount
+//     }
+//   }
+// }''';
+  }
+
   /// 查询一个组织信息
   static String queryOrganization(String name) {
     return '''query { organization(login:"$name") {
@@ -309,6 +343,12 @@ class QLQueries {
       release(tagName:"$tagName") {
         releaseAssets(first:$count) {   
           totalCount 
+          pageInfo {
+            endCursor
+            startCursor
+            hasNextPage
+            hasPreviousPage
+          }
           nodes {
             contentType
             createdAt

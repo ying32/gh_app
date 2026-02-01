@@ -183,6 +183,28 @@ class APIWrap {
     return res.blob?.text ?? '';
   }
 
+  Future<QLList<QLUser>> _userFollower(
+      {required String name,
+      required bool isFollowers,
+      required int count}) async {
+    final res = await gitHubAPI.graphql.query(QLQuery(
+        QLQueries.queryFollowerUsers(
+            name: name, isFollowers: true, count: count)));
+    if (res == null) return const QLList.empty();
+    final input =
+        (res['viewer'] ?? res['user'] ?? res['organization'])?['followers'];
+    if (input == null) return const QLList.empty();
+    return QLList.fromJson(input, QLUser.fromJson);
+  }
+
+  /// 关注“我”的人
+  Future<QLList<QLUser>> userFollowers([String name = '']) =>
+      _userFollower(name: name, isFollowers: true, count: 20);
+
+  /// “我”关注的人
+  Future<QLList<QLUser>> userFollowing([String name = '']) =>
+      _userFollower(name: name, isFollowers: false, count: 20);
+
   ///================================== REST API ===============================
 
   /// 仓库issues
@@ -202,19 +224,6 @@ class APIWrap {
     return gitHubAPI.restful.pullRequests
         .list(_getSlug(repo), state: isOpen ? 'open' : 'closed')
         .toList();
-  }
-
-  /// 关注“我”的人
-  Future<List<User>?> userFollowers([String owner = '']) async {
-    return (owner.isEmpty
-            ? gitHubAPI.restful.users.listCurrentUserFollowers()
-            : gitHubAPI.restful.users.listUserFollowers(owner))
-        .toList();
-  }
-
-  /// “我”关注的人
-  Future<List<User>?> userFollowing([String owner = '']) async {
-    return gitHubAPI.restful.users.listCurrentUserFollowing().toList();
   }
 
 // Future<List<Notification>?> get currentUserNotifications async {

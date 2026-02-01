@@ -177,6 +177,18 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             onPressed: () {
                               _controller.text = QLQueries.queryUser('ying32');
                             }),
+                        MenuFlyoutItem(
+                            text: const Text('查询followers的用户'),
+                            onPressed: () {
+                              _controller.text = QLQueries.queryFollowerUsers(
+                                  name: '', isFollowers: true);
+                            }),
+                        MenuFlyoutItem(
+                            text: const Text('查询following的用户'),
+                            onPressed: () {
+                              _controller.text = QLQueries.queryFollowerUsers(
+                                  name: '', isFollowers: false);
+                            }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('查询组织信息'),
