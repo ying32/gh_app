@@ -49,7 +49,7 @@ class GithubApp extends StatelessWidget {
     return AppProvider(
       builder: (context, child) {
         final appTheme = context.watch<AppTheme>();
-        //return FluentApp.router(
+
         return FluentApp(
           title: appTitle,
           themeMode: appTheme.mode,
@@ -98,12 +98,7 @@ class GithubApp extends StatelessWidget {
             );
           },
           scrollBehavior: CustomMaterialScrollBehavior(),
-          // 非router模式，这里会使用tab模式的
           home: const NavigationPage(),
-          // 使用路由模式的
-          // routeInformationParser: router.routeInformationParser,
-          // routerDelegate: router.routerDelegate,
-          // routeInformationProvider: router.routeInformationProvider,
         );
       },
     );
