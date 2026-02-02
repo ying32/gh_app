@@ -412,46 +412,45 @@ class RepoContentsListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final repo = context.read<RepoModel>().repo;
-    return SizedBox(
-      width: double.infinity,
-      child: APIFutureBuilder(
-        future: APIWrap.instance.repoContents(repo, path, ref: ref),
-        builder: (_, object) {
-          // 如果数据是文件，则显示内容
-          if (object!.isFile) {
-            if (kDebugMode) {
-              print("file isBinary =${object.blob?.isBinary}");
-            }
-            // blob不为null时
-            if (object.blob != null && object.blob!.text != null) {
-              return Card(
-                child: RepoFileContentView(
-                  object.blob!,
-                  filename: p.basename(path),
-                ),
-              );
-            }
-            //TODO: 这里待完善
-            return const Text('还没做内容的哈');
-            //return RepoContentView(contents.file!);
+    return APIFutureBuilder(
+      waitingWidget: SizedBox(
+          height: MediaQuery.of(context).size.height / 2,
+          child: const Center(child: ProgressRing())),
+      future: APIWrap.instance.repoContents(repo, path, ref: ref),
+      builder: (_, object) {
+        // 如果数据是文件，则显示内容
+        if (object!.isFile) {
+          if (kDebugMode) {
+            print("file isBinary =${object.blob?.isBinary}");
           }
-          if (object.entries == null) {
-            return const SizedBox.shrink();
+          // blob不为null时
+          if (object.blob != null && object.blob!.text != null) {
+            return Card(
+              child: RepoFileContentView(
+                object.blob!,
+                filename: p.basename(path),
+              ),
+            );
           }
-          // 找readme文件，仅限根目录下，其实按情况其它的目录也可以查找下。
-          final readmeFile =
-              path.isEmpty ? _getReadMeFile(context, object) : '';
-          // 返回目录结构
-          return Column(
-            children: [
-              _buildTree(object.entries!),
-              const SizedBox(height: 10.0),
-              if (readmeFile.isNotEmpty)
-                RepoReadMe(repo: repo, ref: ref, filename: readmeFile),
-            ],
-          );
-        },
-      ),
+          //TODO: 这里待完善
+          return const Text('还没做内容的哈');
+          //return RepoContentView(contents.file!);
+        }
+        if (object.entries == null) {
+          return const SizedBox.shrink();
+        }
+        // 找readme文件，仅限根目录下，其实按情况其它的目录也可以查找下。
+        final readmeFile = path.isEmpty ? _getReadMeFile(context, object) : '';
+        // 返回目录结构
+        return Column(
+          children: [
+            _buildTree(object.entries!),
+            const SizedBox(height: 10.0),
+            if (readmeFile.isNotEmpty)
+              RepoReadMe(repo: repo, ref: ref, filename: readmeFile),
+          ],
+        );
+      },
     );
   }
 }
