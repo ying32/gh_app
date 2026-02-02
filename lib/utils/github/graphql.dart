@@ -1064,6 +1064,46 @@ class GitHubGraphQLError {
   final Map<String, dynamic> error;
 }
 
+/// 代码提取自 github-9.24.0\lib\src\common\github.dart - GitHub类。
+///
+/// 问：为什么要提取而不自己写？
+///
+/// 因为我也没研究过他这个东西，目前以实现为主，后面再有想法时研究下。
+class GitHubRateLimit {
+  GitHubRateLimit();
+
+  static const _ratelimitLimitHeader = 'x-ratelimit-limit';
+  static const _ratelimitResetHeader = 'x-ratelimit-reset';
+  static const _ratelimitRemainingHeader = 'x-ratelimit-remaining';
+
+  int? get rateLimitLimit => _rateLimitLimit;
+  int? get rateLimitRemaining => _rateLimitRemaining;
+  DateTime? get rateLimitReset => _rateLimitReset == null
+      ? null
+      : DateTime.fromMillisecondsSinceEpoch(_rateLimitReset! * 1000,
+          isUtc: true);
+  int? _rateLimitReset, _rateLimitLimit, _rateLimitRemaining;
+
+  /// 更新
+  void updateRateLimit(Map<String, String> headers) {
+    if (headers.containsKey(_ratelimitLimitHeader)) {
+      _rateLimitLimit = int.parse(headers[_ratelimitLimitHeader]!);
+      _rateLimitRemaining = int.parse(headers[_ratelimitRemainingHeader]!);
+      _rateLimitReset = int.parse(headers[_ratelimitResetHeader]!);
+    }
+  }
+
+  /// 等待，如果有的话
+  Future<void> wait() async {
+    if (rateLimitRemaining != null && rateLimitRemaining! <= 0) {
+      assert(rateLimitReset != null);
+      final now = DateTime.now();
+      final waitTime = rateLimitReset!.difference(now);
+      await Future.delayed(waitTime);
+    }
+  }
+}
+
 /// 认证类型
 enum AuthType {
   anonymous,
@@ -1102,6 +1142,9 @@ class GitHubGraphQL {
 
   /// 是否使用匿名方式
   bool get isAnonymous => auth.type == AuthType.anonymous;
+
+  /// 速率限制
+  final GitHubRateLimit _rateLimit = GitHubRateLimit();
 
   /// 一个查询
   /// ```json
@@ -1182,6 +1225,7 @@ class GitHubGraphQL {
     if (kDebugMode) {
       //print("body: body");
     }
+    await _rateLimit.wait();
     headers ??= <String, String>{};
     // ????用这个，还是？，好像也不一定要设置哈
     //headers['Accept'] = 'application/vnd.github+json';
@@ -1198,6 +1242,7 @@ class GitHubGraphQL {
                 _ => ''
               });
     }
+
     // user-Agent
     headers.putIfAbsent('User-Agent', () => 'GitHub PC/1.0.0');
     // 新建一个请求
@@ -1208,6 +1253,7 @@ class GitHubGraphQL {
     req.body = body;
     // 等待结果
     final resp = await http.Response.fromStream(await _client.send(req));
+    _rateLimit.updateRateLimit(resp.headers);
     // 都没必要判断状态码了，反正他有没有错误在某些情况下都返回200。
     // if (response.statusCode != 200) {}
     final json = jsonDecode(resp.body);
