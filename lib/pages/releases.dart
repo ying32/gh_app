@@ -154,18 +154,18 @@ class _RepoReleaseItem extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          // width: 150,
+          width: 150,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 15.0),
               if (item.createdAt != null)
                 _buildLeftLabel(
                     '${item.createdAt!.year}年${item.createdAt!.month}月${item.createdAt!.day}日'),
               //TODO: 这里实际为发布者的头像，但这里懒得弄了
-              _buildLeftLabel(item.author?.name ?? item.author?.login,
-                  icon: DefaultIcons.github),
+              if (item.author?.name.isNotEmpty ?? false)
+                _buildLeftLabel(item.author?.name, icon: DefaultIcons.github),
               _buildLeftLabel(item.tagName, icon: DefaultIcons.tags),
               //TODO: 这个后面图标其实应该根据状态显示，但是graphql貌似没发现相关的
               _buildLeftLabel(item.abbreviatedOid,
