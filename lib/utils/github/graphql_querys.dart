@@ -713,17 +713,23 @@ class QLQueries {
      }
 }''';
   }
+
+  /// 查询指定issue或者pullRequest
+  static String queryIssueOrPullRequest(String owner, String name, int number,
+      {int count = 30, bool isIssues = true}) {
+    // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
+    return '''query { 
+   repository(owner:"$owner", name:"$name") {
+       ${isIssues ? 'issue' : 'pullRequest'}(number: $number) {
+                number
+                author {
+                   login avatarUrl
+                }
+                title  body  
+       }
+     }
+}''';
+  }
 }
 
 /// 查询指定issue
-/// query {
-//    repository(owner:"ying32", name:"govcl") {
-//           issue(number: 212 ) {
-//                 number
-//                 author {
-//                    login avatarUrl
-//                 }
-//                 title  body
-//           }
-//      }
-// }

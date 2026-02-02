@@ -5,7 +5,8 @@ import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:markdown/markdown.dart' as mk;
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+import 'dialogs.dart';
 
 extension MarkdownGeneratorExt on MarkdownGenerator {
   /// 构建span
@@ -52,12 +53,12 @@ class MarkdownBlockPlus extends StatelessWidget {
     super.key,
     required this.data,
     this.selectable = true,
-    required this.onTap,
+    this.onTap,
   });
 
   final String data;
   final bool selectable;
-  final ValueCallback<String> onTap;
+  final ValueCallback<String>? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +67,9 @@ class MarkdownBlockPlus extends StatelessWidget {
             ? MarkdownConfig.darkConfig
             : MarkdownConfig.defaultConfig)
         .copy(configs: [
-      LinkConfig(onTap: onTap, style: const TextStyle(color: Color(0xff0969da)))
+      LinkConfig(
+          onTap: onTap ?? (link) => onDefaultLinkAction(context, link),
+          style: const TextStyle(color: Color(0xff0969da)))
     ]);
 
     // 这个代码段选择不了？
@@ -90,13 +93,13 @@ class MarkdownBlockPlusDefaultAction extends StatelessWidget {
   final String? body;
 
   void onDefaultLinkAction(BuildContext context, String link) {
-    final url = Uri.tryParse(link);
-    if (url != null) {
+    final uri = Uri.tryParse(link);
+    if (uri != null) {
       // 没有host当对目录的
-      if (url.host.isEmpty && url.path.isNotEmpty) {
-        context.read<PathModel>().path = url.path;
+      if (uri.host.isEmpty && uri.path.isNotEmpty) {
+        context.read<PathModel>().path = uri.path;
       } else {
-        launchUrl(url);
+        onDefaultLinkAction(context, link);
       }
     }
   }

@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/config.dart';
@@ -220,15 +219,7 @@ class _RepoReleaseItem extends StatelessWidget {
               ),
 
               if (item.description.isNotEmpty)
-                MarkdownBlockPlus(
-                  data: item.description,
-                  onTap: (link) {
-                    //TODO：这里要分析链接，如果是github的，就解析后跳转相应的
-                    if (kDebugMode) {
-                      print("点击了链接=$link");
-                    }
-                  },
-                ),
+                MarkdownBlockPlus(data: item.description),
               // item.assets
               const SizedBox(height: 10),
               if (item.assetsCount > 0) _AssetsPanel(item, repo),

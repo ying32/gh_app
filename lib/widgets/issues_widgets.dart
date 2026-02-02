@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -115,15 +114,7 @@ class IssueCommentItem extends StatelessWidget {
                   child: Divider(),
                 ),
                 if (item?.body.isNotEmpty ?? false)
-                  MarkdownBlockPlus(
-                    data: item!.body,
-                    onTap: (link) {
-                      //TODO：这里要分析链接，如果是github的，就解析后跳转相应的
-                      if (kDebugMode) {
-                        print("点击了链接=$link");
-                      }
-                    },
-                  ),
+                  MarkdownBlockPlus(data: item!.body),
               ],
             )),
           ),
@@ -146,6 +137,7 @@ class IssuesCommentsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return APIFutureBuilder(
+        noDataWidget: const SizedBox.shrink(),
         future: APIWrap.instance.repoIssueOrPullRequestComments(repo,
             number: data.number, isIssues: data is QLIssue),
         builder: (_, snapshot) {

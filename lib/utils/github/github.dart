@@ -44,6 +44,29 @@ void clearGithubInstance() {
   gitHubAPI = GitHubGraphQL();
 }
 
+class QLIssueWrap {
+  const QLIssueWrap(this.issue, this.repo);
+  final QLIssue issue;
+  final QLRepository repo;
+
+  QLIssueWrap copyWith({QLIssue? issue}) =>
+      QLIssueWrap(issue ?? this.issue, repo);
+}
+
+class QLPullRequestWrap {
+  const QLPullRequestWrap(this.pull, this.repo);
+  final QLPullRequest pull;
+  final QLRepository repo;
+
+  QLPullRequestWrap copyWith({QLPullRequest? pull}) =>
+      QLPullRequestWrap(pull ?? this.pull, repo);
+}
+
+class QLReleaseWrap {
+  const QLReleaseWrap(this.repo);
+  final QLRepository repo;
+}
+
 /// Github的API包装
 class APIWrap {
   APIWrap._();
@@ -175,7 +198,7 @@ class APIWrap {
     required bool isOpen,
     required bool isIssues,
     bool isMerged = false,
-    required T Function(Map<String, dynamic>) convert,
+    required JSONConverter<T> convert,
   }) async {
     //open, closed, all
     final res = await gitHubAPI.query(QLQuery(
@@ -224,6 +247,69 @@ class APIWrap {
         res['repository']?[isIssues ? 'issue' : 'pullRequest']?['comments'];
     if (input == null) return const QLList.empty();
     return QLList.fromJson(input, QLComment.fromJson);
+  }
+
+  /// 查询指定issue或者pull Request
+  Future<T?> _repoIssueOrPullRequest<T>(
+    QLRepository repo, {
+    required int number,
+    bool isIssues = true,
+    required JSONConverter<T> convert,
+  }) async {
+    final res = await gitHubAPI.query(QLQuery(QLQueries.queryIssueOrPullRequest(
+        repo.owner!.login, repo.name, number,
+        isIssues: isIssues)));
+    if (res == null) return null;
+    final input = res['repository']?[isIssues ? 'issue' : 'pullRequest'];
+    if (input == null) return null;
+    return convert(input);
+  }
+
+  /// 指定issue
+  Future<QLIssue?> repoIssue<T>(
+    QLRepository repo, {
+    required int number,
+  }) =>
+      _repoIssueOrPullRequest(repo,
+          number: number, isIssues: true, convert: QLIssue.fromJson);
+
+  /// 指定pullRequest
+  Future<QLPullRequest?> repoPullRequest<T>(
+    QLRepository repo, {
+    required int number,
+  }) =>
+      _repoIssueOrPullRequest(repo,
+          number: number, isIssues: false, convert: QLPullRequest.fromJson);
+
+  /// 尝试解析github链接，并返回相应的类
+  dynamic tryParseGithubUrl(Uri? uri) {
+    if (uri == null) return null;
+    final segments = uri.pathSegments.where((e) => e.isNotEmpty).toList();
+    if (segments.length < 2) return null;
+    // 最少2个
+    final repo = QLRepository(
+        name: segments[1], owner: QLRepositoryOwner(login: segments[0]));
+    if (segments.length == 2) {
+      return repo;
+    } else if (segments.length > 2) {
+      final val = segments[2];
+      switch (val) {
+        case "issues" || "pull":
+          if (segments.length >= 4) {
+            final number = int.tryParse(segments[3], radix: 10) ?? -1;
+            if (number > 0) {
+              if (val == "issues") {
+                return QLIssueWrap(QLIssue(number: number), repo);
+              } else if (val == "pull") {
+                return QLPullRequestWrap(QLPullRequest(number: number), repo);
+              }
+            }
+          }
+        case "releases":
+          return QLReleaseWrap(repo);
+      }
+    }
+    return null;
   }
 
   ///================================== REST API ===============================

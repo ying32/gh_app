@@ -1,17 +1,14 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/graphql_test.dart';
 import 'package:gh_app/pages/home.dart';
 import 'package:gh_app/pages/issues.dart';
 import 'package:gh_app/pages/pulls.dart';
-import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
-import 'package:gh_app/pages/user_info.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
@@ -181,12 +178,13 @@ class _MainTabView extends StatelessWidget {
               showScrollButtons: false,
               onNewPressed: () {
                 GoGithubDialog.show(context, onSuccess: (data) {
-                  if (data is QLRepository) {
-                    RepoPage.createNewTab(context, data);
-                  } else if (data is QLUser) {
-                    // 创建User页面
-                    UserInfoPage.createNewTab(context, data);
-                  }
+                  goMainTabView(context, data);
+                  // if (data is QLRepository) {
+                  //   RepoPage.createNewTab(context, data);
+                  // } else if (data is QLUser) {
+                  //   // 创建User页面
+                  //   UserInfoPage.createNewTab(context, data);
+                  // }
                 });
               },
               // onReorder: (oldIndex, newIndex) {
@@ -325,14 +323,14 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
 
   @override
   void onWindowFocus() {
-    Clipboard.getData('text/plain').then((e) {
-      if (_lastClipboardText != e?.text) {
-        _lastClipboardText = e?.text;
-        // TODO: 待写。这里检测，当解析出来的是github链接，弹出跳转提示
-        if (kDebugMode) {
-          print("_lastClipboardText=$_lastClipboardText");
-        }
-      }
-    });
+    // Clipboard.getData('text/plain').then((e) {
+    //   if (_lastClipboardText != e?.text) {
+    //     _lastClipboardText = e?.text;
+    //     // TODO: 待写。这里检测，当解析出来的是github链接，弹出跳转提示
+    //     if (kDebugMode) {
+    //       print("_lastClipboardText=$_lastClipboardText");
+    //     }
+    //   }
+    // });
   }
 }
