@@ -101,7 +101,7 @@ class MarkdownBlockPlusDefaultAction extends StatelessWidget {
 
   final String? body;
 
-  void onDefaultLinkAction(BuildContext context, String link) {
+  void _onDefaultLinkAction(BuildContext context, String link) {
     final uri = Uri.tryParse(link);
     if (uri != null) {
       // 没有host当对目录的
@@ -118,7 +118,7 @@ class MarkdownBlockPlusDefaultAction extends StatelessWidget {
     if (body == null || body!.isEmpty) return const SizedBox.shrink();
     return MarkdownBlockPlus(
       data: body!,
-      onTap: (link) => onDefaultLinkAction(context, link),
+      onTap: (link) => _onDefaultLinkAction(context, link),
     );
   }
 }
