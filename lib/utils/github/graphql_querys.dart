@@ -64,6 +64,9 @@ class QLQueries {
             color
             name
           }
+          defaultBranchRef {
+            name
+          }
         }
       } 
     }
@@ -130,6 +133,9 @@ class QLQueries {
           }
           primaryLanguage {
             color
+            name
+          }
+          defaultBranchRef {
             name
           }
         }
@@ -399,6 +405,9 @@ class QLQueries {
             color
             name
           }
+          defaultBranchRef {
+            name
+          } 
           updatedAt
           url
           forkCount
@@ -653,6 +662,9 @@ class QLQueries {
               color
               name
             }
+            defaultBranchRef {
+              name
+            }
             pushedAt
           }
         }
@@ -684,9 +696,9 @@ class QLQueries {
 }''';
   }
 
-  //// 提交的评论
-  // // , orderBy : {direction : DESC, field: UPDATED_AT}
-  // // https://docs.github.com/zh/graphql/reference/objects#issue
+  /// 提交的评论
+  /// // , orderBy : {direction : DESC, field: UPDATED_AT}
+  /// // https://docs.github.com/zh/graphql/reference/objects#issue
   static String queryIssueComments(String owner, String name, int number,
       {int count = 30, bool isIssues = true}) {
     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
