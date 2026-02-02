@@ -35,9 +35,13 @@ class _NavItem {
 }
 
 class _NavItemIconButton extends StatelessWidget {
-  const _NavItemIconButton(this.item);
+  const _NavItemIconButton(
+    this.item, {
+    this.disabled = false,
+  });
 
   final _NavItem item;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +51,15 @@ class _NavItemIconButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: IconButton(
             icon: item.icon,
-            onPressed: () {
-              context.read<TabviewModel>().addTab(
-                  key: item.key, item.body, title: item.title, icon: item.icon);
-            }),
+            onPressed: disabled
+                ? null
+                : () {
+                    context.read<TabviewModel>().addTab(
+                        key: item.key,
+                        item.body,
+                        title: item.title,
+                        icon: item.icon);
+                  }),
       ),
     );
   }
@@ -69,7 +78,7 @@ class NavigationPage extends StatelessWidget {
                   // semanticLabel: 'Document #$index',
                   icon: const DefaultIcon.home(),
                   body: const HomePage(),
-                  closeIcon: FluentIcons.emoji,
+                  //closeIcon: FluentIcons.emoji,
                   onClosed: null)
             ]),
         child: const _InternalNavigationPage());
@@ -79,7 +88,8 @@ class NavigationPage extends StatelessWidget {
 class _LeftNav extends StatelessWidget {
   _LeftNav();
 
-  final List<_NavItem> originalItems = [
+  /// 需要登录才能使用的
+  final List<_NavItem> _currentUserItems = [
     _NavItem(
       key: const ValueKey(RouterTable.issues),
       icon: const DefaultIcon.issues(size: 18),
@@ -107,6 +117,9 @@ class _LeftNav extends StatelessWidget {
       //body: const ReposPage(),
       body: const SizedBox.shrink(),
     ),
+  ];
+
+  final List<_NavItem> _otherItems = [
     _NavItem(
       key: const ValueKey(RouterTable.search),
       icon: const DefaultIcon.search(size: 18),
@@ -114,8 +127,9 @@ class _LeftNav extends StatelessWidget {
       body: const SearchPage(),
     ),
   ];
+
   // 底部的
-  final List<_NavItem> footerItems = [
+  final List<_NavItem> _footerItems = [
     _NavItem(
       key: const ValueKey(RouterTable.settings),
       icon: const DefaultIcon.settings(size: 18),
@@ -131,10 +145,24 @@ class _LeftNav extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        ...originalItems.map((e) => _NavItemIconButton(e)),
+        Selector<CurrentUserModel, QLUser?>(
+          selector: (_, model) => model.user,
+          builder: (_, user, __) => Column(
+              children: _currentUserItems
+                  .map((e) => _NavItemIconButton(e, disabled: user == null))
+                  .toList(growable: false)),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Divider(),
+        ),
+        ..._otherItems.map((e) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: _NavItemIconButton(e),
+            )),
         if (kDebugMode) ...[
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+            padding: EdgeInsets.symmetric(vertical: 2.0),
             child: Divider(direction: Axis.horizontal),
           ),
           const OpenGraphQLIconButton(),
@@ -142,9 +170,9 @@ class _LeftNav extends StatelessWidget {
         const Spacer(),
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Divider(direction: Axis.horizontal),
+          child: Divider(),
         ),
-        ...footerItems.map((e) => Padding(
+        ..._footerItems.map((e) => Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: _NavItemIconButton(e),
             )),
@@ -179,12 +207,6 @@ class _MainTabView extends StatelessWidget {
               onNewPressed: () {
                 GoGithubDialog.show(context, onSuccess: (data) {
                   goMainTabView(context, data);
-                  // if (data is QLRepository) {
-                  //   RepoPage.createNewTab(context, data);
-                  // } else if (data is QLUser) {
-                  //   // 创建User页面
-                  //   UserInfoPage.createNewTab(context, data);
-                  // }
                 });
               },
               // onReorder: (oldIndex, newIndex) {
@@ -222,7 +244,7 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
     with WindowListener {
   final viewKey = GlobalKey(debugLabel: 'Navigation View Key');
 
-  String? _lastClipboardText;
+  // String? _lastClipboardText;
 
   @override
   void initState() {
@@ -242,18 +264,6 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
 
   @override
   Widget build(BuildContext context) {
-    // final localizations = FluentLocalizations.of(context);
-
-    // final appTheme = context.watch<AppTheme>();
-    // final theme = FluentTheme.of(context);
-    // if (widget.shellContext != null) {
-    //   if (router.canPop() == false) {
-    //     setState(() {});
-    //   }
-    // }
-//  ChangeNotifierProvider<CurrentUserModel>(
-//           create: (_) => CurrentUserModel(null),
-//         ),
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(

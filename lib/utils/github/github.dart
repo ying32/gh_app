@@ -19,7 +19,7 @@ class AuthField {
   AuthField.fromJson(Map<String, dynamic> json)
       : authType = enumFromStringValue(
             AuthType.values, json['auth_type'], AuthType.anonymous),
-        token = json['token'] ?? json['token_or_username'] ?? ''; // 兼容原来的，之后移除掉
+        token = json['token'] ?? '';
 }
 
 /// 创建github实例，根据配置的类型

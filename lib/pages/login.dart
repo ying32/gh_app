@@ -1,10 +1,13 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const _authTypeStrings = ["匿名", "Access Token", "OAuth2"];
 
@@ -17,13 +20,11 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   AuthType _authType = AuthType.accessToken;
-  final _tokenOrUserNameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final _tokenController = TextEditingController();
 
   @override
   void dispose() {
-    _tokenOrUserNameController.dispose();
-    _passwordController.dispose();
+    _tokenController.dispose();
     super.dispose();
   }
 
@@ -41,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     try {
       switch (_authType) {
         case AuthType.accessToken:
-          final token = _tokenOrUserNameController.text.trim();
+          final token = _tokenController.text.trim();
           if (token.isEmpty) {
             _showInfo('AccessToken不能为空', severity: InfoBarSeverity.error);
             return;
@@ -52,20 +53,17 @@ class _LoginPageState extends State<LoginPage> {
           createGithub(auth);
           try {
             await APIWrap.instance.currentUser;
+            if (mounted) {
+              APIWrap.instance.currentUser.then((e) {
+                context.read<CurrentUserModel>().user = e;
+              });
+            }
             _showInfo('登录成功');
           } catch (e) {
             clearGithubInstance();
             _showInfo('登录失败', error: "$e", severity: InfoBarSeverity.error);
           }
         case AuthType.oauth2:
-          // var flow = OAuth2Flow('ClientID', 'ClientSecret');
-          // var authUrl = flow.createAuthorizeUrl();
-          // // 这里打开浏览器，并取得code
-          // flow.exchange(code).then((response) {
-          //   final auth = AuthField(_authType, response.token);
-          //   AppConfig.instance.auth = auth;
-          //   createGithub(auth);
-          // });
           _showInfo('OAuth2 还没有实现哦', severity: InfoBarSeverity.error);
 
         default:
@@ -127,9 +125,8 @@ class _LoginPageState extends State<LoginPage> {
                           child: IconButton(
                               icon: const Icon(Remix.token_swap_line),
                               onPressed: () {
-                                //
-                                _showInfo('还没写呢！',
-                                    severity: InfoBarSeverity.error);
+                                launchUrl(Uri.parse(
+                                    'https://github.com/settings/tokens'));
                               }),
                         ),
                       )
@@ -140,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                 InfoLabel(
                   label: _authTypeStrings[_authType.index],
                   child: TextBox(
-                    controller: _tokenOrUserNameController,
+                    controller: _tokenController,
                   ),
                 ),
               InfoLabel(
