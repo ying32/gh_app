@@ -59,9 +59,16 @@ class RepoBranchModel extends ChangeNotifier {
   String? _selectedBranch;
   String? get selectedBranch => _selectedBranch;
   set selectedBranch(String? value) {
-    if (_selectedBranch != value) {
-      _selectedBranch = value;
-      notifyListeners();
-    }
+    if (_selectedBranch == value) return;
+    _selectedBranch = value;
+    notifyListeners();
+  }
+
+  QLList<QLRef> _refs = const QLList.empty();
+  QLList<QLRef> get refs => _refs;
+  set refs(QLList<QLRef> value) {
+    if (value == _refs) return;
+    _refs = value;
+    notifyListeners();
   }
 }

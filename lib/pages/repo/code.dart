@@ -9,50 +9,88 @@ class _RepoBranches extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = context.read<RepoModel>().repo;
 
-    return APIFutureBuilder(
-      future: APIWrap.instance.repoRefs(repo),
-      builder: (_, snapshot) {
-        final refs = snapshot.isEmpty
-            ? [QLRef(name: repo.defaultBranchRef.name)]
-            : snapshot.data;
-        return Row(
-          children: [
-            Selector2<RepoModel, RepoBranchModel, (QLRepository, String?)>(
-              selector: (_, model, model2) =>
-                  (model.repo, model2.selectedBranch),
-              builder: (_, model, __) {
-                final defaultBranch = model.$1.defaultBranchRef.name;
-                final selectedBranch = model.$2;
-
-                return DropDownButton(
-                    onOpen: () {
-                      // 下拉时
-                    },
-                    title: IconText(
-                        icon: DefaultIcons.branch,
-                        text: Text(selectedBranch ?? defaultBranch)),
-                    items: refs
-                        .map((e) => MenuFlyoutItem(
-                            leading: e.name == (selectedBranch ?? defaultBranch)
-                                ? const DefaultIcon.check()
-                                : null,
-                            text: Text(e.name),
-                            trailing: e.name == defaultBranch
-                                ? TagLabel.other('默认',
-                                    color: context.isDark
-                                        ? Colors.white
-                                        : Colors.black)
-                                : null,
-                            onPressed: () {
-                              context.read<RepoBranchModel>().selectedBranch =
-                                  e.name == defaultBranch ? null : e.name;
-                            }))
-                        .toList());
-              },
-            ),
-          ],
-        );
+    return DropdownPanelButton(
+      flyout: ChangeNotifierProvider.value(
+        value: context.read<RepoBranchModel>(),
+        child: FlyoutContent(
+          constraints: const BoxConstraints(maxWidth: 260.0, maxHeight: 300),
+          child: Selector<RepoBranchModel, QLList<QLRef>>(
+            selector: (_, model) => model.refs,
+            builder: (_, refs, __) {
+              return SingleChildScrollView(
+                child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: refs.data
+                        .map((e) => Tooltip(
+                              message: e.name,
+                              child: LinkButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    context
+                                            .read<RepoBranchModel>()
+                                            .selectedBranch =
+                                        e.name == repo.defaultBranchRef.name
+                                            ? null
+                                            : e.name;
+                                  },
+                                  text: SizedBox(
+                                    height: 30,
+                                    child: Row(
+                                      children: [
+                                        if (e.name ==
+                                            (context
+                                                    .read<RepoBranchModel>()
+                                                    .selectedBranch ??
+                                                repo.defaultBranchRef.name))
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 8.0),
+                                            child: DefaultIcon.check(),
+                                          )
+                                        else
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 8.0),
+                                            child: SizedBox(width: 16),
+                                          ),
+                                        Expanded(
+                                            child: Text(e.name,
+                                                overflow:
+                                                    TextOverflow.ellipsis)),
+                                        if (e.name ==
+                                            repo.defaultBranchRef.name)
+                                          TagLabel.other('默认',
+                                              color: context.isDark
+                                                  ? Colors.white
+                                                  : Colors.black),
+                                      ],
+                                    ),
+                                  )),
+                            ))
+                        .toList()),
+              );
+            },
+          ),
+        ),
+      ),
+      onOpen: () {
+        // 下拉时
+        if (context.read<RepoBranchModel>().refs.isEmpty) {
+          APIWrap.instance.repoRefs(repo).then((res) {
+            context.read<RepoBranchModel>().refs = res;
+          });
+        }
       },
+      title: SizedBox(
+        height: 32,
+        child: IconText(
+          icon: DefaultIcons.branch,
+          text: Selector<RepoBranchModel, String?>(
+              selector: (_, model) => model.selectedBranch,
+              builder: (_, selectedBranch, __) =>
+                  Text(selectedBranch ?? repo.defaultBranchRef.name)),
+        ),
+      ),
     );
   }
 }
@@ -228,13 +266,26 @@ class RepoCodePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: RepoContentsListView(
-                      path: context.watch<PathModel>().path,
-                      ref: context.watch<RepoBranchModel>().selectedBranch,
-                      onPathChange: (value) {
-                        context.read<PathModel>().path = value;
-                      },
-                    ),
+                    // child: RepoContentsListView(
+                    //   path: context.watch<PathModel>().path,
+                    //   ref: context.watch<RepoBranchModel>().selectedBranch,
+                    //   onPathChange: (value) {
+                    //     context.read<PathModel>().path = value;
+                    //   },
+                    // ),
+                    child: Selector2<RepoBranchModel, PathModel,
+                            (String?, String)>(
+                        selector: (_, ref, path) =>
+                            (ref.selectedBranch, path.path),
+                        builder: (_, value, __) {
+                          return RepoContentsListView(
+                            path: value.$2,
+                            ref: value.$1,
+                            onPathChange: (value) {
+                              context.read<PathModel>().path = value;
+                            },
+                          );
+                        }),
                   ),
                   const SizedBox(width: 8.0),
                   // 右边

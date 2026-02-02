@@ -272,8 +272,8 @@ class RepoBreadcrumbBar extends StatelessWidget {
 }
 
 /// 内容视图
-class RepoContentView extends StatelessWidget {
-  const RepoContentView(
+class RepoFileContentView extends StatelessWidget {
+  const RepoFileContentView(
     this.file, {
     super.key,
     required this.filename,
@@ -424,7 +424,7 @@ class RepoContentsListView extends StatelessWidget {
             }
             // blob不为null时
             if (object.blob != null && object.blob!.text != null) {
-              return RepoContentView(
+              return RepoFileContentView(
                 object.blob!,
                 filename: p.basename(path),
               );

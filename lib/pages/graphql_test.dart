@@ -109,8 +109,16 @@ class _GraphQLTestState extends State<GraphQLTest> {
       if (val is Map) {
         subItems.addAll(_buildTreeViewItems(val));
       } else if (val is List) {
-        for (final item in val) {
-          subItems.addAll(_buildTreeViewItems(item));
+        for (var i = 0; i < val.length; i++) {
+          final item = val[i];
+          final List<TreeViewItem> orders = [];
+          orders.addAll(_buildTreeViewItems(item));
+
+          subItems.add(TreeViewItem(
+              content: Text("$i",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.blue)),
+              children: orders));
         }
       } else {
         subItems.add(TreeViewItem(
@@ -250,10 +258,13 @@ class _GraphQLTestState extends State<GraphQLTest> {
                                   path: "", ref: "HEAD");
                             }),
                         MenuFlyoutItem(
-                            text: const Text('仓库分支信息'),
+                            text: const Text('仓库分支信息(refs, tags)'),
                             onPressed: () {
-                              _controller.text =
-                                  QLQueries.queryRepoRefs('ying32', 'govcl');
+                              // 他这分支n多，方便测试哈
+                              _controller
+                                      .text = //https://github.com/zed-industries/zed
+                                  QLQueries.queryRepoRefs(
+                                      'zed-industries', 'zed');
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(

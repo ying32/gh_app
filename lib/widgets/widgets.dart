@@ -321,3 +321,101 @@ class APIFutureBuilder<T> extends StatelessWidget {
         });
   }
 }
+
+/// 改自 fluent_ui-4.8.7\lib\src\controls\inputs\split_button.dart
+class DropdownPanelButton extends StatefulWidget {
+  const DropdownPanelButton({
+    super.key,
+    this.leading,
+    required this.title,
+    required this.flyout,
+    this.onOpen,
+  });
+
+  final Widget? leading;
+  final Widget title;
+  final Widget flyout;
+  final VoidCallback? onOpen;
+
+  @override
+  State<DropdownPanelButton> createState() => _DropdownPanelButtonState();
+}
+
+class _DropdownPanelButtonState extends State<DropdownPanelButton> {
+  late final FlyoutController flyoutController = FlyoutController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    flyoutController.dispose();
+    super.dispose();
+  }
+
+  void showFlyout() async {
+    if (flyoutController.isOpen) return;
+    widget.onOpen?.call();
+    setState(() {});
+    await flyoutController.showFlyout(
+      barrierColor: Colors.transparent,
+      autoModeConfiguration: FlyoutAutoConfiguration(
+          preferredMode: FlyoutPlacementMode.bottomLeft),
+      builder: (context) => widget.flyout,
+    );
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusBorder(
+      focused: false,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4.0),
+        child: DecoratedBox(
+          decoration: ShapeDecoration(
+              shape: ButtonThemeData.shapeBorder(context, {ButtonStates.none})),
+          child: IntrinsicHeight(
+            child: HoverButton(
+              onPressed: showFlyout,
+              builder: (context, states) {
+                return FlyoutTarget(
+                  controller: flyoutController,
+                  child: Container(
+                    color: ButtonThemeData.buttonColor(
+                      context,
+                      flyoutController.isOpen
+                          ? {ButtonStates.pressing}
+                          : states,
+                      transparentWhenNone: true,
+                    ),
+                    padding: const EdgeInsetsDirectional.symmetric(
+                        horizontal: 12.0), //, vertical: 8.0
+                    alignment: Alignment.center,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 50),
+                      opacity: flyoutController.isOpen ? 0.5 : 1,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.leading != null) widget.leading!,
+                          widget.title,
+                          const Padding(
+                            padding: EdgeInsets.only(left: 8.0),
+                            child: ChevronDown(),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
