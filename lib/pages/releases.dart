@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
+import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
@@ -73,6 +74,16 @@ class _AssetsPanel extends StatefulWidget {
 class _AssetsPanelState extends State<_AssetsPanel> {
   bool _expanded = false;
 
+  /// 简单的替换url
+  String _replaceURL(String url) {
+    var newUrl = AppConfig.instance.releaseFileAssetsMirrorUrl;
+    if (!newUrl.endsWith("/")) {
+      newUrl = "$newUrl/";
+    }
+    return url.replaceFirst(
+        "https://github.com/", AppConfig.instance.releaseFileAssetsMirrorUrl);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expander(
@@ -113,8 +124,9 @@ class _AssetsPanelState extends State<_AssetsPanel> {
                     //   _buildLinkButton(
                     //       'Source code (tar.gz)', item.tarballUrl!),
                     // if (item.assets?.isNotEmpty ?? false)
-                    ...snapshot.data.map((e) =>
-                        _LinkButton(e.name, e.downloadUrl, size: e.size)),
+                    ...snapshot.data.map((e) => _LinkButton(
+                        e.name, _replaceURL(e.downloadUrl),
+                        size: e.size)),
                   ],
                 );
               },
