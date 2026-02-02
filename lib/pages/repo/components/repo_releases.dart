@@ -32,7 +32,7 @@ class RepoReleases extends StatelessWidget {
           const SizedBox(height: 10),
           // Text('${}'),
           IconText(
-            icon: Remix.price_tag_3_line,
+            icon: DefaultIcons.releases,
             iconColor: Colors.green,
             text: Text(
               lastRelease.name,
@@ -49,7 +49,7 @@ class RepoReleases extends StatelessWidget {
                 style: const TextStyle(fontSize: 11)),
           ),
           if (repo.releasesCount > 1)
-            LinkStyleButton(
+            LinkButton(
               text: Text('+ ${repo.releasesCount - 1} releases',
                   style: TextStyle(color: Colors.blue)),
               onPressed: () {

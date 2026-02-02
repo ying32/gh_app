@@ -9,10 +9,8 @@ class _PullRequestItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(
-        Remix.issues_line,
-        color: pull.isOpen ? Colors.green : Colors.red,
-      ),
+      leading:
+          DefaultIcon.issues(color: pull.isOpen ? Colors.green : Colors.red),
       title: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
         child: Row(
@@ -41,7 +39,7 @@ class _PullRequestItem extends StatelessWidget {
           : SizedBox(
               width: 60,
               child: IconText(
-                icon: Remix.chat_2_line,
+                icon: DefaultIcons.comment,
                 text: Text('${pull.commentsCount}'),
               ),
             ),

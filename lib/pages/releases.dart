@@ -3,11 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
 import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/widgets.dart';
@@ -52,7 +52,7 @@ class _LinkButton extends StatelessWidget {
 
     return Tooltip(
       message: link,
-      child: LinkStyleButton(
+      child: LinkButton(
         text: Padding(
             padding: const EdgeInsets.symmetric(vertical: 5.0), child: child),
         // 这里还可以添加一个替换规则，替换成镜像啥的
@@ -165,12 +165,12 @@ class _RepoReleaseItem extends StatelessWidget {
                     '${item.createdAt!.year}年${item.createdAt!.month}月${item.createdAt!.day}日'),
               //TODO: 这里实际为发布者的头像，但这里懒得弄了
               _buildLeftLabel(item.author?.name ?? item.author?.login,
-                  icon: Remix.github_fill),
-              _buildLeftLabel(item.tagName, icon: Remix.price_tag_2_line),
+                  icon: DefaultIcons.github),
+              _buildLeftLabel(item.tagName, icon: DefaultIcons.tags),
               //TODO: 这个后面图标其实应该根据状态显示，但是graphql貌似没发现相关的
               _buildLeftLabel(item.abbreviatedOid,
-                  icon: Remix.git_commit_line,
-                  trailing: Icon(Remix.verified_badge_line,
+                  icon: DefaultIcons.comment,
+                  trailing: Icon(DefaultIcons.verifiedBadge,
                       color: Colors.green, size: 18)),
             ],
           ),
@@ -273,7 +273,7 @@ class ReleasesPage extends StatelessWidget with PageMixin {
           ReleasesPage(repo: repo),
           key: ValueKey("${RouterTable.release}/${repo.fullName}"),
           title: '${repo.fullName} Releases',
-          icon: Remix.price_tag_3_line,
+          icon: const DefaultIcon.tag(),
         );
   }
 }

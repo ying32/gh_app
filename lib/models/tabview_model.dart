@@ -1,5 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 
 class TabviewModel extends ChangeNotifier {
   TabviewModel(this._tabs);
@@ -27,7 +27,7 @@ class TabviewModel extends ChangeNotifier {
   void addTab(Widget child,
       {required ValueKey? key,
       required String title,
-      IconData? icon,
+      Widget? icon,
       bool canClose = true}) {
     final index = tabs.indexWhere((e) => e.key == key);
     if (index != -1) {
@@ -41,7 +41,7 @@ class TabviewModel extends ChangeNotifier {
       key: key,
       text: Text(title),
       // semanticLabel: 'Document #$index',
-      icon: Icon(icon ?? Remix.git_repository_line),
+      icon: icon ?? const DefaultIcon.repository(),
       body: child,
       closeIcon: canClose ? FluentIcons.chrome_close : null,
       onClosed: !canClose ? null : () => _doClose(tab),

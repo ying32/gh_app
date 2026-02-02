@@ -8,10 +8,8 @@ class _IssueItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(
-        Remix.issues_line,
-        color: issue.isOpen ? Colors.green : Colors.red,
-      ),
+      leading:
+          DefaultIcon.issues(color: issue.isOpen ? Colors.green : Colors.red),
       title: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
         child: Wrap(
@@ -41,7 +39,7 @@ class _IssueItem extends StatelessWidget {
           : SizedBox(
               width: 60,
               child: IconText(
-                icon: Remix.chat_2_line,
+                icon: DefaultIcons.comment,
                 text: Text('${issue.commentsCount}'),
               ),
             ),

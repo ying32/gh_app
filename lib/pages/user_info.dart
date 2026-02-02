@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:provider/provider.dart';
@@ -70,7 +70,7 @@ class UserInfoPage extends StatelessWidget {
           UserInfoPage(user),
           key: ValueKey("${RouterTable.user}/${user.login}"),
           title: user.name,
-          icon: Remix.user_line,
+          icon: const DefaultIcon.user(),
         );
   }
 }

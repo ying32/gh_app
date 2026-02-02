@@ -32,7 +32,7 @@ class OpenGraphQLIconButton extends StatelessWidget {
                   key: const ValueKey('/graphql/test'),
                   const GraphQLTest(),
                   title: 'GraphQL测试',
-                  icon: Remix.paragraph);
+                  icon: const Icon(Remix.paragraph));
             }),
       ),
     );
@@ -152,7 +152,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   children: [
-                    LinkStyleButton(
+                    LinkButton(
                         text: const Text("API参考：$_apiURL"),
                         onPressed: () {
                           launchUrl(Uri.parse(_apiURL));

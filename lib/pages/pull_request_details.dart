@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/issues_widgets.dart';
 import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/widgets.dart';
@@ -51,7 +51,7 @@ class PullRequestDetails extends StatelessWidget with PageMixin {
                         radius: 15,
                         text: Row(
                           children: [
-                            const Icon(Remix.issues_line, color: Colors.white),
+                            const DefaultIcon.issues(color: Colors.white),
                             const SizedBox(width: 5),
                             Text(pull.isOpen ? '打开' : '关闭',
                                 style: const TextStyle(
@@ -64,12 +64,10 @@ class PullRequestDetails extends StatelessWidget with PageMixin {
                             ? Colors.green.lighter
                             : Colors.red.lighter),
                     const Spacer(),
-                    LinkAction(
-                      icon: const Icon(FluentIcons.open_source, size: 18),
-                      link:
-                          "https://github.com/${repo.fullName}/pull/${pull.number}",
-                      //message: '在浏览器中打开',
-                    ),
+                    IconLinkButton.linkSource(
+                        "https://github.com/${repo.fullName}/pull/${pull.number}"
+                        //message: '在浏览器中打开',
+                        ),
                   ],
                 )
               ],

@@ -1,7 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/config.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/page.dart';
 
@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> with PageMixin {
             spacing: 10.0,
             runSpacing: 20.0,
             children: [
-              const Icon(Remix.github_fill, size: 60),
+              const DefaultIcon.github(size: 60),
               subtitle(content: const Text('登录Github')),
               //   Text('CONTRIBUTORS', style: theme.typography.bodyStrong),
               InfoLabel(

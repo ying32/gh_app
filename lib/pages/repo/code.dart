@@ -14,7 +14,7 @@ class _RepoBranches extends StatelessWidget {
         // if (!snapshotIsOk(snapshot, false, false)) {
         //   return DropDownButton(
         //     title: IconText(
-        //         icon: Remix.git_branch_line, text: Text(repo.defaultBranch)),
+        //         icon: DefaultIcons.branch, text: Text(repo.defaultBranch)),
         //     items: [
         //       MenuFlyoutItem(
         //           text: const Center(
@@ -37,12 +37,12 @@ class _RepoBranches extends StatelessWidget {
 
                 return DropDownButton(
                     title: IconText(
-                        icon: Remix.git_branch_line,
+                        icon: DefaultIcons.branch,
                         text: Text(selectedBranch ?? defaultBranch)),
                     items: refs
                         .map((e) => MenuFlyoutItem(
                             leading: e.name == (selectedBranch ?? defaultBranch)
-                                ? const Icon(Remix.check_line)
+                                ? const DefaultIcon.check()
                                 : null,
                             text: Text(e.name),
                             trailing: e.name == defaultBranch
@@ -79,15 +79,13 @@ class _BranchAndTagsCount extends StatelessWidget {
               HyperlinkButton(
                 onPressed: () {},
                 child: IconText(
-                    icon: Remix.git_branch_line,
-                    text: Text("${repo.refsCount}")),
+                    icon: DefaultIcons.branch, text: Text("${repo.refsCount}")),
               ),
               const SizedBox(width: 10.0),
               HyperlinkButton(
                 onPressed: () {},
                 child: IconText(
-                    icon: Remix.price_tag_3_line,
-                    text: Text("${repo.tagsCount}")),
+                    icon: DefaultIcons.tags, text: Text("${repo.tagsCount}")),
               ),
             ],
           );
@@ -130,7 +128,7 @@ class _TopBar1 extends StatelessWidget {
           child: Button(
             onPressed: _onWatch,
             child: IconText(
-              icon: Remix.eye_line,
+              icon: DefaultIcons.watch,
               text: Text('${repo.watchersCount.toKiloString()} 关注'),
             ),
           ),
@@ -141,7 +139,7 @@ class _TopBar1 extends StatelessWidget {
             onPressed:
                 repo.forkingAllowed == true && !repo.isFork ? _onFork : null,
             child: IconText(
-              icon: Remix.git_fork_line,
+              icon: DefaultIcons.fork,
               text: Text('${repo.forksCount.toKiloString()} 分叉'),
             ),
           ),
@@ -151,7 +149,7 @@ class _TopBar1 extends StatelessWidget {
           child: Button(
             onPressed: _onStar,
             child: IconText(
-              icon: Remix.star_line,
+              icon: DefaultIcons.star,
               text: Text('${repo.stargazersCount.toKiloString()} 点赞'),
             ),
           ),

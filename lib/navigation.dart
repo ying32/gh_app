@@ -14,9 +14,9 @@ import 'package:gh_app/pages/settings.dart';
 import 'package:gh_app/pages/user_info.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
@@ -33,7 +33,7 @@ class _NavItem {
   });
   ValueKey key;
   String title;
-  IconData icon;
+  Widget icon;
   Widget body;
 }
 
@@ -49,7 +49,7 @@ class _NavItemIconButton extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: IconButton(
-            icon: Icon(item.icon, size: 18),
+            icon: item.icon,
             onPressed: () {
               context.read<TabviewModel>().addTab(
                   key: item.key, item.body, title: item.title, icon: item.icon);
@@ -70,7 +70,7 @@ class NavigationPage extends StatelessWidget {
                   key: const ValueKey(RouterTable.root),
                   text: const Text('我的'),
                   // semanticLabel: 'Document #$index',
-                  icon: const Icon(Remix.home_line),
+                  icon: const DefaultIcon.home(),
                   body: const HomePage(),
                   closeIcon: FluentIcons.emoji,
                   onClosed: null)
@@ -85,34 +85,34 @@ class _LeftNav extends StatelessWidget {
   final List<_NavItem> originalItems = [
     _NavItem(
       key: const ValueKey(RouterTable.issues),
-      icon: Remix.issues_line,
+      icon: const DefaultIcon.issues(size: 18),
       title: '问题',
       body: const IssuesPage(),
     ),
     _NavItem(
       key: const ValueKey(RouterTable.pulls),
-      icon: Remix.git_pull_request_line,
+      icon: const DefaultIcon.pullRequest(size: 18),
       title: '合并请求',
       // body: const PullRequestPage(),
       body: const PullPage(),
     ),
     _NavItem(
       key: const ValueKey(RouterTable.repos),
-      icon: Remix.git_repository_line,
+      icon: const DefaultIcon.repository(size: 18),
       title: '我的仓库',
       body: const ReposPage(),
     ),
     // todo: 还没写哈
     _NavItem(
       key: const ValueKey(RouterTable.repos),
-      icon: Remix.star_line,
+      icon: const DefaultIcon.star(size: 18),
       title: '我收藏的仓库',
       //body: const ReposPage(),
       body: const SizedBox.shrink(),
     ),
     _NavItem(
       key: const ValueKey(RouterTable.search),
-      icon: Remix.search_line,
+      icon: const DefaultIcon.search(size: 18),
       title: '搜索',
       body: const SearchPage(),
     ),
@@ -121,7 +121,7 @@ class _LeftNav extends StatelessWidget {
   final List<_NavItem> footerItems = [
     _NavItem(
       key: const ValueKey(RouterTable.settings),
-      icon: Remix.settings_line,
+      icon: const DefaultIcon.settings(size: 18),
       title: '设置',
       body: const SettingsPage(),
     ),
@@ -151,11 +151,7 @@ class _LeftNav extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: _NavItemIconButton(e),
             )),
-        const LinkAction(
-          message: '源代码',
-          icon: Icon(FluentIcons.open_source, size: 18),
-          link: appRepoUrl,
-        ),
+        const IconLinkButton.linkSource(appRepoUrl, message: '源代码'),
         const SizedBox(height: 8),
       ],
     );
@@ -263,7 +259,7 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
-        leading: const GitHubIcon(size: 32),
+        leading: const DefaultIcon.github(size: 32),
         automaticallyImplyLeading: false,
         title: () {
           return const DragToMoveArea(
@@ -285,7 +281,7 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
                 children: [
                   UserHeadImage(user.avatarUrl, imageSize: 40),
                   const SizedBox(width: 8.0),
-                  LinkStyleButton(
+                  LinkButton(
                     text: UserNameWidget(user, onlyNickName: true),
                     onPressed: () {
                       launchUrl(Uri.parse(user.url));

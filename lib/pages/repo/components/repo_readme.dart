@@ -27,7 +27,7 @@ class RepoReadMe extends StatelessWidget {
               Row(
                 children: [
                   const IconText(
-                      icon: Remix.book_open_line,
+                      icon: DefaultIcons.readme,
                       text: Text(
                         'README',
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -35,7 +35,7 @@ class RepoReadMe extends StatelessWidget {
                   const SizedBox(width: 12.0),
                   if (repo.license.name.isNotEmpty)
                     IconText(
-                        icon: Remix.scales_line,
+                        icon: DefaultIcons.license,
                         text: Text(
                           repo.license.name,
                           style: const TextStyle(fontWeight: FontWeight.bold),

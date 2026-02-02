@@ -1,6 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
-import 'package:gh_app/utils/fonts/remix_icon.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:url_launcher/link.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -110,9 +110,9 @@ class TagLabel extends StatelessWidget {
           text: Text(text, style: TextStyle(fontSize: 11, color: color)));
 }
 
-/// 链接跳转的
-class LinkStyleButton extends StatelessWidget {
-  const LinkStyleButton({
+/// 链接跳转的？？？？
+class LinkButton extends StatelessWidget {
+  const LinkButton({
     super.key,
     required this.text,
     required this.onPressed,
@@ -139,32 +139,16 @@ class LinkStyleButton extends StatelessWidget {
   }
 }
 
-/// Github的图标
-class GitHubIcon extends StatelessWidget {
-  const GitHubIcon({
-    super.key,
-    this.size = 16,
-    this.color,
-  });
-
-  final double size;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) =>
-      Icon(Remix.github_fill, size: size, color: color);
-}
-
 /// 一个icon样式的带跳转本地open的
-class LinkAction extends StatelessWidget {
-  const LinkAction({
+class IconLinkButton extends StatelessWidget {
+  const IconLinkButton({
     super.key,
     required this.icon,
     required this.link,
     this.message,
   });
 
-  final Icon icon;
+  final Widget icon;
   final String link;
   final String? message;
 
@@ -184,6 +168,10 @@ class LinkAction extends StatelessWidget {
       ),
     );
   }
+
+  /// 使用[DefaultIcon.linkSource]图标的
+  const IconLinkButton.linkSource(this.link, {super.key, this.message})
+      : icon = const DefaultIcon.linkSource(size: 18);
 }
 
 /// 初始加载数据

@@ -6,11 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/theme.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:path/path.dart' as p;
@@ -78,14 +78,14 @@ class RepoListItem extends StatelessWidget {
               if (isPinStyle)
                 const Padding(
                   padding: EdgeInsets.only(right: 8.0),
-                  child: Icon(Remix.git_repository_line),
+                  child: DefaultIcon.repository(),
                 ),
               if (!isPinStyle && repo.owner?.avatarUrl != null)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: UserHeadImage(repo.owner!.avatarUrl, imageSize: 35),
                 ),
-              LinkStyleButton(
+              LinkButton(
                   onPressed: () {
                     RepoPage.createNewTab(context, repo);
 
@@ -111,11 +111,7 @@ class RepoListItem extends StatelessWidget {
                     child: TagLabel.archived()),
 
               const Spacer(),
-              if (!isPinStyle)
-                LinkAction(
-                  icon: const Icon(FluentIcons.open_source, size: 18),
-                  link: repo.url,
-                ),
+              if (!isPinStyle) IconLinkButton.linkSource(repo.url),
             ],
           ),
 
@@ -159,7 +155,7 @@ class RepoListItem extends StatelessWidget {
               // 授权协议
               if (!isPinStyle && repo.license.name.isNotEmpty) ...[
                 IconText(
-                    icon: Remix.scales_line,
+                    icon: DefaultIcons.license,
                     padding: padding,
                     iconColor: appTheme.color.lightest,
                     text: Text(repo.license.name,
@@ -169,7 +165,7 @@ class RepoListItem extends StatelessWidget {
               HyperlinkButton(
                 onPressed: () {},
                 child: IconText(
-                    icon: Remix.git_fork_line,
+                    icon: DefaultIcons.fork,
                     // padding: padding,
                     text: Text(repo.forksCount.toKiloString())),
               ),
@@ -177,7 +173,7 @@ class RepoListItem extends StatelessWidget {
               HyperlinkButton(
                 onPressed: () {},
                 child: IconText(
-                    icon: Remix.star_line,
+                    icon: DefaultIcons.star,
                     // padding: padding,
                     text: Text(repo.stargazersCount.toKiloString())),
               ),
@@ -186,7 +182,7 @@ class RepoListItem extends StatelessWidget {
                 HyperlinkButton(
                   onPressed: () {},
                   child: IconText(
-                      icon: Remix.issues_line,
+                      icon: DefaultIcons.issues,
                       // padding: padding,
                       text: Text(repo.openIssuesCount.toKiloString())),
                 ),
@@ -364,7 +360,7 @@ class RepoContentsListView extends StatelessWidget {
         width: 24,
         child: file.isFile
             ? FileIcon(file.name, size: 24)
-            : Icon(Remix.folder_fill, color: Colors.blue.lighter),
+            : DefaultIcon.folder(color: Colors.blue.lighter),
       ),
       title: Text(file.name),
       //trailing: const SizedBox.shrink(),

@@ -6,11 +6,11 @@ import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/releases.dart';
 import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/issues_widgets.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
 import 'package:gh_app/widgets/page.dart';
@@ -51,7 +51,7 @@ class _TabPagesState extends State<_TabPages> {
             tabs: [
               Tab(
                 text: const Text('代码'),
-                icon: const Icon(Remix.code_line),
+                icon: const DefaultIcon.code(),
                 closeIcon: null,
                 body: RepoCodePage(repo),
               ),
@@ -59,27 +59,27 @@ class _TabPagesState extends State<_TabPages> {
               if (repo.hasIssuesEnabled)
                 Tab(
                   text: Text('问题 ${repo.openIssuesCount}'),
-                  icon: const Icon(Remix.issues_line),
+                  icon: const DefaultIcon.issues(),
                   closeIcon: null,
                   body: RepoIssuesPage(repo),
                 ),
 
               Tab(
                 text: Text('合并请求 ${repo.openPullRequestsCount}'),
-                icon: const Icon(Remix.git_pull_request_line),
+                icon: const DefaultIcon.pullRequest(),
                 closeIcon: null,
                 body: RepoPullRequestPage(repo),
               ),
               Tab(
                 text: const Text('Actions'),
-                icon: const Icon(Remix.play_circle_line),
+                icon: const DefaultIcon.action(),
                 closeIcon: null,
                 body: RepoActionPage(repo),
               ),
               if (repo.hasWikiEnabled)
                 Tab(
                   text: const Text('Wiki'),
-                  icon: const Icon(Remix.book_open_line),
+                  icon: const DefaultIcon.wiki(),
                   closeIcon: null,
                   body: RepoWikiPage(repo),
                 ),
@@ -156,7 +156,7 @@ class _InternalRepoPage extends StatelessWidget {
                 if (repo.isPrivate)
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: Icon(Remix.git_repository_private_line),
+                    child: DefaultIcon.repositoryPrivate(),
                   ),
                 if (repo.isArchived)
                   const Padding(
@@ -164,11 +164,7 @@ class _InternalRepoPage extends StatelessWidget {
                     child: TagLabel.archived(),
                   ),
                 const Spacer(),
-                LinkAction(
-                  icon: const Icon(FluentIcons.open_source, size: 18),
-                  link: repo.url,
-                  message: '在浏览器中打开',
-                ),
+                IconLinkButton.linkSource(repo.url, message: '在浏览器中打开')
               ],
             ),
           ),

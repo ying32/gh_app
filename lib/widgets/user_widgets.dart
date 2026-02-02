@@ -2,9 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:url_launcher/link.dart';
 
@@ -27,7 +27,7 @@ class UserHeadImage extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: imageSize,
                 errorWidget: (_, __, ___) =>
-                    Icon(Remix.github_fill, size: imageSize),
+                    DefaultIcon.github(size: imageSize),
               ),
             ),
           );
@@ -189,7 +189,7 @@ class UserLineInfo extends StatelessWidget {
                 uri: Uri.parse(isEmail ? "mailto:$value" : value),
                 builder: (context, open) => Semantics(
                   link: true,
-                  child: LinkStyleButton(
+                  child: LinkButton(
                     onPressed: () => open?.call(),
                     text: child,
                     padding: EdgeInsets.zero,
@@ -226,7 +226,7 @@ class UserLineDiskUseInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UserLineInfo(
-      icon: Remix.drive_line,
+      icon: DefaultIcons.drive,
       value: (value ?? 0).toSizeString(),
     );
   }
@@ -257,7 +257,7 @@ class UserInfoPanel extends StatelessWidget {
         ),
         UserLineInfo(icon: null, value: user?.bio),
         UserLineInfo(
-          icon: Remix.group_line,
+          icon: DefaultIcons.group,
           value: Row(
             children: [
               HyperlinkButton(
@@ -277,26 +277,26 @@ class UserInfoPanel extends StatelessWidget {
               // m.TextButton.icon(
               //     label: Text(
               //         "${_currentUser?.followersCount ?? 0}个关注者· "),
-              //     icon: const Icon(Remix.group_line, size: 16),
+              //     icon: const Icon(DefaultIcons.group, size: 16),
               //     onPressed: () {}),
               // m.TextButton.icon(
               //     label: Text(
               //         "${_currentUser?.followingCount ?? 0}个关注· "),
-              //     icon: const Icon(Remix.group_line, size: 16),
+              //     icon: const Icon(DefaultIcons.group, size: 16),
               //     onPressed: () {}),
             ],
           ),
         ),
-        UserLineInfo(icon: Remix.organization_chart, value: user?.company),
-        UserLineInfo(icon: Remix.twitter_line, value: user?.twitterUsername),
-        UserLineInfo(icon: Remix.map_pin_line, value: user?.location),
+        UserLineInfo(icon: DefaultIcons.organization, value: user?.company),
+        UserLineInfo(icon: DefaultIcons.twitter, value: user?.twitterUsername),
+        UserLineInfo(icon: DefaultIcons.location, value: user?.location),
         UserLineInfo(
-            icon: Remix.mail_line,
+            icon: DefaultIcons.mail,
             value: user?.email,
             isLink: true,
             isEmail: true),
         UserLineInfo(
-            icon: Remix.links_line, value: user?.websiteUrl, isLink: true),
+            icon: DefaultIcons.links, value: user?.websiteUrl, isLink: true),
         //UserLineDiskUseInfo(value: user?.diskUsage),
         const SizedBox(height: 8.0),
       ],

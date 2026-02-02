@@ -29,7 +29,7 @@ class RepoAbout extends StatelessWidget {
         if (repo.homepageUrl.isNotEmpty)
           UserLineInfo(
               textColor: Colors.blue,
-              icon: Remix.links_line,
+              icon: DefaultIcons.links,
               value: repo.homepageUrl,
               isLink: true),
         // IconText(
@@ -53,10 +53,10 @@ class RepoAbout extends StatelessWidget {
           ),
 
         const IconText(
-            icon: Remix.book_open_line, padding: padding, text: Text('Readme')),
+            icon: DefaultIcons.readme, padding: padding, text: Text('Readme')),
         if (repo.license.name.isNotEmpty)
           IconText(
-              icon: Remix.scales_line,
+              icon: DefaultIcons.license,
               padding: padding,
               text: Text(
                 repo.license.name,
@@ -65,15 +65,15 @@ class RepoAbout extends StatelessWidget {
               expanded: true),
         // Activity
         IconText(
-            icon: Remix.star_line,
+            icon: DefaultIcons.star,
             padding: padding,
             text: Text('${repo.stargazersCount.toKiloString()} 点赞')),
         IconText(
-            icon: Remix.eye_line,
+            icon: DefaultIcons.watch,
             padding: padding,
             text: Text('${repo.watchersCount.toKiloString()} 关注')),
         IconText(
-            icon: Remix.git_fork_line,
+            icon: DefaultIcons.fork,
             padding: padding,
             text: Text('${repo.forksCount.toKiloString()} 分叉')),
       ],
