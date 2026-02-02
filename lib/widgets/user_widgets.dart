@@ -26,6 +26,7 @@ class UserHeadImage extends StatelessWidget {
                 imageUrl: avatarUrl!,
                 fit: BoxFit.cover,
                 width: imageSize,
+                height: imageSize,
                 errorWidget: (_, __, ___) =>
                     DefaultIcon.github(size: imageSize),
               ),

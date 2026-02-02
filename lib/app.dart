@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +48,6 @@ class GithubApp extends StatelessWidget {
     return AppProvider(
       builder: (context, child) {
         final appTheme = context.watch<AppTheme>();
-
         return FluentApp(
           title: appTitle,
           themeMode: appTheme.mode,
@@ -83,20 +81,6 @@ class GithubApp extends StatelessWidget {
                 ),
           ),
           locale: appTheme.locale,
-          builder: (context, child) {
-            return Directionality(
-              textDirection: appTheme.textDirection,
-              child: NavigationPaneTheme(
-                data: NavigationPaneThemeData(
-                  backgroundColor: appTheme.windowEffect !=
-                          flutter_acrylic.WindowEffect.disabled
-                      ? Colors.transparent
-                      : null,
-                ),
-                child: child!,
-              ),
-            );
-          },
           scrollBehavior: CustomMaterialScrollBehavior(),
           home: const NavigationPage(),
         );
