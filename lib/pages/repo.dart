@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/pages/issue_details.dart';
@@ -142,9 +141,10 @@ class _InternalRepoPage extends StatelessWidget {
                   child: IconButton(
                     icon: UserHeadImage(repo.owner?.avatarUrl, imageSize: 50),
                     onPressed: () {
-                      // UserInfoPage.createNewTab(context, repo.owner!);
-                      if (kDebugMode) {
-                        print("type=${repo.isInOrganization}");
+                      if (repo.isInOrganization) {
+                        //UserInfoPage.createNewTab(context, user)
+                      } else {
+                        //UserInfoPage.createNewTab(context, user);
                       }
                     },
                   ),

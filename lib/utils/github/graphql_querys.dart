@@ -40,6 +40,7 @@ class QLQueries {
     location
     twitterUsername
     url
+    isViewer 
     websiteUrl
     followers  {
       totalCount
@@ -411,6 +412,7 @@ class QLQueries {
           updatedAt
           url
           forkCount
+          isInOrganization
           stargazerCount
           isArchived
           isPrivate

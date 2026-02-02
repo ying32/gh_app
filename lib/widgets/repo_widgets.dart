@@ -424,9 +424,11 @@ class RepoContentsListView extends StatelessWidget {
             }
             // blob不为null时
             if (object.blob != null && object.blob!.text != null) {
-              return RepoFileContentView(
-                object.blob!,
-                filename: p.basename(path),
+              return Card(
+                child: RepoFileContentView(
+                  object.blob!,
+                  filename: p.basename(path),
+                ),
               );
             }
             //TODO: 这里待完善

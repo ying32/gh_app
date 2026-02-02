@@ -15,37 +15,37 @@ class RepoReadMe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return APIFutureBuilder(
-      noDataWidget: const SizedBox.shrink(),
-      errorWidget: const SizedBox.shrink(),
-      future: APIWrap.instance.repoReadMe(repo, filename, ref: ref),
-      builder: (_, snapshot) {
-        return Card(
-          child: Column(
+    return Card(
+      child: Column(
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  const IconText(
-                      icon: DefaultIcons.readme,
-                      text: Text(
-                        'README',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      )),
-                  const SizedBox(width: 12.0),
-                  if (repo.license.name.isNotEmpty)
-                    IconText(
-                        icon: DefaultIcons.license,
-                        text: Text(
-                          repo.license.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        )),
-                ],
-              ),
-              MarkdownBlockPlusDefaultAction(snapshot),
+              const IconText(
+                  icon: DefaultIcons.readme,
+                  text: Text(
+                    'README',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  )),
+              const SizedBox(width: 12.0),
+              if (repo.license.name.isNotEmpty)
+                IconText(
+                    icon: DefaultIcons.license,
+                    text: Text(
+                      repo.license.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    )),
             ],
           ),
-        );
-      },
+          APIFutureBuilder(
+            noDataWidget: const SizedBox.shrink(),
+            errorWidget: const SizedBox.shrink(),
+            future: APIWrap.instance.repoReadMe(repo, filename, ref: ref),
+            builder: (_, snapshot) {
+              return MarkdownBlockPlusDefaultAction(snapshot);
+            },
+          ),
+        ],
+      ),
     );
   }
 }

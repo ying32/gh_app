@@ -566,6 +566,7 @@ class QLUser extends QLUserBase {
     required super.login,
     super.avatarUrl,
     this.url = '',
+    this.isViewer = false,
     this.name = '',
     this.company = '',
     this.websiteUrl = '',
@@ -580,6 +581,9 @@ class QLUser extends QLUserBase {
 
   /// 链接地址，比如 https://github.com/{user-name}
   final String url;
+
+  /// 是否登录的用户
+  final bool isViewer;
 
   /// 用户昵称
   final String name;
@@ -623,6 +627,7 @@ class QLUser extends QLUserBase {
       location: input['location'] ?? '',
       twitterUsername: input['twitterUsername'] ?? '',
       url: input['url'] ?? '',
+      isViewer: input['isViewer'] ?? false,
       websiteUrl: input['websiteUrl'] ?? '',
       followersCount: input['followers']?['totalCount'] ?? 0,
       followingCount: input['following']?['totalCount'] ?? 0,

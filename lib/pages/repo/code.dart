@@ -13,7 +13,7 @@ class _RepoBranches extends StatelessWidget {
       flyout: ChangeNotifierProvider.value(
         value: context.read<RepoBranchModel>(),
         child: FlyoutContent(
-          constraints: const BoxConstraints(maxWidth: 260.0, maxHeight: 300),
+          constraints: const BoxConstraints(maxWidth: 300.0, maxHeight: 300),
           child: Selector<RepoBranchModel, QLList<QLRef>>(
             selector: (_, model) => model.refs,
             builder: (_, refs, __) {

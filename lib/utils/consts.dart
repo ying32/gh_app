@@ -13,6 +13,7 @@ class RouterTable {
   static const issues = "/issues";
   static const pulls = "/pulls";
   static const repos = "/repos";
+  static const stars = "/stars";
   static const repo = "/repo";
   static const search = "/search";
   static const user = "/user";
