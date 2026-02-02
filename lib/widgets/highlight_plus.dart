@@ -16,12 +16,14 @@ class HighlightViewPlus extends StatelessWidget {
     super.key,
     required this.fileName,
     this.isDiff = false,
+    this.language,
     int tabSize = 8, // TODO: https://github.com/flutter/flutter/issues/50087
   }) : source = input.replaceAll('\t', ' ' * tabSize);
 
   final String source;
   final String fileName;
   final bool isDiff;
+  final String? language;
 
   // 因为有些不能根据扩展名识别，所以这里维护一个
   static final _extHighlights = {
@@ -53,11 +55,20 @@ class HighlightViewPlus extends StatelessWidget {
     "makefile": {"Makefile"},
   };
 
+  //当 language不为null时，则查询下这个的，
+  static final _langAlias = {
+    "golang": "go",
+  };
+
   /// 这个正则还要重新弄下，这个识别不太好
   static final _xmlStartPattern = RegExp(r'\<\?xml|\<.+?xmlns\=\"');
 
   /// 查询语法高亮
   String get _getLang {
+    if (language != null) {
+      return _langAlias[language] ?? language!;
+    }
+
     // 根据文件名查询语法
     final shortName = path_lib.basename(fileName);
 
