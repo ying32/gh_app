@@ -1,6 +1,7 @@
 part of '../repo.dart';
 
 /// 分支列表
+/// TODO: 这个要优化，下只在下拉的时候才加载其它分支信息
 class _RepoBranches extends StatelessWidget {
   const _RepoBranches();
 
@@ -11,19 +12,6 @@ class _RepoBranches extends StatelessWidget {
     return APIFutureBuilder(
       future: APIWrap.instance.repoRefs(repo),
       builder: (_, snapshot) {
-        // if (!snapshotIsOk(snapshot, false, false)) {
-        //   return DropDownButton(
-        //     title: IconText(
-        //         icon: DefaultIcons.branch, text: Text(repo.defaultBranch)),
-        //     items: [
-        //       MenuFlyoutItem(
-        //           text: const Center(
-        //             child: SizedBox(width: 100, child: ProgressRing()),
-        //           ),
-        //           onPressed: () {})
-        //     ],
-        //   );
-        // }
         final refs = snapshot.isEmpty
             ? [QLRef(name: repo.defaultBranchRef.name)]
             : snapshot.data;
@@ -37,6 +25,9 @@ class _RepoBranches extends StatelessWidget {
                 final selectedBranch = model.$2;
 
                 return DropDownButton(
+                    onOpen: () {
+                      // 下拉时
+                    },
                     title: IconText(
                         icon: DefaultIcons.branch,
                         text: Text(selectedBranch ?? defaultBranch)),

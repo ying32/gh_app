@@ -118,10 +118,10 @@ class APIWrap {
 
   /// 分支列表
   Future<QLList<QLRef>> repoRefs(QLRepository repo,
-      {String refPrefix = 'refs/heads/'}) async {
+      {int count = 10, String refPrefix = 'refs/heads/'}) async {
     final res = await gitHubAPI.query(QLQuery(QLQueries.queryRepoRefs(
         repo.owner!.login, repo.name,
-        refPrefix: refPrefix)));
+        count: count, refPrefix: refPrefix)));
     if (res == null) return const QLList.empty();
     final refs = res['repository']?['refs'];
     if (refs == null) return const QLList.empty();
