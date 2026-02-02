@@ -51,7 +51,7 @@ class _IssueItem extends StatelessWidget {
   }
 }
 
-class RepoIssuesPage extends StatelessWidget with PageMixin {
+class RepoIssuesPage extends StatelessWidget {
   const RepoIssuesPage(this.repo, {super.key});
 
   final QLRepository repo;

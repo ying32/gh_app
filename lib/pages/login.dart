@@ -1,9 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/config.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
-import 'package:gh_app/widgets/page.dart';
 
 const _authTypeStrings = ["匿名", "Access Token", "OAuth2", "帐户密码"];
 
@@ -14,7 +14,7 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with PageMixin {
+class _LoginPageState extends State<LoginPage> {
   AuthType _authType = AuthType.accessToken;
   final _tokenOrUserNameController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -41,6 +41,11 @@ class _LoginPageState extends State<LoginPage> with PageMixin {
       switch (_authType) {
         case AuthType.accessToken:
           final token = _tokenOrUserNameController.text.trim();
+          if (token.isEmpty) {
+            _showInfo('AccessToken不能为空', severity: InfoBarSeverity.error);
+            return;
+          }
+          //TODO: 这里还要处理状态，先不管了，以后再弄吧
           final auth = AuthField(_authType, token);
           AppConfig.instance.auth = auth;
           createGithub(auth);
@@ -81,8 +86,6 @@ class _LoginPageState extends State<LoginPage> with PageMixin {
 
   @override
   Widget build(BuildContext context) {
-    // assert(debugCheckHasFluentTheme(context));
-    // final theme = FluentTheme.of(context);
     return Center(
       child: SizedBox(
         width: MediaQuery.of(context).size.width / 2.0,
@@ -93,24 +96,55 @@ class _LoginPageState extends State<LoginPage> with PageMixin {
             runSpacing: 20.0,
             children: [
               const DefaultIcon.github(size: 60),
-              subtitle(content: const Text('登录Github')),
-              //   Text('CONTRIBUTORS', style: theme.typography.bodyStrong),
+              Padding(
+                padding:
+                    const EdgeInsetsDirectional.only(top: 14.0, bottom: 2.0),
+                child: DefaultTextStyle(
+                  style: FluentTheme.of(context).typography.subtitle!,
+                  child: const Text('登录Github'),
+                ),
+              ),
               InfoLabel(
                 label: '登录方式',
-                child: ComboBox(
-                    value: _authType,
-                    items: AuthType.values
-                        .where((e) => e != AuthType.anonymous)
-                        .map((e) => ComboBoxItem(
-                              value: e,
-                              child: Text(_authTypeStrings[e.index]),
-                            ))
-                        .toList(),
-                    isExpanded: true,
-                    onChanged: (v) {
-                      if (v == _authType) return;
-                      setState(() => _authType = v ?? AuthType.accessToken);
-                    }),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ComboBox(
+                          value: _authType,
+                          items: AuthType.values
+                              //TODO: 这里过滤掉匿名和使用帐号密码登录方式
+                              .where((e) =>
+                                  e != AuthType.anonymous &&
+                                  e != AuthType.userPassword)
+                              .map((e) => ComboBoxItem(
+                                    value: e,
+                                    child: Text(_authTypeStrings[e.index]),
+                                  ))
+                              .toList(),
+                          isExpanded: true,
+                          onChanged: (v) {
+                            if (v == _authType) return;
+                            setState(
+                                () => _authType = v ?? AuthType.accessToken);
+                          }),
+                    ),
+                    // 这里如果是使用accessToken认证的，则显示一个提示按钮，用于指示创建accessToken
+                    if (_authType == AuthType.accessToken)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Tooltip(
+                          message: '跳转到github去创建accessToken',
+                          child: IconButton(
+                              icon: const Icon(Remix.token_swap_line),
+                              onPressed: () {
+                                //
+                                _showInfo('还没写呢！',
+                                    severity: InfoBarSeverity.error);
+                              }),
+                        ),
+                      )
+                  ],
+                ),
               ),
               if (_authType != AuthType.oauth2)
                 InfoLabel(

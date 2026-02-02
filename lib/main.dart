@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
 import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
@@ -15,7 +14,7 @@ void main() async {
 
   // 加载配置
   await AppConfig.instance.init();
-  createGithub(AppConfig.instance.auth);
+  //createGithub(AppConfig.instance.auth);
   if (kDebugMode) {
     print("AppConfig.instance.auth=${AppConfig.instance.auth.toJson()}");
   }

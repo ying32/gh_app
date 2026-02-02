@@ -50,7 +50,7 @@ class _PullRequestItem extends StatelessWidget {
   }
 }
 
-class RepoPullRequestPage extends StatelessWidget with PageMixin {
+class RepoPullRequestPage extends StatelessWidget {
   const RepoPullRequestPage(this.repo, {super.key});
 
   final QLRepository repo;

@@ -4,7 +4,6 @@ import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
-import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 
@@ -134,7 +133,7 @@ class IssueCommentItem extends StatelessWidget {
   }
 }
 
-class IssuesCommentsView extends StatelessWidget with PageMixin {
+class IssuesCommentsView extends StatelessWidget {
   const IssuesCommentsView(
     this.data, {
     super.key,

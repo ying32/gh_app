@@ -4,11 +4,10 @@ import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/issues_widgets.dart';
-import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
-class IssueDetailsPage extends StatelessWidget with PageMixin {
+class IssueDetailsPage extends StatelessWidget {
   const IssueDetailsPage(
     this.issue, {
     super.key,

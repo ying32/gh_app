@@ -8,7 +8,6 @@ import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
-import 'package:gh_app/widgets/page.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -229,7 +228,7 @@ class _RepoReleaseItem extends StatelessWidget {
   }
 }
 
-class ReleasesPage extends StatelessWidget with PageMixin {
+class ReleasesPage extends StatelessWidget {
   const ReleasesPage({
     super.key,
     required this.repo,
