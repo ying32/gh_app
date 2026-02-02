@@ -146,21 +146,12 @@ class IssuesCommentsView extends StatelessWidget with PageMixin {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return APIFutureBuilder(
         future: APIWrap.instance.repoIssueOrPullRequestComments(repo,
             number: data.number, isIssues: data is QLIssue),
         builder: (_, snapshot) {
-          if (!snapshotIsOk(snapshot, false, false)) {
-            return const Center(child: ProgressRing());
-          }
-          if (snapshot.hasError) {
-            return errorDescription(snapshot.error);
-          }
-          if (!snapshot.hasData) {
-            return description(content: const Text("没有数据"));
-          }
           return Column(
-            children: snapshot.data!.data
+            children: snapshot.data
                 .map((e) => IssueCommentItem(
                       item: e,
                       owner: repo.owner?.login,

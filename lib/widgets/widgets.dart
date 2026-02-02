@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:url_launcher/link.dart';
 import 'package:window_manager/window_manager.dart';
@@ -258,5 +259,65 @@ class _PaginationBarState extends State<PaginationBar> {
   @override
   Widget build(BuildContext context) {
     return const Placeholder();
+  }
+}
+
+/// 简化api使用的异步加载
+class APIFutureBuilder<T> extends StatelessWidget {
+  const APIFutureBuilder({
+    super.key,
+    required this.future,
+    required this.builder,
+    this.waitingWidget,
+    this.errorWidget,
+    this.noDataWidget,
+    this.showStackTrace = false,
+  });
+
+  final Future<T> future;
+  final Widget Function(BuildContext context, T value) builder;
+
+  /// 在等待数据中自定义的显示，如果没有则显示默认的
+  final Widget? waitingWidget;
+
+  /// 数据发生错误时显示的，如果没有则显示默认的
+  final Widget? errorWidget;
+
+  /// 数据为null或者List, Map, QLList为空时显示的，如果没有则显示默认的
+  final Widget? noDataWidget;
+
+  /// 当发生错误的时候，是否显示堆栈信息，默认不显示
+  final bool showStackTrace;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<T>(
+        future: future,
+        builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
+          // 如果未完成，则显示加载进度指示
+          if (snapshot.connectionState != ConnectionState.done) {
+            return waitingWidget ?? const Center(child: ProgressRing());
+          }
+          // 有错误，显示错误
+          if (snapshot.hasError) {
+            return errorWidget ??
+                Center(
+                    child: Text(
+                        "${snapshot.error}${showStackTrace ? '\n${snapshot.stackTrace}' : ''}",
+                        style: TextStyle(fontSize: 18, color: Colors.red)));
+          }
+          // 没有数据时显示的
+          if (!snapshot.hasData ||
+              ((snapshot.data is List) && (snapshot.data as List).isEmpty) ||
+              ((snapshot.data is Map) && (snapshot.data as Map).isEmpty) ||
+              ((snapshot.data is QLList) &&
+                  (snapshot.data as QLList).isEmpty)) {
+            return noDataWidget ??
+                const Center(
+                    child: Text("没有数据", style: TextStyle(fontSize: 13)));
+          }
+          // 最后返回数据，不为null
+          return builder(context, snapshot.data as T);
+        });
   }
 }

@@ -370,32 +370,34 @@ class RepoContentsListView extends StatelessWidget {
     );
   }
 
+  QLTree _matchReadMeFile(QLObject object, RegExp regex) {
+    return object.entries!.firstWhere((e) => regex.firstMatch(e.name) != null,
+        orElse: () => const QLTree());
+  }
+
   String _getReadMeFile(BuildContext context, QLObject object) {
     if (object.isFile) return '';
-    final langCode = Localizations.localeOf(context).languageCode;
-    final regex = RegExp(
-        r'README[\.|-|_]?' + langCode + r'[\s\S]*?\.?(?:md|txt)',
-        caseSensitive: false);
     // 优先匹配本地化的
-    var tree = object.entries!.firstWhere(
-        (e) => regex.firstMatch(e.name) != null,
-        orElse: () => const QLTree());
+    var tree = _matchReadMeFile(
+        object,
+        RegExp(
+            r'README[\.|-|_]?' +
+                Localizations.localeOf(context).languageCode +
+                r'[\s\S]*?\.?(?:md|txt)',
+            caseSensitive: false));
     if (tree.name.isNotEmpty) {
       return tree.name;
     }
     // 没有则匹配默认的
-    final regexDefault =
-        RegExp(r'README[\.|-|_]?[\s\S]*?\.?(?:md|txt)', caseSensitive: false);
-    tree = object.entries!.firstWhere(
-        (e) => regexDefault.firstMatch(e.name) != null,
-        orElse: () => const QLTree());
+    tree = _matchReadMeFile(object,
+        RegExp(r'README[\.|-|_]?[\s\S]*?\.?(?:md|txt)', caseSensitive: false));
     if (tree.name.isNotEmpty) {
       return tree.name;
     }
     return '';
   }
 
-  // 构建目录
+  // 构建目录，这个还可以再优化的，不使用Column，暂时先这样吧
   Widget _buildTree(List<QLTree> entries) => Card(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -403,10 +405,6 @@ class RepoContentsListView extends StatelessWidget {
           children: [
             ...entries.where((e) => e.isDir).map((e) => _buildItem(e)),
             ...entries.where((e) => e.isFile).map((e) => _buildItem(e)),
-
-            // const SizedBox(height: 8.0),
-            // readme，只有根目录下才显示README？或者文件中有就显示？
-            // const RepoReadMe(),
           ],
         ),
       );
@@ -416,18 +414,11 @@ class RepoContentsListView extends StatelessWidget {
     final repo = context.read<RepoModel>().repo;
     return SizedBox(
       width: double.infinity,
-      child: FutureBuilder(
+      child: APIFutureBuilder(
         future: APIWrap.instance.repoContents(repo, path, ref: ref),
-        builder: (_, snapshot) {
-          if (!snapshotIsOk(snapshot, false)) {
-            return const Center(child: ProgressRing());
-          }
-          final object = snapshot.data;
-          if (object == null) {
-            return const SizedBox.shrink();
-          }
+        builder: (_, object) {
           // 如果数据是文件，则显示内容
-          if (object.isFile) {
+          if (object!.isFile) {
             if (kDebugMode) {
               print("file isBinary =${object.blob?.isBinary}");
             }
@@ -445,7 +436,7 @@ class RepoContentsListView extends StatelessWidget {
           if (object.entries == null) {
             return const SizedBox.shrink();
           }
-          // 找readme文件
+          // 找readme文件，仅限根目录下，其实按情况其它的目录也可以查找下。
           final readmeFile =
               path.isEmpty ? _getReadMeFile(context, object) : '';
           // 返回目录结构
@@ -453,7 +444,8 @@ class RepoContentsListView extends StatelessWidget {
             children: [
               _buildTree(object.entries!),
               const SizedBox(height: 10.0),
-              RepoReadMe(repo: repo, ref: ref, filename: readmeFile),
+              if (readmeFile.isNotEmpty)
+                RepoReadMe(repo: repo, ref: ref, filename: readmeFile),
             ],
           );
         },

@@ -6,7 +6,6 @@ import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
-import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
 import 'package:gh_app/widgets/page.dart';
@@ -91,18 +90,21 @@ class _AssetsPanelState extends State<_AssetsPanel> {
       ),
       content: !_expanded
           ? const SizedBox.shrink()
-          : FutureBuilder(
+          : APIFutureBuilder(
+              waitingWidget: const Center(
+                  child:
+                      SizedBox(width: 20, height: 20, child: ProgressRing())),
               future:
                   APIWrap.instance.repoReleaseAssets(widget.repo, widget.item),
               builder: (_, snapshot) {
-                if (!snapshotIsOk(snapshot, false, false)) {
-                  return const Center(
-                      child: SizedBox(
-                          width: 20, height: 20, child: ProgressRing()));
-                }
-                if (snapshot.hasError || (snapshot.data?.isEmpty ?? true)) {
-                  return const Center(child: Text('没有数据'));
-                }
+                // if (!snapshotIsOk(snapshot, false, false)) {
+                //   return const Center(
+                //       child: SizedBox(
+                //           width: 20, height: 20, child: ProgressRing()));
+                // }
+                // if (snapshot.hasError || (snapshot.data?.isEmpty ?? true)) {
+                //   return const Center(child: Text('没有数据'));
+                // }
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -112,7 +114,7 @@ class _AssetsPanelState extends State<_AssetsPanel> {
                     //   _buildLinkButton(
                     //       'Source code (tar.gz)', item.tarballUrl!),
                     // if (item.assets?.isNotEmpty ?? false)
-                    ...snapshot.data!.data.map((e) =>
+                    ...snapshot.data.map((e) =>
                         _LinkButton(e.name, e.downloadUrl, size: e.size)),
                   ],
                 );
@@ -237,18 +239,10 @@ class ReleasesPage extends StatelessWidget with PageMixin {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return APIFutureBuilder(
         future: APIWrap.instance.repoReleases(repo),
         builder: (_, snapshot) {
-          if (!snapshotIsOk(snapshot, false, false)) {
-            return const Center(
-              child: ProgressRing(),
-            );
-          }
-          if (snapshot.hasError) {
-            return errorDescription(snapshot.error);
-          }
-          final releases = snapshot.data ?? const QLList.empty();
+          final releases = snapshot.data;
           if (releases.isEmpty) {
             return const Center(
               child: Text('没有数据'),

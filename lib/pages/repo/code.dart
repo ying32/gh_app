@@ -8,7 +8,7 @@ class _RepoBranches extends StatelessWidget {
   Widget build(BuildContext context) {
     final repo = context.read<RepoModel>().repo;
 
-    return FutureBuilder(
+    return APIFutureBuilder(
       future: APIWrap.instance.repoRefs(repo),
       builder: (_, snapshot) {
         // if (!snapshotIsOk(snapshot, false, false)) {
@@ -24,8 +24,9 @@ class _RepoBranches extends StatelessWidget {
         //     ],
         //   );
         // }
-        final refs =
-            (snapshot.data?.data ?? [QLRef(name: repo.defaultBranchRef.name)]);
+        final refs = snapshot.isEmpty
+            ? [QLRef(name: repo.defaultBranchRef.name)]
+            : snapshot.data;
         return Row(
           children: [
             Selector2<RepoModel, RepoBranchModel, (QLRepository, String?)>(

@@ -58,23 +58,14 @@ class RepoIssuesPage extends StatelessWidget with PageMixin {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return APIFutureBuilder(
       future: APIWrap.instance.repoIssues(repo),
       builder: (context, snapshot) {
-        if (!snapshotIsOk(snapshot, false, false)) {
-          return const Center(child: ProgressRing());
-        }
-        if (snapshot.hasError) {
-          return errorDescription(snapshot.error);
-        }
-        if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return const Center(child: Text('没有数据'));
-        }
         return Card(
           padding: EdgeInsets.zero,
           child: ListView.separated(
-              itemCount: snapshot.data!.length,
-              itemBuilder: (_, index) => _IssueItem(snapshot.data![index]),
+              itemCount: snapshot.length,
+              itemBuilder: (_, index) => _IssueItem(snapshot[index]),
               separatorBuilder: (_, index) => const Divider(
                     size: 1,
                     direction: Axis.horizontal,

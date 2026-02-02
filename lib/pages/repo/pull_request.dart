@@ -57,24 +57,15 @@ class RepoPullRequestPage extends StatelessWidget with PageMixin {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return APIFutureBuilder(
       future: APIWrap.instance.repoPullRequests(repo),
       builder: (context, snapshot) {
-        if (!snapshotIsOk(snapshot, false, false)) {
-          return const Center(child: ProgressRing());
-        }
-        if (snapshot.hasError) {
-          return errorDescription(snapshot.error);
-        }
-        if (snapshot.data == null || snapshot.data!.isEmpty) {
-          return const Center(child: Text('没有数据'));
-        }
         return Card(
           padding: EdgeInsets.zero,
           child: ListView.separated(
-              itemCount: snapshot.data!.length,
+              itemCount: snapshot.length,
               itemBuilder: (_, index) =>
-                  _PullRequestItem(snapshot.data![index], repo: repo),
+                  _PullRequestItem(snapshot[index], repo: repo),
               separatorBuilder: (_, index) => const Divider(
                     size: 1,
                     direction: Axis.horizontal,

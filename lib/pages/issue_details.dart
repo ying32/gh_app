@@ -176,7 +176,7 @@ class IssueDetailsPage extends StatelessWidget with PageMixin {
           IssueDetailsPage(issue, repo: repo),
           key: ValueKey(
               "${RouterTable.issues}/${repo.fullName}/${issue.number}"),
-          title: "${repo.fullName} issue ${issue.number}",
+          title: "${repo.fullName} issue #${issue.number}",
         );
   }
 }

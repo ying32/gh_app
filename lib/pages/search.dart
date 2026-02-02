@@ -28,7 +28,7 @@ class _SearchPageState extends State<SearchPage>
 
   void _doSearch(String text) {
     if (text.isEmpty) {
-      _showInfo('请输入一个要搜索的关键字', severity: InfoBarSeverity.info);
+      _showInfo('请输入一个要搜索的仓库关键字', severity: InfoBarSeverity.info);
       return;
     }
     _repos = const QLList.empty();
@@ -62,12 +62,18 @@ class _SearchPageState extends State<SearchPage>
           padding: const EdgeInsets.symmetric(vertical: 15.0),
           child: TextBox(
             controller: _controller,
-            placeholder: '请输入一个要搜索的关键字',
+            placeholder: '请输入一个要搜索的仓库关键字，支持github搜索的表达式',
             onEditingComplete: _searching
                 ? null
                 : () {
                     _doSearch(_controller.text.trim());
                   },
+            suffix: IconButton(
+              icon: const Icon(FluentIcons.clear),
+              onPressed: () {
+                _controller.clear();
+              },
+            ),
           ),
         ),
       ),

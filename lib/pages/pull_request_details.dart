@@ -174,7 +174,7 @@ class PullRequestDetails extends StatelessWidget with PageMixin {
     context.read<TabviewModel>().addTab(
           PullRequestDetails(pull, repo: repo),
           key: ValueKey("${RouterTable.pulls}/${repo.fullName}/${pull.number}"),
-          title: "${repo.fullName} pull Request ${pull.number}",
+          title: "${repo.fullName} pull Request #${pull.number}",
         );
   }
 }

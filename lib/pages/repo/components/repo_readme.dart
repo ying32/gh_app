@@ -15,12 +15,11 @@ class RepoReadMe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return APIFutureBuilder(
+      noDataWidget: const SizedBox.shrink(),
+      errorWidget: const SizedBox.shrink(),
       future: APIWrap.instance.repoReadMe(repo, filename, ref: ref),
       builder: (_, snapshot) {
-        if (!snapshotIsOk(snapshot, false, false)) {
-          return const SizedBox.shrink();
-        }
         return Card(
           child: Column(
             children: [
@@ -42,7 +41,7 @@ class RepoReadMe extends StatelessWidget {
                         )),
                 ],
               ),
-              MarkdownBlockPlusDefaultAction(snapshot.data),
+              MarkdownBlockPlusDefaultAction(snapshot),
             ],
           ),
         );
