@@ -1,6 +1,6 @@
 # gh_app
 
-一个Github桌面版App（样式仿照github Web版），使用github [GraphQL API V4](https://docs.github.com/zh/graphql) + 部分 [REST API v3](https://docs.github.com/zh/rest) 实现
+一个Github桌面版App（样式仿照github Web版），使用github [GraphQL API V4](https://docs.github.com/zh/graphql) 实现
 
 * flutter: 3.22.1
 * dart: 3.4.1
@@ -9,13 +9,18 @@
 
 写这个的初衷是因为国内访问github太难了，但是使用API方式比较正常，而且官方的github桌面版实在用不习惯，貌似也满足不了我的要求。
 
+## 进度
+
+**注：因为对GraphQL也不熟，一边写一边学的。**
+
+
 
 ## 其它
 
 ### github API
 
 * [GraphQL v4](https://docs.github.com/zh/graphql)
-* [REST v3](https://docs.github.com/zh/rest)
+* ~~[REST v3](https://docs.github.com/zh/rest)~~
 
 ### API 的限制
 
