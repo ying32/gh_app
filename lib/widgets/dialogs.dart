@@ -311,10 +311,11 @@ class ExitAppDialog extends StatelessWidget {
     );
   }
 
-  static void show(BuildContext context, bool mounted) async {
-    bool isPreventClose = await windowManager.isPreventClose();
-    if (isPreventClose && mounted) {
-      showDialog(context: context, builder: (_) => const ExitAppDialog());
-    }
+  static void show(BuildContext context, bool mounted) {
+    windowManager.isPreventClose().then((isPreventClose) {
+      if (isPreventClose && mounted) {
+        showDialog(context: context, builder: (_) => const ExitAppDialog());
+      }
+    });
   }
 }
