@@ -1,81 +1,47 @@
 import 'package:gh_app/utils/utils.dart';
-import 'package:github/github.dart';
 
-import 'cache_github.dart';
 import 'graphql.dart';
 import 'graphql_querys.dart';
 
-class GitHubAPI {
-  GitHubAPI({
-    this.auth = const Authentication.anonymous(),
-  })  : restful = CacheGitHub(auth: auth),
-        graphql = GitHubGraphQL(auth: auth);
-
-  /// Authentication Information
-  final Authentication auth;
-
-  /// V3版本API，使用Restful操作的
-  final CacheGitHub restful;
-
-  /// V4版本API，使用GraphQL操作的
-  final GitHubGraphQL graphql;
-
-  /// 是否使用匿名方式
-  bool get isAnonymous => auth.isAnonymous;
-}
-
 /// 默认的API
-GitHubAPI gitHubAPI = GitHubAPI();
-
-/// 认证类型
-enum AuthType {
-  anonymous,
-  accessToken,
-  oauth2,
-  userPassword,
-}
+var gitHubAPI = GitHubGraphQL();
 
 class AuthField {
-  const AuthField(this.authType, this.tokenOrUserName, [this.password]);
+  const AuthField(this.authType, this.token);
   final AuthType authType;
-  final String tokenOrUserName;
-  final String? password;
+  final String token;
 
   Map<String, dynamic> toJson() => {
         "auth_type": authType.name,
-        "token_or_username": tokenOrUserName,
-        if (password != null) "password": password,
+        "token": token,
       };
 
   AuthField.fromJson(Map<String, dynamic> json)
       : authType = enumFromStringValue(
             AuthType.values, json['auth_type'], AuthType.anonymous),
-        tokenOrUserName = json['token_or_username'] ?? '',
-        password = json['password'];
+        token = json['token'] ?? json['token_or_username'] ?? ''; // 兼容原来的，之后移除掉
 }
 
 /// 创建github实例，根据配置的类型
 bool createGithub(AuthField value) {
   // 其实不判断也没事，反正那啥一样
-  if (value.tokenOrUserName.isEmpty) return false;
+  if (value.token.isEmpty) return false;
   switch (value.authType) {
     case AuthType.accessToken:
       gitHubAPI =
-          GitHubAPI(auth: Authentication.bearerToken(value.tokenOrUserName));
+          GitHubGraphQL(auth: Authorization.withBearerToken(value.token));
     case AuthType.oauth2:
       gitHubAPI =
-          GitHubAPI(auth: Authentication.withToken(value.tokenOrUserName));
-    case AuthType.userPassword:
-      gitHubAPI = GitHubAPI(
-          auth: Authentication.basic(value.tokenOrUserName, value.password));
+          GitHubGraphQL(auth: Authorization.withOAuth2Token(value.token));
+
     default:
-      gitHubAPI = GitHubAPI();
+      gitHubAPI = GitHubGraphQL();
   }
   return true;
 }
 
 void clearGithubInstance() {
-  gitHubAPI = GitHubAPI();
+  gitHubAPI = GitHubGraphQL();
 }
 
 /// Github的API包装
@@ -91,25 +57,25 @@ class APIWrap {
 
   /// 当前user信息
   Future<QLUser?> get currentUser async =>
-      _currentUser ??= (gitHubAPI.auth.isAnonymous
+      _currentUser ??= (gitHubAPI.isAnonymous
           ? null
-          : await gitHubAPI.graphql
-              .query(QLQuery(QLQueries.queryUser()), convert: QLUser.fromJson));
+          : await gitHubAPI.query(QLQuery(QLQueries.queryUser()),
+              convert: QLUser.fromJson));
 
   /// 指定用户信息
-  Future<QLUser?> userInfo(String name) => gitHubAPI.graphql
+  Future<QLUser?> userInfo(String name) => gitHubAPI
       .query(QLQuery(QLQueries.queryUser(name)), convert: QLUser.fromJson);
 
   /// 指定组织信息
   Future<QLOrganization?> organizationInfo(String name) =>
-      gitHubAPI.graphql.query(QLQuery(QLQueries.queryOrganization(name)),
+      gitHubAPI.query(QLQuery(QLQueries.queryOrganization(name)),
           convert: QLOrganization.fromJson);
 
   /// 获取仓库列表信息
   /// TODO: 这里还要传个东西，判断是否为组织的
   Future<QLList<QLRepository>> userRepos(String owner) async {
-    final res = await gitHubAPI.graphql
-        .query(QLQuery(QLQueries.queryRepos(owner: owner)));
+    final res =
+        await gitHubAPI.query(QLQuery(QLQueries.queryRepos(owner: owner)));
     if (res == null) return const QLList.empty();
     return QLList.fromJson(
         (res['viewer'] ?? res['user'] ?? res['organization'])?['repositories'],
@@ -118,14 +84,14 @@ class APIWrap {
 
   /// 用户信息
   Future<QLRepository?> userRepo(QLRepository repo) async {
-    return gitHubAPI.graphql.query(
+    return gitHubAPI.query(
         QLQuery(QLQueries.queryRepo(repo.owner!.login, repo.name)),
         convert: QLRepository.fromJson);
   }
 
   /// 当前仓库releases
   Future<QLList<QLRelease>> repoReleases(QLRepository repo) async {
-    final res = await gitHubAPI.graphql.query(
+    final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryRepoReleases(repo.owner!.login, repo.name)));
     if (res == null) return const QLList.empty();
     return QLList.fromJson(res['repository']?['releases'], QLRelease.fromJson);
@@ -134,9 +100,9 @@ class APIWrap {
   /// 指定release的Assets文件列表
   Future<QLList<QLReleaseAsset>> repoReleaseAssets(
       QLRepository repo, QLRelease release) async {
-    final res = await gitHubAPI.graphql.query(QLQuery(
-        QLQueries.queryRepoReleaseAssets(repo.owner!.login, repo.name,
-            tagName: release.tagName)));
+    final res = await gitHubAPI.query(QLQuery(QLQueries.queryRepoReleaseAssets(
+        repo.owner!.login, repo.name,
+        tagName: release.tagName)));
     if (res == null) return const QLList.empty();
     final obj = res['repository']?['release']?['releaseAssets'];
     if (obj == null) return const QLList.empty();
@@ -145,7 +111,7 @@ class APIWrap {
 
   /// 搜索
   Future<QLList<QLRepository>> searchRepo(String query) async {
-    final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.search(query)));
+    final res = await gitHubAPI.query(QLQuery(QLQueries.search(query)));
     if (res == null) return const QLList.empty();
     return QLList.fromJson(res['search'], QLRepository.fromJson);
   }
@@ -153,7 +119,7 @@ class APIWrap {
   /// 分支列表
   Future<QLList<QLRef>> repoRefs(QLRepository repo,
       {String refPrefix = 'refs/heads/'}) async {
-    final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.queryRepoRefs(
+    final res = await gitHubAPI.query(QLQuery(QLQueries.queryRepoRefs(
         repo.owner!.login, repo.name,
         refPrefix: refPrefix)));
     if (res == null) return const QLList.empty();
@@ -165,7 +131,7 @@ class APIWrap {
   /// 目录内容缓存
   Future<QLObject?> repoContents(QLRepository repo, String path,
       {String? ref}) async {
-    final res = await gitHubAPI.graphql.query(QLQuery(QLQueries.queryObject(
+    final res = await gitHubAPI.query(QLQuery(QLQueries.queryObject(
         repo.owner!.login, repo.name,
         path: path, ref: ref)));
     if (res == null) return null;
@@ -186,9 +152,8 @@ class APIWrap {
       {required String name,
       required bool isFollowers,
       required int count}) async {
-    final res = await gitHubAPI.graphql.query(QLQuery(
-        QLQueries.queryFollowerUsers(
-            name: name, isFollowers: true, count: count)));
+    final res = await gitHubAPI.query(QLQuery(QLQueries.queryFollowerUsers(
+        name: name, isFollowers: true, count: count)));
     if (res == null) return const QLList.empty();
     final input =
         (res['viewer'] ?? res['user'] ?? res['organization'])?['followers'];
@@ -213,7 +178,7 @@ class APIWrap {
     required T Function(Map<String, dynamic>) convert,
   }) async {
     //open, closed, all
-    final res = await gitHubAPI.graphql.query(QLQuery(
+    final res = await gitHubAPI.query(QLQuery(
         QLQueries.queryRepoIssuesOrPullRequests(repo.owner!.login, repo.name,
             states: isMerged
                 ? 'MERGED'
@@ -251,9 +216,9 @@ class APIWrap {
     required int number,
     bool isIssues = true,
   }) async {
-    final res = await gitHubAPI.graphql.query(QLQuery(
-        QLQueries.queryIssueComments(repo.owner!.login, repo.name, number,
-            isIssues: isIssues)));
+    final res = await gitHubAPI.query(QLQuery(QLQueries.queryIssueComments(
+        repo.owner!.login, repo.name, number,
+        isIssues: isIssues)));
     if (res == null) return const QLList.empty();
     final input =
         res['repository']?[isIssues ? 'issue' : 'pullRequest']?['comments'];

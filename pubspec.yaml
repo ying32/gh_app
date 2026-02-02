@@ -39,8 +39,9 @@ dependencies:
   fluent_ui: 4.8.7
   #fluent_ui: 4.10.0
 
+  # 改用graphql了，所以这个不需要了
   # 这个是github接口，9.25.0 需要dart 3.5
-  github: 9.24.0
+  #github: 9.24.0
 
   crypto: ^3.0.3
 

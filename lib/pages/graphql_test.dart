@@ -79,7 +79,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
           context: context, severity: InfoBarSeverity.error);
       return;
     }
-    gitHubAPI.graphql.query(QLQuery(_controller.text)).then((e) {
+    gitHubAPI.query(QLQuery(_controller.text)).then((e) {
       if (e is Map) {
         setState(() {
           _treeNodes.addAll(_buildTreeViewItems(e));

@@ -2,10 +2,11 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 
-const _authTypeStrings = ["匿名", "Access Token", "OAuth2", "帐户密码"];
+const _authTypeStrings = ["匿名", "Access Token", "OAuth2"];
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -67,15 +68,6 @@ class _LoginPageState extends State<LoginPage> {
           // });
           _showInfo('OAuth2 还没有实现哦', severity: InfoBarSeverity.error);
 
-        case AuthType.userPassword:
-          final password = _passwordController.text.trim();
-          final auth = AuthField(
-              _authType,
-              _tokenOrUserNameController.text.trim(),
-              password.isEmpty ? null : password);
-          AppConfig.instance.auth = auth;
-          createGithub(auth);
-          break;
         default:
           break;
       }
@@ -113,9 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                           value: _authType,
                           items: AuthType.values
                               //TODO: 这里过滤掉匿名和使用帐号密码登录方式
-                              .where((e) =>
-                                  e != AuthType.anonymous &&
-                                  e != AuthType.userPassword)
+                              .where((e) => e != AuthType.anonymous)
                               .map((e) => ComboBoxItem(
                                     value: e,
                                     child: Text(_authTypeStrings[e.index]),
@@ -148,20 +138,10 @@ class _LoginPageState extends State<LoginPage> {
               ),
               if (_authType != AuthType.oauth2)
                 InfoLabel(
-                  label: switch (_authType) {
-                    AuthType.userPassword => '用户名',
-                    _ => _authTypeStrings[_authType.index],
-                  },
+                  label: _authTypeStrings[_authType.index],
                   child: TextBox(
                     controller: _tokenOrUserNameController,
                   ),
-                ),
-              if (_authType == AuthType.userPassword)
-                InfoLabel(
-                  label: '密码',
-                  child: PasswordBox(
-                      controller: _passwordController,
-                      revealMode: PasswordRevealMode.peekAlways),
                 ),
               InfoLabel(
                 label: '',

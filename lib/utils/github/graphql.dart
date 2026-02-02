@@ -1,10 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:github/github.dart';
 import 'package:http/http.dart' as http;
 
-import 'cache_github.dart';
+import 'http_cache.dart';
 
 /// 分页信息，按规则传递。比如：
 /// 每页10个
@@ -1058,21 +1057,51 @@ class QLQuery {
 /// https://docs.github.com/zh/graphql
 ///
 
+typedef JSONConverter<T> = T Function(Map<String, dynamic>);
+
+class GitHubGraphQLError {
+  const GitHubGraphQLError(this.error);
+  final Map<String, dynamic> error;
+}
+
+/// 认证类型
+enum AuthType {
+  anonymous,
+  accessToken,
+  oauth2,
+}
+
+/// 认证方式
+class Authorization {
+  const Authorization({required this.type, this.token});
+  final AuthType type;
+  final String? token;
+  const Authorization.anonymous()
+      : type = AuthType.anonymous,
+        token = null;
+  const Authorization.withOAuth2Token(this.token) : type = AuthType.oauth2;
+  const Authorization.withBearerToken(this.token) : type = AuthType.accessToken;
+}
+
 class GitHubGraphQL {
   GitHubGraphQL({
-    this.auth = const Authentication.anonymous(),
-    this.endpoint = 'https://api.github.com/graphql',
-  }) : _github = CacheGitHub(
-            auth: auth, endpoint: endpoint, version: '', isGraphQL: true);
+    this.auth = const Authorization.anonymous(),
+  });
+
+  /// graphql API地址
+  static const graphqlApiUrl = 'https://api.github.com/graphql';
 
   /// 认证信息
-  Authentication auth;
+  Authorization auth;
 
-  /// API挂截点
-  final String endpoint;
+  /// http客户端
+  final http.Client _client = http.Client();
 
-  /// github实例
-  final CacheGitHub _github;
+  /// 缓存
+  final HTTPCache _cache = HTTPCache();
+
+  /// 是否使用匿名方式
+  bool get isAnonymous => auth.type == AuthType.anonymous;
 
   /// 一个查询
   /// ```json
@@ -1082,11 +1111,9 @@ class GitHubGraphQL {
     QLQuery query, {
     void Function(http.Response response)? fail,
     Map<String, String>? headers,
-    Map<String, dynamic>? params,
-    JSONConverter<S, T?>? convert,
+    JSONConverter<T>? convert,
   }) =>
-      _request(query,
-          fail: fail, headers: headers, params: params, convert: convert);
+      _request(query, fail: fail, headers: headers, convert: convert);
 
   //  "Content-Type: application/json",
   //   "Accept: application/vnd.github.v4.idl"
@@ -1097,54 +1124,111 @@ class GitHubGraphQL {
     void Function(http.Response response)? fail,
     Map<String, String>? headers,
     Map<String, dynamic>? params,
-    JSONConverter<S, T?>? convert,
+    JSONConverter<T>? convert,
   }) async =>
-      _request(query,
-          fail: fail, headers: headers, params: params, convert: convert);
+      _request(query, fail: fail, headers: headers, convert: convert);
 
   /// 忽略path字段，强制为[endpoint]，本可不这样做的，但是他内部的[request]方法在判断[path]时
   /// 附加了一个”/“符号，造成服务端识为这是一个rest API。
   /// 暂时不公开，之后再看吧
   /// Accept: application/vnd.github+json.
-  Future<T> _request<S, T>(
+  Future<T> _request<T>(
     QLQuery query, {
     Map<String, String>? headers,
-    Map<String, dynamic>? params,
     void Function(http.Response response)? fail,
-    JSONConverter<S, T?>? convert,
+    JSONConverter<T>? convert,
   }) async {
-    if (kDebugMode) {
-      //print("body: ${query.jsonText}");
+    final queryBody = query.jsonText;
+    final key = _cache.genKey("POST:$graphqlApiUrl:$queryBody");
+    // 已经缓存了，直接返回缓存
+    var data = await _cache.readCachedFile(key);
+    // 是否需要更新缓存
+    var needUpdate = data == null; // 数据为null则没有本地缓存
+    var needWait = data == null; // 是否需要等待
+    if (data != null && data.isNotEmpty) {
+      // 本次是否已经更新过缓存了
+      if (!_cache.isCached(key)) {
+        needUpdate = true;
+      }
+    }
+    // 是否需要更新
+    if (needUpdate) {
+      //print("需要更新");
+      if (needWait) {
+        data =
+            await _doRequest(cachedKey: key, body: queryBody, headers: headers);
+      } else {
+        _doRequest(cachedKey: key, body: queryBody, headers: headers);
+      }
+    } else {
+      //print("正在使用缓存");
     }
 
-    //convert ??= (input) => input as T?;
-    headers ??= {};
-    final response = await _github.request("POST", endpoint,
-        headers: headers,
-        params: params,
-        body: query.jsonText,
-        statusCode: 200,
-        fail: fail,
-        preview: null);
-    final json = jsonDecode(response.body);
+    /// 取数据段
+    data = data?['data'];
+    if (data == null) return null as T;
+    // 实际数据节点
+    if (convert == null) {
+      return data as T;
+    }
+    return convert(data);
+  }
 
+  Future<Map<String, dynamic>> _doRequest({
+    required String cachedKey,
+    required String body,
+    Map<String, String>? headers,
+  }) async {
+    if (kDebugMode) {
+      //print("body: body");
+    }
+    headers ??= <String, String>{};
+    // ????用这个，还是？，好像也不一定要设置哈
+    //headers['Accept'] = 'application/vnd.github+json';
+    headers['Accept'] = 'application/json';
+    headers['Content-Type'] = 'application/json';
+
+    // 设置认证方式
+    if (auth.type != AuthType.anonymous && (auth.token?.isNotEmpty ?? false)) {
+      headers.putIfAbsent(
+          'Authorization',
+          () => switch (auth.type) {
+                AuthType.accessToken => 'Bearer ${auth.token}',
+                AuthType.oauth2 => 'token ${auth.token}',
+                _ => ''
+              });
+    }
+    // user-Agent
+    headers.putIfAbsent('User-Agent', () => 'GitHub PC/1.0.0');
+    // 新建一个请求
+    final req = http.Request('POST', Uri.parse(graphqlApiUrl));
+    // 添加http头
+    req.headers.addAll(headers);
+    // 设置body数据
+    req.body = body;
+    // 等待结果
+    final resp = await http.Response.fromStream(await _client.send(req));
+    // 都没必要判断状态码了，反正他有没有错误在某些情况下都返回200。
+    // if (response.statusCode != 200) {}
+    final json = jsonDecode(resp.body);
     // 有错误，这个错误在定义了[statusCode]时会解析
     // {"message":"Problems parsing JSON","documentation_url":"https://docs.github.com/graphql","status":"400"}
     // 实际为422错误，但没有哈
     // {"errors":[{"path":["query","DSD"],"extensions":{"code":"undefinedField","typeName":"Query","fieldName":"DSD"},"locations":[{"line":11,"column":4}],"message":"Field 'DSD' doesn't exist on type 'Query'"}]}
     // 这个错误貌似依然返回200？
-    if (json['errors'] != null && response.statusCode == 200) {
+    if (json['errors'] != null ||
+        (resp.statusCode != 200 && json['message'] != null)) {
       // 按理说应该状态码返回422，但没返回的原因是啥？？？？
-      //response = response.o = 422;
-      // 有错误了，这里他错误了也会返回个200，造成原来的解析不了
-      _github.handleStatusCode(http.Response.bytes(response.bodyBytes, 422,
-          headers: response.headers, isRedirect: response.isRedirect));
+      throw GitHubGraphQLError(json); //懒得处理了，直接整个错误得了
     }
-    // 实际数据节点
-    final data = json['data']; // ?? json
-    if (convert == null) {
-      return data;
+    // 不为200的，直接返回状态码和状态码描述
+    if (resp.statusCode != 200) {
+      throw GitHubGraphQLError(
+          {"code": resp.statusCode, "message": resp.reasonPhrase});
     }
-    return convert(data) as T;
+    // 写缓存数据
+    _cache.writeFileCache(cachedKey, resp.bodyBytes);
+    // 200的时候才写数据
+    return json;
   }
 }
