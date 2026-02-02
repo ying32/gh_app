@@ -9,6 +9,7 @@ import 'package:gh_app/pages/pulls.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
+import 'package:gh_app/pages/starred_repos.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
@@ -109,13 +110,11 @@ class _LeftNav extends StatelessWidget {
       title: '我的仓库',
       body: const ReposPage(),
     ),
-    // todo: 还没写哈
     _NavItem(
       key: const ValueKey(RouterTable.stars),
       icon: const DefaultIcon.star(size: 18),
       title: '我收藏的仓库',
-      //body: const ReposPage(),
-      body: const SizedBox.shrink(),
+      body: const StarredReposPage(),
     ),
   ];
 

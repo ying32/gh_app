@@ -1067,6 +1067,9 @@ typedef JSONConverter<T> = T Function(Map<String, dynamic>);
 class GitHubGraphQLError {
   const GitHubGraphQLError(this.error);
   final Map<String, dynamic> error;
+
+  @override
+  String toString() => jsonEncode(error);
 }
 
 /// 代码提取自 github-9.24.0\lib\src\common\github.dart - GitHub类。

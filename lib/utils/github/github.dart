@@ -96,12 +96,14 @@ class APIWrap {
 
   /// 获取仓库列表信息
   /// TODO: 这里还要传个东西，判断是否为组织的
-  Future<QLList<QLRepository>> userRepos(String owner) async {
-    final res =
-        await gitHubAPI.query(QLQuery(QLQueries.queryRepos(owner: owner)));
+  Future<QLList<QLRepository>> userRepos(String owner,
+      {bool isStarred = false}) async {
+    final res = await gitHubAPI.query(
+        QLQuery(QLQueries.queryRepos(owner: owner, isStarred: isStarred)));
     if (res == null) return const QLList.empty();
     return QLList.fromJson(
-        (res['viewer'] ?? res['user'] ?? res['organization'])?['repositories'],
+        (res['viewer'] ?? res['user'] ?? res['organization'])?[
+            isStarred ? 'starredRepositories' : 'repositories'],
         QLRepository.fromJson);
   }
 

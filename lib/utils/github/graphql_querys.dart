@@ -384,10 +384,17 @@ class QLQueries {
     int count = 50,
     String sortDirection = "DESC",
     String sortField = "CREATED_AT",
+    bool isStarred = false,
   }) {
+    // 贡献过的仓库 topRepositories
+    if (isStarred) {
+      // 只有这一个参数
+      sortField = 'STARRED_AT';
+    }
+
     // 只查询user的仓库信息
     return '''query {  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {
-    repositories(first:$count, orderBy: {direction: $sortDirection, field: $sortField}) {
+    ${isStarred ? 'starredRepositories' : 'repositories'}(first:$count, orderBy: {direction: $sortDirection, field: $sortField}) {
       totalCount
       pageInfo {
         endCursor
