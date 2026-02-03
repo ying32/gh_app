@@ -33,7 +33,8 @@ class HTTPCache {
     final file = File(p.join(await apiCacheRoot, key));
     if (await file.exists()) {
       try {
-        return jsonDecode(await file.readAsString());
+        return jsonDecode(
+            utf8.decode(gzip.decoder.convert(await file.readAsBytes())));
       } catch (e) {
         //
       }
@@ -48,7 +49,8 @@ class HTTPCache {
       final file = File(p.join(dir.path, key));
       // 打上标记
       _caches[key] = null;
-      return file.writeAsBytes(data, flush: true);
+
+      return file.writeAsBytes(gzip.encoder.convert(data), flush: true);
     } catch (e) {
       // 保存失败
     }

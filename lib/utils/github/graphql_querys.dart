@@ -820,3 +820,17 @@ class QLQueries {
 //        }
 //    }
 // }
+
+/// https://docs.github.com/zh/graphql/reference/objects#topic
+// topics
+//query {
+//
+//     topic(name: "govcl") {
+//        __typename
+//       name
+//       repositories(first: 10) {
+//           totalCount
+//           nodes {  name }
+//        }
+//     }
+// }
