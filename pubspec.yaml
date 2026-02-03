@@ -79,6 +79,12 @@ dependencies:
 
   pull_to_refresh: ^2.0.0
 
+  #flutter_widget_from_html: 0.15.3
+  flutter_widget_from_html_core: ^0.15.2
+
+dependency_overrides:
+  #chewie: 1.7.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -99,6 +105,8 @@ dev_dependencies:
   # dart run gh_app:pasercss
   # css解析，用于prism-themes生成dart导入
   csslib: ^1.0.2
+
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

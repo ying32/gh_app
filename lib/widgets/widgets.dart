@@ -65,13 +65,14 @@ class TagLabel extends StatelessWidget {
   });
 
   final Color color;
-  final Widget text;
+  final Widget? text;
   final EdgeInsetsGeometry? padding;
   final double? radius;
   final double? opacity;
 
   @override
   Widget build(BuildContext context) {
+    if (text == null) return const SizedBox.shrink();
     return Container(
       padding:
           padding ?? const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
@@ -112,9 +113,11 @@ class TagLabel extends StatelessWidget {
           color: color,
           padding: padding,
           radius: radius,
-          text: Text(text,
-              style: TextStyle(
-                  fontSize: 11, color: color, fontWeight: fontWeight)));
+          text: text.isEmpty
+              ? null
+              : Text(text,
+                  style: TextStyle(
+                      fontSize: 11, color: color, fontWeight: fontWeight)));
 }
 
 /// 链接跳转的？？？？

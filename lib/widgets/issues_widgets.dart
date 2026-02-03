@@ -1,4 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -6,6 +8,7 @@ import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 
+import 'dialogs.dart';
 import 'markdown_plus.dart';
 
 /// issues的标签
@@ -101,7 +104,7 @@ class IssueCommentItem extends StatelessWidget {
                     Text(
                         '${item?.author?.login} 打开于 ${item?.createdAt?.toLabel}'),
                     const Spacer(),
-                    if (!isFirst)
+                    if (!isFirst && (item?.author?.login.isNotEmpty ?? false))
                       TagLabel.other(item?.author?.login == owner
                           ? '所有者'
                           : item?.author?.login == openAuthor
@@ -113,7 +116,19 @@ class IssueCommentItem extends StatelessWidget {
                   padding: EdgeInsets.symmetric(vertical: 8.0),
                   child: Divider(),
                 ),
-                if (item?.body.isNotEmpty ?? false)
+                // 优先显示html格式的
+                if (item?.bodyHTML?.isNotEmpty ?? false)
+                  SelectionArea(
+                    child: HtmlWidget(
+                      item!.bodyHTML!,
+                      baseUrl: Uri.tryParse(githubUrl),
+                      onTapUrl: (link) {
+                        onDefaultLinkAction(context, link);
+                        return true;
+                      },
+                    ),
+                  )
+                else if (item?.body.isNotEmpty ?? false)
                   MarkdownBlockPlus(data: item!.body),
               ],
             )),
