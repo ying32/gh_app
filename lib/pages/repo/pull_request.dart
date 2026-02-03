@@ -62,17 +62,32 @@ class RepoPullRequestPage extends StatelessWidget {
       builder: (context, snapshot) {
         return Card(
           padding: EdgeInsets.zero,
-          child: ListView.separated(
-              itemCount: snapshot.length,
-              itemBuilder: (_, index) =>
-                  _PullRequestItem(snapshot[index], repo: repo),
-              separatorBuilder: (_, index) => const Divider(
-                    size: 1,
-                    direction: Axis.horizontal,
-                    style: DividerThemeData(
-                        verticalMargin: EdgeInsets.zero,
-                        horizontalMargin: EdgeInsets.zero),
-                  )),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView.separated(
+                    itemCount: snapshot.length,
+                    itemBuilder: (_, index) =>
+                        _PullRequestItem(snapshot[index], repo: repo),
+                    separatorBuilder: (_, index) => const Divider(
+                          size: 1,
+                          direction: Axis.horizontal,
+                          style: DividerThemeData(
+                              verticalMargin: EdgeInsets.zero,
+                              horizontalMargin: EdgeInsets.zero),
+                        )),
+              ),
+              if (snapshot.pageInfo != null && snapshot.totalCount > 0)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                      bottom: 8.0, top: 8.0, end: 2),
+                  child: PaginationBar(
+                      pageInfo: snapshot.pageInfo!,
+                      totalCount: snapshot.totalCount,
+                      pageSize: snapshot.pageSize),
+                ),
+            ],
+          ),
         );
       },
     );

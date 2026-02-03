@@ -654,6 +654,7 @@ class QLQueries {
       hasNextPage
       hasPreviousPage
     }
+    repositoryCount
     nodes {
        ... on Repository {
             name

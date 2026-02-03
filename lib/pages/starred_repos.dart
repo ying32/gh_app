@@ -13,7 +13,7 @@ class StarredReposPage extends StatelessWidget {
     return APIFutureBuilder(
       future: APIWrap.instance.userRepos(owner, isStarred: true),
       builder: (_, snapshot) {
-        return RepoListView(repos: snapshot);
+        return RepoListView(repos: snapshot, showOpenIssues: false);
       },
     );
   }

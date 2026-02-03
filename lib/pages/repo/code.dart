@@ -17,6 +17,12 @@ class _RepoBranches extends StatelessWidget {
           child: Selector<RepoBranchModel, QLList<QLRef>>(
             selector: (_, model) => model.refs,
             builder: (_, refs, __) {
+              if (refs.isEmpty) {
+                return const SizedBox(
+                    height: 30,
+                    width: 100,
+                    child: Center(child: ProgressRing()));
+              }
               return SingleChildScrollView(
                 child: Column(
                     mainAxisSize: MainAxisSize.min,

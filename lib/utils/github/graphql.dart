@@ -44,10 +44,12 @@ class QLList<T> {
   const QLList({
     this.totalCount = 0,
     this.pageInfo,
+    this.pageSize = 0,
   }) : _data = const [];
   final List<T> _data;
   final int totalCount;
   final QLPageInfo? pageInfo;
+  final int pageSize;
 
   /// 内部数据
   List<T> get data => _data;
@@ -59,12 +61,12 @@ class QLList<T> {
   //void clear() => _data.clear();
 
   QLList.fromJson(
-    Map<String, dynamic> input,
-    T Function(Map<String, dynamic>) convert,
-  )   : _data = input['nodes'] == null
+      Map<String, dynamic> input, T Function(Map<String, dynamic>) convert,
+      {this.pageSize = 0, String? totalCountAlias})
+      : _data = input['nodes'] == null
             ? []
             : List.from(input['nodes'] as List).map((e) => convert(e)).toList(),
-        totalCount = input['totalCount'] ?? 0,
+        totalCount = input[totalCountAlias ?? 'totalCount'] ?? 0,
         pageInfo = input['pageInfo'] == null
             ? null
             : QLPageInfo.fromJson(input['pageInfo']);
@@ -73,6 +75,7 @@ class QLList<T> {
   const QLList.empty()
       : _data = const [],
         totalCount = 0,
+        pageSize = 0,
         pageInfo = null;
 }
 
@@ -665,6 +668,7 @@ class QLIssueOrPullRequestOrCommentBase {
   const QLIssueOrPullRequestOrCommentBase({
     this.author,
     this.body = '',
+    this.bodyHTML,
     this.createdAt,
     this.editor,
     this.lastEditedAt,
@@ -676,6 +680,8 @@ class QLIssueOrPullRequestOrCommentBase {
 
   /// 内容
   final String body;
+
+  final String? bodyHTML;
 
   /// 创建时间
   final DateTime? createdAt;
@@ -695,6 +701,7 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
   const QLIssueOrPullRequest({
     super.author,
     super.body,
+    super.bodyHTML,
     super.createdAt,
     super.editor,
     super.lastEditedAt,
@@ -751,6 +758,7 @@ class QLIssue extends QLIssueOrPullRequest {
     super.author,
     super.title,
     super.body,
+    super.bodyHTML,
     super.closedAt,
     super.createdAt,
     super.editor,
@@ -772,6 +780,7 @@ class QLIssue extends QLIssueOrPullRequest {
               : QLActor.fromJson(input['author']),
           title: input['title'] ?? '',
           body: input['body'] ?? '',
+          bodyHTML: input['bodyHTML'],
           closedAt: _parseDateTime(input['closedAt']),
           createdAt: _parseDateTime(input['createdAt']),
           editor: input['editor'] == null
@@ -799,6 +808,7 @@ class QLPullRequest extends QLIssueOrPullRequest {
     super.author,
     super.title,
     super.body,
+    super.bodyHTML,
     super.closedAt,
     super.createdAt,
     super.editor,
@@ -823,6 +833,7 @@ class QLPullRequest extends QLIssueOrPullRequest {
               : QLActor.fromJson(input['author']),
           title: input['title'] ?? '',
           body: input['body'] ?? '',
+          bodyHTML: input['bodyHTML'],
           closedAt: _parseDateTime(input['closedAt']),
           createdAt: _parseDateTime(input['createdAt']),
           editor: input['editor'] == null
@@ -847,6 +858,7 @@ class QLComment extends QLIssueOrPullRequestOrCommentBase {
   const QLComment({
     super.author,
     super.body,
+    super.bodyHTML,
     super.createdAt,
     super.editor,
     super.lastEditedAt,
@@ -875,6 +887,7 @@ class QLComment extends QLIssueOrPullRequestOrCommentBase {
               ? null
               : QLActor.fromJson(input['author']),
           body: input['body'] ?? '',
+          bodyHTML: input['bodyHTML'],
           createdAt: _parseDateTime(input['createdAt']),
           editor: input['editor'] == null
               ? null

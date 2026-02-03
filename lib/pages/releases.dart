@@ -250,17 +250,36 @@ class ReleasesPage extends StatelessWidget {
               child: Text('没有数据'),
             );
           }
-          return ListView.separated(
-              itemCount: releases.length,
-              padding: EdgeInsetsDirectional.only(
-                bottom: kPageDefaultVerticalPadding,
-                // start: PageHeader.horizontalPadding(context),
-                end: PageHeader.horizontalPadding(context),
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.separated(
+                    itemCount: releases.length,
+                    padding: EdgeInsetsDirectional.only(
+                      bottom: kPageDefaultVerticalPadding,
+                      // start: PageHeader.horizontalPadding(context),
+                      end: PageHeader.horizontalPadding(context),
+                    ),
+                    itemBuilder: (context, index) =>
+                        _RepoReleaseItem(releases[index], repo: repo),
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const SizedBox(height: 30)),
               ),
-              itemBuilder: (context, index) =>
-                  _RepoReleaseItem(releases[index], repo: repo),
-              separatorBuilder: (BuildContext context, int index) =>
-                  const SizedBox(height: 30));
+              if (snapshot.pageInfo != null && snapshot.totalCount > 0)
+                Padding(
+                  padding: EdgeInsetsDirectional.only(
+                    bottom: 8.0,
+                    top: 8.0,
+                    // start: PageHeader.horizontalPadding(context),
+                    end: PageHeader.horizontalPadding(context),
+                  ),
+                  child: PaginationBar(
+                      pageInfo: snapshot.pageInfo!,
+                      totalCount: snapshot.totalCount,
+                      pageSize: snapshot.pageSize),
+                ),
+            ],
+          );
         });
   }
 

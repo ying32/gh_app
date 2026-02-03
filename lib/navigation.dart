@@ -79,7 +79,7 @@ class NavigationPage extends StatelessWidget {
                   // semanticLabel: 'Document #$index',
                   icon: const DefaultIcon.home(),
                   body: const HomePage(),
-                  //closeIcon: FluentIcons.emoji,
+                  closeIcon: null,
                   onClosed: null)
             ]),
         child: const _InternalNavigationPage());
@@ -200,6 +200,7 @@ class _MainTabView extends StatelessWidget {
               onChanged: (index) {
                 context.read<TabviewModel>().currentIndex = index;
               },
+              shortcutsEnabled: false,
               tabWidthBehavior: TabWidthBehavior.sizeToContent,
               closeButtonVisibility: CloseButtonVisibilityMode.always,
               showScrollButtons: false,

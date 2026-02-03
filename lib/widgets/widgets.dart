@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
+import 'package:gh_app/widgets/dialogs.dart';
 import 'package:url_launcher/link.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -122,7 +123,7 @@ class LinkButton extends StatelessWidget {
 
   final Widget text;
   final EdgeInsetsGeometry padding;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -248,17 +249,80 @@ class WindowButtons extends StatelessWidget {
 }
 
 /// 分页按钮，嗯，先放着
+/// TODO: 这个分页组件还没完全实现，只是简单的弄下
 class PaginationBar extends StatefulWidget {
-  const PaginationBar({super.key});
+  const PaginationBar({
+    super.key,
+    required this.pageInfo,
+    required this.totalCount,
+    required this.pageSize,
+  });
 
   @override
   State<PaginationBar> createState() => _PaginationBarState();
+
+  final QLPageInfo pageInfo;
+  final int totalCount;
+  final int pageSize;
 }
 
 class _PaginationBarState extends State<PaginationBar> {
+  List<Widget> _buildPageButtons() {
+    if (widget.totalCount > 0 && widget.pageSize > 0) {
+      final res = <Widget>[];
+      for (int i = 1; i <= (widget.totalCount / widget.pageSize).ceil(); i++) {
+        res.add(Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3.0),
+          child: Button(
+              child: Text("$i"),
+              onPressed: () {
+                showInfoDialog('没有实现', context: context);
+              }),
+        ));
+      }
+      return res;
+    }
+    return [];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Button(
+            onPressed: widget.pageInfo.hasPreviousPage
+                ? () {
+                    showInfoDialog('没有实现', context: context);
+                  }
+                : null,
+            child: const Text('上一页')),
+        const SizedBox(width: 10),
+        Container(
+          constraints:
+              BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 3),
+          child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _buildPageButtons(),
+              )),
+        ),
+
+        // Padding(
+        //   padding: const EdgeInsets.symmetric(horizontal: 10.0),
+        //   child: Text('${widget.totalCount}'),
+        // ),
+        const SizedBox(width: 10),
+        Button(
+            onPressed: widget.pageInfo.hasNextPage
+                ? () {
+                    showInfoDialog('没有实现', context: context);
+                  }
+                : null,
+            child: const Text('下一页')),
+      ],
+    );
   }
 }
 
