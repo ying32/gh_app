@@ -10,7 +10,7 @@ class HTTPCache {
   HTTPCache();
 
   /// 缓存
-  final _caches = <String, dynamic>{};
+  final _caches = <String, DateTime>{};
 
   /// 缓存根目录
   Future<String> get cacheRoot async =>
@@ -26,7 +26,11 @@ class HTTPCache {
   String genKey(String text) => md5String(text);
 
   /// 指定key是否已经缓存过了
-  bool isCached(String key) => _caches.containsKey(key);
+  bool isCached(String key) {
+    final date = _caches[key];
+    return date != null &&
+        DateTime.now().difference(date) < const Duration(minutes: 15);
+  }
 
   /// 从缓存中加载
   Future<Map<String, dynamic>?> readCachedFile(String key) async {
@@ -48,8 +52,7 @@ class HTTPCache {
     try {
       final file = File(p.join(dir.path, key));
       // 打上标记
-      _caches[key] = null;
-
+      _caches[key] = DateTime.now();
       return file.writeAsBytes(gzip.encoder.convert(data), flush: true);
     } catch (e) {
       // 保存失败

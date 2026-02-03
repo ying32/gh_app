@@ -117,6 +117,7 @@ class IssueCommentItem extends StatelessWidget {
                   child: Divider(),
                 ),
                 // 优先显示html格式的
+                //TODO: 发现个问题，使用HTML的，代码高亮没有了，如果使用markdown的HTML代码他又没解析，还得另想办法
                 if (item?.bodyHTML?.isNotEmpty ?? false)
                   SelectionArea(
                     child: HtmlWidget(

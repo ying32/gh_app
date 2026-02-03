@@ -150,7 +150,7 @@ class UserInfoPanel extends StatelessWidget {
             children: [
               UserHeadImage(user?.avatarUrl, imageSize: 60),
               const SizedBox(width: 10.0),
-              UserNameWidget(user),
+              SelectionArea(child: UserNameWidget(user)),
             ],
           ),
         ),
