@@ -15,9 +15,36 @@ import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'highlight_plus.dart';
 import 'markdown_plus.dart';
+
+class RepoTopics extends StatelessWidget {
+  const RepoTopics(this.topics, {super.key});
+
+  final List<String> topics;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+        runSpacing: 10.0,
+        spacing: 8.0,
+        children: topics
+            .map((e) => LinkButton(
+                  padding: EdgeInsets.zero,
+                  borderRadius: BorderRadius.circular(10),
+                  text: TagLabel.other(
+                    e,
+                    color: Colors.blue,
+                  ),
+                  onPressed: () {
+                    launchUrl(Uri.parse('https://github.com/topics/$e'));
+                  },
+                ))
+            .toList());
+  }
+}
 
 /// 语言的圆点
 class LangCircleDot extends StatelessWidget {
@@ -118,27 +145,17 @@ class RepoListItem extends StatelessWidget {
           // 描述
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
+            child: SelectableText(
               repo.description,
               style: TextStyle(color: appTheme.color.lightest),
             ),
           ),
 
-          // 关键词
           if (!isPinStyle && (repo.topics?.isNotEmpty ?? false))
             // tags
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Wrap(
-                  runSpacing: 10.0,
-                  spacing: 8.0,
-                  children: repo.topics!
-                      .map((e) => TagLabel.other(
-                            e,
-                            color: Colors.blue,
-                          ))
-                      .toList()),
-            ),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: RepoTopics(repo.topics!)),
 
           //Text('${item.tagsUrl}'),
 

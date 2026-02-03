@@ -154,7 +154,7 @@ class UserInfoPanel extends StatelessWidget {
             ],
           ),
         ),
-        UserLineInfo(icon: null, value: user?.bio),
+        SelectionArea(child: UserLineInfo(icon: null, value: user?.bio)),
         UserLineInfo(
           icon: DefaultIcons.group,
           value: Row(

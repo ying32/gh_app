@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/consts.dart';
@@ -33,15 +35,30 @@ class IssueDetailsPage extends StatelessWidget {
               runSpacing: 10,
               spacing: 10,
               children: [
-                Text(
-                  issue.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                Text(
-                  '# ${issue.number}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w400, fontSize: 20),
+                // SelectableText(
+                //   issue.title,
+                //   style: const TextStyle(
+                //       fontWeight: FontWeight.bold, fontSize: 20),
+                // ),
+                // SelectableText(
+                //   '# ${issue.number}',
+                //   style: const TextStyle(
+                //       fontWeight: FontWeight.w400, fontSize: 20),
+                // ),
+                SelectableText.rich(
+                  TextSpan(
+                      text: issue.title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 22),
+                      children: [
+                        TextSpan(
+                          text: ' # ${issue.number}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w400, fontSize: 20),
+                        )
+                      ]),
+                  selectionHeightStyle: ui.BoxHeightStyle.max,
+                  // style: TextStyle(fontFamily: appTheme.fontFamily),
                 ),
                 Row(
                   children: [

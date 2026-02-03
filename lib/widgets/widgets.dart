@@ -124,11 +124,13 @@ class LinkButton extends StatelessWidget {
     required this.text,
     required this.onPressed,
     this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+    this.borderRadius,
   });
 
   final Widget text;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onPressed;
+  final BorderRadius? borderRadius;
 
   @override
   Widget build(BuildContext context) {
@@ -136,11 +138,9 @@ class LinkButton extends StatelessWidget {
       // color: Colors.transparent,
       type: m.MaterialType.transparency,
       child: m.InkWell(
+        borderRadius: borderRadius,
         onTap: onPressed,
-        child: Padding(
-          padding: padding,
-          child: text,
-        ),
+        child: Padding(padding: padding, child: text),
       ),
     );
   }

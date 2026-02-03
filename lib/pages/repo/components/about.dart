@@ -22,7 +22,7 @@ class RepoAbout extends StatelessWidget {
         ),
         Padding(
           padding: padding,
-          child: Text(repo.description),
+          child: SelectableText(repo.description),
         ),
 
         // blog
@@ -38,18 +38,9 @@ class RepoAbout extends StatelessWidget {
         //     text: Text(repo.homepage)),
 
         if (repo.topics?.isNotEmpty ?? false)
-          // tags
           Padding(
             padding: padding,
-            child: Wrap(
-                runSpacing: 10.0,
-                spacing: 8.0,
-                children: repo.topics!
-                    .map((e) => TagLabel.other(
-                          e,
-                          color: Colors.blue,
-                        ))
-                    .toList()),
+            child: RepoTopics(repo.topics!),
           ),
 
         const IconText(

@@ -164,7 +164,7 @@ class _InternalRepoPage extends StatelessWidget {
                     },
                   ),
                 ),
-                Text(repo.fullName),
+                SelectableText(repo.fullName),
                 if (repo.isPrivate)
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4),
