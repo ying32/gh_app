@@ -564,6 +564,21 @@ class QLOrganization extends QLUserBase {
   }
 }
 
+/// 用户状态
+///
+/// https://docs.github.com/zh/graphql/reference/objects#userstatus
+class QLUserStatus {
+  const QLUserStatus({this.emoji = '', this.emojiHTML = '', this.message = ''});
+  final String emoji;
+  final String emojiHTML;
+  final String message;
+
+  QLUserStatus.fromJson(Map<String, dynamic> input)
+      : emoji = input['emoji'] ?? '',
+        emojiHTML = input['emojiHTML'] ?? '',
+        message = input['message'] ?? '';
+}
+
 /// 个人用户
 class QLUser extends QLUserBase {
   const QLUser({
@@ -577,6 +592,7 @@ class QLUser extends QLUserBase {
     this.location = '',
     this.email = '',
     this.bio = '',
+    this.status = const QLUserStatus(),
     this.followersCount = 0,
     this.followingCount = 0,
     this.twitterUsername = '',
@@ -607,6 +623,9 @@ class QLUser extends QLUserBase {
   /// 签名信息
   final String bio;
 
+  /// 用户状态
+  final QLUserStatus status;
+
   /// 关注“我”的人
   final int followersCount;
 
@@ -627,6 +646,9 @@ class QLUser extends QLUserBase {
       avatarUrl: input['avatarUrl'] ?? '',
       company: input['company'] ?? '',
       bio: input['bio'] ?? '',
+      status: input['status'] == null
+          ? const QLUserStatus()
+          : QLUserStatus.fromJson(input['status']),
       email: input['email'] ?? '',
       location: input['location'] ?? '',
       twitterUsername: input['twitterUsername'] ?? '',

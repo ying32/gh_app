@@ -54,6 +54,7 @@ class QLQueries {
     following {
       totalCount
     }
+    status { emoji emojiHTML message }
     pinnedItems(first: 6, types:REPOSITORY) {
       nodes {
         ... on Repository {

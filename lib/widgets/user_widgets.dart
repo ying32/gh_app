@@ -155,6 +155,12 @@ class UserInfoPanel extends StatelessWidget {
           ),
         ),
         SelectionArea(child: UserLineInfo(icon: null, value: user?.bio)),
+        const SizedBox(height: 8),
+        SelectionArea(
+            child: UserLineInfo(
+                icon: null,
+                value:
+                    "${user?.status.emojiHTML.replaceAll(RegExp(r'\<\/?div\>'), '') ?? ''} ${user?.status.message ?? ''}")),
         UserLineInfo(
           icon: DefaultIcons.group,
           value: Row(
