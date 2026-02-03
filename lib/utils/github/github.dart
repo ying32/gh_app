@@ -1,3 +1,4 @@
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/utils.dart';
 
 import 'graphql.dart';
@@ -97,15 +98,18 @@ class APIWrap {
   /// 获取仓库列表信息
   /// TODO: 这里还要传个东西，判断是否为组织的
   Future<QLList<QLRepository>> userRepos(String owner,
-      {bool isStarred = false, int count = 50}) async {
+      {bool isStarred = false, int? count, String? nextCursor}) async {
     final res = await gitHubAPI.query(QLQuery(QLQueries.queryRepos(
-        owner: owner, isStarred: isStarred, count: count)));
+        owner: owner,
+        isStarred: isStarred,
+        count: count,
+        nextCursor: nextCursor)));
     if (res == null) return const QLList.empty();
     return QLList.fromJson(
         (res['viewer'] ?? res['user'] ?? res['organization'])?[
             isStarred ? 'starredRepositories' : 'repositories'],
         QLRepository.fromJson,
-        pageSize: count);
+        pageSize: count ?? defaultPageSize);
   }
 
   /// 用户信息
@@ -117,51 +121,52 @@ class APIWrap {
 
   /// 当前仓库releases
   Future<QLList<QLRelease>> repoReleases(QLRepository repo,
-      {int count = 20}) async {
+      {int? count, String? nextCursor}) async {
     final res = await gitHubAPI.query(QLQuery(QLQueries.queryRepoReleases(
         repo.owner!.login, repo.name,
-        count: count)));
+        count: count, nextCursor: nextCursor)));
     if (res == null) return const QLList.empty();
     return QLList.fromJson(res['repository']?['releases'], QLRelease.fromJson,
-        pageSize: count);
+        pageSize: count ?? defaultPageSize);
   }
 
   /// 指定release的Assets文件列表
   Future<QLList<QLReleaseAsset>> repoReleaseAssets(
       QLRepository repo, QLRelease release,
-      {int count = 30}) async {
+      {int? count, String? nextCursor}) async {
     final res = await gitHubAPI.query(QLQuery(QLQueries.queryRepoReleaseAssets(
-      repo.owner!.login,
-      repo.name,
-      tagName: release.tagName,
-      count: count,
-    )));
+        repo.owner!.login, repo.name,
+        tagName: release.tagName, count: count, nextCursor: nextCursor)));
     if (res == null) return const QLList.empty();
     final obj = res['repository']?['release']?['releaseAssets'];
     if (obj == null) return const QLList.empty();
-    return QLList.fromJson(obj, QLReleaseAsset.fromJson, pageSize: count);
+    return QLList.fromJson(obj, QLReleaseAsset.fromJson,
+        pageSize: count ?? defaultPageSize);
   }
 
   /// 搜索
   Future<QLList<QLRepository>> searchRepo(String query,
-      {int count = 15}) async {
-    final res =
-        await gitHubAPI.query(QLQuery(QLQueries.search(query, count: count)));
+      {int? count, String? nextCursor}) async {
+    final res = await gitHubAPI.query(
+        QLQuery(QLQueries.search(query, count: count, nextCursor: nextCursor)));
     if (res == null) return const QLList.empty();
     return QLList.fromJson(res['search'], QLRepository.fromJson,
-        totalCountAlias: 'repositoryCount', pageSize: count);
+        totalCountAlias: 'repositoryCount', pageSize: count ?? defaultPageSize);
   }
 
   /// 分支列表
   Future<QLList<QLRef>> repoRefs(QLRepository repo,
-      {int count = 10, String refPrefix = 'refs/heads/'}) async {
+      {int? count,
+      String? nextCursor,
+      String refPrefix = 'refs/heads/'}) async {
     final res = await gitHubAPI.query(QLQuery(QLQueries.queryRepoRefs(
         repo.owner!.login, repo.name,
-        count: count, refPrefix: refPrefix)));
+        count: count, nextCursor: nextCursor, refPrefix: refPrefix)));
     if (res == null) return const QLList.empty();
     final refs = res['repository']?['refs'];
     if (refs == null) return const QLList.empty();
-    return QLList.fromJson(refs, QLRef.fromJson, pageSize: count);
+    return QLList.fromJson(refs, QLRef.fromJson,
+        pageSize: count ?? defaultPageSize);
   }
 
   /// 目录内容缓存
@@ -187,23 +192,27 @@ class APIWrap {
   Future<QLList<QLUser>> _userFollower(
       {required String name,
       required bool isFollowers,
-      required int count}) async {
+      int? count,
+      String? nextCursor}) async {
     final res = await gitHubAPI.query(QLQuery(QLQueries.queryFollowerUsers(
-        name: name, isFollowers: true, count: count)));
+        name: name, isFollowers: true, count: count, nextCursor: nextCursor)));
     if (res == null) return const QLList.empty();
     final input =
         (res['viewer'] ?? res['user'] ?? res['organization'])?['followers'];
     if (input == null) return const QLList.empty();
-    return QLList.fromJson(input, QLUser.fromJson, pageSize: count);
+    return QLList.fromJson(input, QLUser.fromJson,
+        pageSize: count ?? defaultPageSize);
   }
 
   /// 关注“我”的人
-  Future<QLList<QLUser>> userFollowers([String name = '']) =>
-      _userFollower(name: name, isFollowers: true, count: 20);
+  Future<QLList<QLUser>> userFollowers(
+          {String name = '', String? nextCursor}) =>
+      _userFollower(name: name, isFollowers: true, nextCursor: nextCursor);
 
   /// “我”关注的人
-  Future<QLList<QLUser>> userFollowing([String name = '']) =>
-      _userFollower(name: name, isFollowers: false, count: 20);
+  Future<QLList<QLUser>> userFollowing(
+          {String name = '', String? nextCursor}) =>
+      _userFollower(name: name, isFollowers: false, nextCursor: nextCursor);
 
   /// 后面再根据需求去弄
   Future<QLList<T>> _repoIssuesOrPullRequests<T>(
@@ -211,64 +220,69 @@ class APIWrap {
     required bool isOpen,
     required bool isIssues,
     bool isMerged = false,
-    int count = 30,
+    int? count,
+    String? nextCursor,
     required JSONConverter<T> convert,
   }) async {
     //open, closed, all
-    final res =
-        await gitHubAPI.query(QLQuery(QLQueries.queryRepoIssuesOrPullRequests(
-      repo.owner!.login,
-      repo.name,
-      states: isMerged
-          ? 'MERGED'
-          : isOpen
-              ? 'OPEN'
-              : 'CLOSED',
-      isIssues: isIssues,
-      count: count,
-    )));
+    final res = await gitHubAPI.query(QLQuery(
+        QLQueries.queryRepoIssuesOrPullRequests(repo.owner!.login, repo.name,
+            states: isMerged
+                ? 'MERGED'
+                : isOpen
+                    ? 'OPEN'
+                    : 'CLOSED',
+            isIssues: isIssues,
+            count: count,
+            nextCursor: nextCursor)));
 
     if (res == null) return const QLList.empty();
     final input = res['repository']?[isIssues ? 'issues' : 'pullRequests'];
     if (input == null) return const QLList.empty();
-    return QLList<T>.fromJson(input, convert, pageSize: count);
+    return QLList<T>.fromJson(input, convert,
+        pageSize: count ?? defaultPageSize);
   }
 
   /// 仓库issues
   Future<QLList<QLIssue>> repoIssues(QLRepository repo,
-          {bool isOpen = true, int count = 30}) =>
+          {bool isOpen = true, int? count, String? nextCursor}) =>
       _repoIssuesOrPullRequests(repo,
           isOpen: isOpen,
           isIssues: true,
           isMerged: false,
           count: count,
+          nextCursor: nextCursor,
           convert: QLIssue.fromJson);
 
   /// 仓库pullRequests
   Future<QLList<QLPullRequest>> repoPullRequests(QLRepository repo,
-          {bool isOpen = true, bool isMerged = false, int count = 30}) =>
+          {bool isOpen = true,
+          bool isMerged = false,
+          int? count,
+          String? nextCursor}) =>
       _repoIssuesOrPullRequests(repo,
           isOpen: isOpen,
           isIssues: false,
           isMerged: isMerged,
           count: count,
+          nextCursor: nextCursor,
           convert: QLPullRequest.fromJson);
 
   /// 查询issue或者pull的评论
-  Future<QLList<QLComment>> repoIssueOrPullRequestComments<T>(
-    QLRepository repo, {
-    required int number,
-    bool isIssues = true,
-    int count = 30,
-  }) async {
+  Future<QLList<QLComment>> repoIssueOrPullRequestComments<T>(QLRepository repo,
+      {required int number,
+      bool isIssues = true,
+      int? count,
+      String? nextCursor}) async {
     final res = await gitHubAPI.query(QLQuery(QLQueries.queryIssueComments(
         repo.owner!.login, repo.name, number,
-        count: count, isIssues: isIssues)));
+        count: count, nextCursor: nextCursor, isIssues: isIssues)));
     if (res == null) return const QLList.empty();
     final input =
         res['repository']?[isIssues ? 'issue' : 'pullRequest']?['comments'];
     if (input == null) return const QLList.empty();
-    return QLList.fromJson(input, QLComment.fromJson, pageSize: count);
+    return QLList.fromJson(input, QLComment.fromJson,
+        pageSize: count ?? defaultPageSize);
   }
 
   /// 查询指定issue或者pull Request

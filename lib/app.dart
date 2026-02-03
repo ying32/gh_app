@@ -4,6 +4,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'models/user_model.dart';
 import 'navigation.dart';
@@ -81,6 +82,13 @@ class GithubApp extends StatelessWidget {
                 ),
           ),
           locale: appTheme.locale,
+          localizationsDelegates: const [
+            RefreshLocalizations.delegate,
+          ],
+          // localeResolutionCallback:
+          //     (Locale? locale, Iterable<Locale> supportedLocales) {
+          //   return locale;
+          // },
           scrollBehavior: CustomMaterialScrollBehavior(),
           home: const NavigationPage(),
         );

@@ -1,3 +1,5 @@
+import 'package:gh_app/utils/consts.dart';
+
 ///NOTE: 当如果列表类型有多种时，需要使用 `... on TYPE`来选择记录，否则不需要使用这个，当然使用了也没问题
 ///比如：
 ///```json
@@ -22,8 +24,12 @@
 ///```
 /// 分页 https://docs.github.com/zh/graphql/guides/using-pagination-in-the-graphql-api
 ///
-///
+/// TODO: 正常来说时面的数据都要使用变量来传递，但是我懒得弄哈，以后再优化吧
 class QLQueries {
+  /// 下个游标
+  static String _getNextCursor(String? cursor) =>
+      cursor != null && cursor.isNotEmpty ? ', after: "$cursor"' : '';
+
   /// 查询用户信息
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#user
@@ -77,10 +83,13 @@ class QLQueries {
 
   /// 查询“我”关注的或者关注“我”的用户信息
   static String queryFollowerUsers(
-      {String name = '', bool isFollowers = true, int count = 20}) {
+      {String name = '',
+      bool isFollowers = true,
+      int? count,
+      String? nextCursor}) {
     return '''query {  
     viewer {
-    ${isFollowers ? 'followers' : 'following'}(first: $count) {
+    ${isFollowers ? 'followers' : 'following'}(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}) {
       totalCount
       pageInfo {
         endCursor
@@ -301,10 +310,11 @@ class QLQueries {
   /// https://docs.github.com/zh/graphql/reference/objects#release
   ///
   /// `CREATED_AT`和`NAME`
-  static String queryRepoReleases(String owner, String name, {int count = 20}) {
+  static String queryRepoReleases(String owner, String name,
+      {int? count, String? nextCursor}) {
     // 应该要按更新时间排，但是没有相应的值可选
     return '''query { repository(owner:"$owner", name:"$name") {
-      releases(first:$count, orderBy: {direction: DESC, field: CREATED_AT}) {
+      releases(first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, orderBy: {direction: DESC, field: CREATED_AT}) {
         totalCount 
         pageInfo {
           endCursor
@@ -343,12 +353,12 @@ class QLQueries {
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#repository
   static String queryRepoReleaseAssets(String owner, String name,
-      {required String tagName, int count = 30}) {
+      {required String tagName, int? count, String? nextCursor}) {
     // 应该要按更新时间排，但是没有相应的值可选
     return '''query {
     repository(owner:"$owner", name:"$name") {
       release(tagName:"$tagName") {
-        releaseAssets(first:$count) {   
+        releaseAssets(first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}) {   
           totalCount 
           pageInfo {
             endCursor
@@ -379,13 +389,13 @@ class QLQueries {
   /// [sortDirection] 排序，可取值`DESC`或`ASC`
   ///
   /// [sortField] 排序，可取值`CREATED_AT`、`NAME`、`PUSHED_AT`、`STARGAZERS`、`UPDATED_AT`
-  static String queryRepos({
-    String owner = '',
-    int count = 50,
-    String sortDirection = "DESC",
-    String sortField = "CREATED_AT",
-    bool isStarred = false,
-  }) {
+  static String queryRepos(
+      {String owner = '',
+      int? count,
+      String sortDirection = "DESC",
+      String sortField = "CREATED_AT",
+      bool isStarred = false,
+      String? nextCursor}) {
     // 贡献过的仓库 topRepositories
     if (isStarred) {
       // 只有这一个参数
@@ -394,7 +404,7 @@ class QLQueries {
 
     // 只查询user的仓库信息
     return '''query {  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {
-    ${isStarred ? 'starredRepositories' : 'repositories'}(first:$count, orderBy: {direction: $sortDirection, field: $sortField}) {
+    ${isStarred ? 'starredRepositories' : 'repositories'}(first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, orderBy: {direction: $sortDirection, field: $sortField}) {
       totalCount
       pageInfo {
         endCursor
@@ -459,11 +469,12 @@ class QLQueries {
   static String queryRepoIssuesOrPullRequests(
     String owner,
     String name, {
-    int count = 30,
+    int? count,
     String states = 'OPEN',
     bool isIssues = true,
     String sortDirection = "DESC",
     String sortField = "CREATED_AT",
+    String? nextCursor,
   }) {
     // 查询一个仓库的issues信息
     //                   timeline(after: 10) {
@@ -483,7 +494,7 @@ class QLQueries {
     //                 }
     //                 closed
     return '''query { repository(owner:"$owner", name:"$name") {
-          ${isIssues ? 'issues' : 'pullRequests'}(last: $count, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
+          ${isIssues ? 'issues' : 'pullRequests'}(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
              totalCount
              pageInfo {
               endCursor
@@ -629,7 +640,7 @@ class QLQueries {
   ///
   ///  `DISCUSSION`、`ISSUE` `ISSUE_ADVANCED` `REPOSITORY` `USER`
   static String search(String query,
-      {int count = 15, String type = 'REPOSITORY'}) {
+      {int? count, String type = 'REPOSITORY', String? nextCursor}) {
     /// ... on Discussion { }
     /// ... on Issue { }
     /// ... on Organization { }
@@ -647,7 +658,7 @@ class QLQueries {
     /// userCount
     /// wikiCount
     return '''query {
-  search(first: $count, query: "$query", type: $type) {
+  search(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, query: "$query", type: $type) {
     pageInfo {
       endCursor
       startCursor
@@ -688,11 +699,11 @@ class QLQueries {
   ///
   /// [refPrefix] 可取值： `refs/heads/`, `refs/tags/`
   static String queryRepoRefs(String owner, String name,
-      {int count = 30, String refPrefix = 'refs/heads/'}) {
+      {int? count, String refPrefix = 'refs/heads/', String? nextCursor}) {
     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
     return '''query {
     repository(owner:"$owner", name:"$name") {
-       refs(first: $count, refPrefix: "$refPrefix", orderBy: {direction : DESC, field: TAG_COMMIT_DATE}) {
+       refs(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, refPrefix: "$refPrefix", orderBy: {direction : DESC, field: TAG_COMMIT_DATE}) {
           totalCount 
           pageInfo {
             endCursor
@@ -710,12 +721,12 @@ class QLQueries {
   /// // , orderBy : {direction : DESC, field: UPDATED_AT}
   /// // https://docs.github.com/zh/graphql/reference/objects#issue
   static String queryIssueComments(String owner, String name, int number,
-      {int count = 30, bool isIssues = true}) {
+      {int? count, bool isIssues = true, String? nextCursor}) {
     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
     return '''query { 
    repository(owner:"$owner", name:"$name") {
        ${isIssues ? 'issue' : 'pullRequest'}(number: $number) {
-          comments  (first:$count) {
+          comments  (first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}) {
                totalCount
                nodes {
                   author { login avatarUrl }
@@ -738,7 +749,7 @@ class QLQueries {
 
   /// 查询指定issue或者pullRequest
   static String queryIssueOrPullRequest(String owner, String name, int number,
-      {int count = 30, bool isIssues = true}) {
+      {bool isIssues = true}) {
     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
     return '''query { 
    repository(owner:"$owner", name:"$name") {

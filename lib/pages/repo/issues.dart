@@ -56,39 +56,48 @@ class RepoIssuesPage extends StatelessWidget {
 
   final QLRepository repo;
 
+  Future<QLList<QLIssue>> _onLoadData(QLPageInfo? pageInfo) async {
+    if (pageInfo == null || !pageInfo.hasNextPage) return const QLList.empty();
+    return APIWrap.instance.repoIssues(repo, nextCursor: pageInfo.endCursor);
+  }
+
   @override
   Widget build(BuildContext context) {
     return APIFutureBuilder(
       future: APIWrap.instance.repoIssues(repo),
       builder: (context, snapshot) {
         return Card(
-          padding: EdgeInsets.zero,
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView.separated(
-                    itemCount: snapshot.length,
-                    itemBuilder: (_, index) => _IssueItem(snapshot[index]),
-                    separatorBuilder: (_, index) => const Divider(
-                          size: 1,
-                          direction: Axis.horizontal,
-                          style: DividerThemeData(
-                              verticalMargin: EdgeInsets.zero,
-                              horizontalMargin: EdgeInsets.zero),
-                        )),
-              ),
-              if (snapshot.pageInfo != null && snapshot.totalCount > 0)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                      bottom: 8.0, top: 8.0, end: 2),
-                  child: PaginationBar(
-                      pageInfo: snapshot.pageInfo!,
-                      totalCount: snapshot.totalCount,
-                      pageSize: snapshot.pageSize),
-                ),
-            ],
+          child: ListViewRefresher(
+            initData: snapshot,
+            separator: const Divider(
+                size: 1,
+                direction: Axis.horizontal,
+                style: DividerThemeData(
+                    verticalMargin: EdgeInsets.zero,
+                    horizontalMargin: EdgeInsets.zero)),
+            padding: EdgeInsetsDirectional.only(
+              bottom: kPageDefaultVerticalPadding,
+              // start: PageHeader.horizontalPadding(context),
+              end: PageHeader.horizontalPadding(context),
+            ),
+            itemBuilder: (_, item, __) => _IssueItem(item),
+            onLoading: _onLoadData,
           ),
         );
+
+        // return Card(
+        //   padding: EdgeInsets.zero,
+        //   child: ListView.separated(
+        //       itemCount: snapshot.length,
+        //       itemBuilder: (_, index) => _IssueItem(snapshot[index]),
+        //       separatorBuilder: (_, index) => const Divider(
+        //             size: 1,
+        //             direction: Axis.horizontal,
+        //             style: DividerThemeData(
+        //                 verticalMargin: EdgeInsets.zero,
+        //                 horizontalMargin: EdgeInsets.zero),
+        //           )),
+        // );
       },
     );
   }

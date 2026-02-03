@@ -77,6 +77,8 @@ dependencies:
   flutter_prism: ^0.2.2
   #markdown_viewer: ^0.6.2
 
+  pull_to_refresh: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

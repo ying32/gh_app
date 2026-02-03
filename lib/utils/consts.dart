@@ -25,3 +25,6 @@ const appRepoUrl = 'https://github.com/ying32/gh_app';
 
 /// 一个点
 const dotChar = '·';
+
+/// 默认每页的size数
+const defaultPageSize = 15;

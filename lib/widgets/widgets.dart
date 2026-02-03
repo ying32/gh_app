@@ -1,8 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
-import 'package:gh_app/widgets/dialogs.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/link.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -249,79 +250,212 @@ class WindowButtons extends StatelessWidget {
 }
 
 /// 分页按钮，嗯，先放着
-/// TODO: 这个分页组件还没完全实现，只是简单的弄下
-class PaginationBar extends StatefulWidget {
-  const PaginationBar({
+/// TODO: 这个分页组件还没完全实现，只是简单的弄下。
+/// 另外这个感觉不能在GraphQL API里面使用吧，只适合REST API的，
+/// 估计得改下，改为上拉加载数据
+// class PaginationBar extends StatefulWidget {
+//   const PaginationBar({
+//     super.key,
+//     required this.pageInfo,
+//     required this.totalCount,
+//     required this.pageSize,
+//   });
+//
+//   @override
+//   State<PaginationBar> createState() => _PaginationBarState();
+//
+//   final QLPageInfo pageInfo;
+//   final int totalCount;
+//   final int pageSize;
+// }
+//
+// class _PaginationBarState extends State<PaginationBar> {
+//   List<Widget> _buildPageButtons() {
+//     if (widget.totalCount > 0 && widget.pageSize > 0) {
+//       final res = <Widget>[];
+//       for (int i = 1; i <= (widget.totalCount / widget.pageSize).ceil(); i++) {
+//         res.add(Padding(
+//           padding: const EdgeInsets.symmetric(horizontal: 3.0),
+//           child: Button(
+//               child: Text("$i"),
+//               onPressed: () {
+//                 showInfoDialog('没有实现', context: context);
+//               }),
+//         ));
+//       }
+//       return res;
+//     }
+//     return [];
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Row(
+//       mainAxisAlignment: MainAxisAlignment.end,
+//       crossAxisAlignment: CrossAxisAlignment.center,
+//       children: [
+//         Button(
+//             onPressed: widget.pageInfo.hasPreviousPage
+//                 ? () {
+//                     showInfoDialog('没有实现', context: context);
+//                   }
+//                 : null,
+//             child: const Text('上一页')),
+//         const SizedBox(width: 10),
+//         Container(
+//           constraints:
+//               BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 3),
+//           child: SingleChildScrollView(
+//               scrollDirection: Axis.horizontal,
+//               child: Row(
+//                 children: _buildPageButtons(),
+//               )),
+//         ),
+//
+//         // Padding(
+//         //   padding: const EdgeInsets.symmetric(horizontal: 10.0),
+//         //   child: Text('${widget.totalCount}'),
+//         // ),
+//         const SizedBox(width: 10),
+//         Button(
+//             onPressed: widget.pageInfo.hasNextPage
+//                 ? () {
+//                     showInfoDialog('没有实现', context: context);
+//                   }
+//                 : null,
+//             child: const Text('下一页')),
+//       ],
+//     );
+//   }
+// }
+
+typedef AsyncNextQLListGetter<T> = Future<QLList<T>> Function(QLPageInfo?);
+
+/// 可以上拉刷新和下拉加载的ListView包装
+class ListViewRefresher<T> extends StatefulWidget {
+  const ListViewRefresher({
     super.key,
-    required this.pageInfo,
-    required this.totalCount,
-    required this.pageSize,
+    required this.initData,
+    required this.itemBuilder,
+    this.separator,
+    this.padding,
+    this.onRefresh,
+    this.onLoading,
   });
 
-  @override
-  State<PaginationBar> createState() => _PaginationBarState();
+  final QLList<T> initData;
+  final Widget? separator;
+  final EdgeInsetsGeometry? padding;
+  final Widget Function(BuildContext, T item, int) itemBuilder;
+  final ValueChanged<RefreshController>? onRefresh;
+  final AsyncNextQLListGetter<T>? onLoading;
 
-  final QLPageInfo pageInfo;
-  final int totalCount;
-  final int pageSize;
+  @override
+  State<ListViewRefresher<T>> createState() => _ListViewRefresherState<T>();
 }
 
-class _PaginationBarState extends State<PaginationBar> {
-  List<Widget> _buildPageButtons() {
-    if (widget.totalCount > 0 && widget.pageSize > 0) {
-      final res = <Widget>[];
-      for (int i = 1; i <= (widget.totalCount / widget.pageSize).ceil(); i++) {
-        res.add(Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 3.0),
-          child: Button(
-              child: Text("$i"),
-              onPressed: () {
-                showInfoDialog('没有实现', context: context);
-              }),
-        ));
-      }
-      return res;
-    }
-    return [];
+class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  QLPageInfo? _pageInfo;
+  final List<T> _list = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageInfo = widget.initData.pageInfo;
+    _list.addAll(widget.initData.data);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Button(
-            onPressed: widget.pageInfo.hasPreviousPage
-                ? () {
-                    showInfoDialog('没有实现', context: context);
-                  }
-                : null,
-            child: const Text('上一页')),
-        const SizedBox(width: 10),
-        Container(
-          constraints:
-              BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 3),
-          child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _buildPageButtons(),
-              )),
-        ),
+    //https://github.com/peng8350/flutter_pulltorefresh/blob/master/README_CN.md
+    //    // 全局配置子树下的SmartRefresher,下面列举几个特别重要的属性
+    //      RefreshConfiguration(
+    //          headerBuilder: () => WaterDropHeader(),        // 配置默认头部指示器,假如你每个页面的头部指示器都一样的话,你需要设置这个
+    //          footerBuilder:  () => ClassicFooter(),        // 配置默认底部指示器
+    //          headerTriggerDistance: 80.0,        // 头部触发刷新的越界距离
+    //          springDescription:SpringDescription(stiffness: 170, damping: 16, mass: 1.9),         // 自定义回弹动画,三个属性值意义请查询flutter api
+    //          maxOverScrollExtent :100, //头部最大可以拖动的范围,如果发生冲出视图范围区域,请设置这个属性
+    //          maxUnderScrollExtent:0, // 底部最大可以拖动的范围
+    //          enableScrollWhenRefreshCompleted: true, //这个属性不兼容PageView和TabBarView,如果你特别需要TabBarView左右滑动,你需要把它设置为true
+    //          enableLoadingWhenFailed : true, //在加载失败的状态下,用户仍然可以通过手势上拉来触发加载更多
+    //          hideFooterWhenNotFull: false, // Viewport不满一屏时,禁用上拉加载更多功能
+    //          enableBallisticLoad: true, // 可以通过惯性滑动触发加载更多
+    //         child: MaterialApp(
+    //             ........
+    //         )
+    //     );
+    return RefreshConfiguration(
+      hideFooterWhenNotFull: true,
+      child: SmartRefresher(
+        enablePullDown: widget.onRefresh != null,
+        enablePullUp: widget.onLoading != null,
+        header: const ClassicHeader(),
+        footer: const ClassicFooter(),
 
-        // Padding(
-        //   padding: const EdgeInsets.symmetric(horizontal: 10.0),
-        //   child: Text('${widget.totalCount}'),
+        // footer: CustomFooter(
+        //   builder: (context, mode) {
+        //     Widget body;
+        //     if (mode == LoadStatus.idle) {
+        //       body = const Text("上拉加载");
+        //     } else if (mode == LoadStatus.loading) {
+        //       body = const CupertinoActivityIndicator();
+        //     } else if (mode == LoadStatus.failed) {
+        //       body = const Text("加载失败！点击重试！");
+        //     } else if (mode == LoadStatus.canLoading) {
+        //       body = const Text("松手,加载更多!");
+        //     } else {
+        //       body = const Text("没有更多数据了!");
+        //     }
+        //     return SizedBox(
+        //       height: 55.0,
+        //       child: Center(child: body),
+        //     );
+        //   },
         // ),
-        const SizedBox(width: 10),
-        Button(
-            onPressed: widget.pageInfo.hasNextPage
-                ? () {
-                    showInfoDialog('没有实现', context: context);
+        // _refreshController.refreshCompleted();
+        onRefresh: widget.onRefresh == null
+            ? null
+            : () => widget.onRefresh!.call(_refreshController),
+        // _refreshController.loadComplete();
+        onLoading: widget.onLoading == null
+            ? null
+            : () {
+                widget.onLoading!.call(_pageInfo).then((data) {
+                  if (kDebugMode) {
+                    print(
+                        "=======================${_pageInfo?.hasNextPage}, ${_pageInfo?.endCursor}");
                   }
-                : null,
-            child: const Text('下一页')),
-      ],
+                  if (data.isNotEmpty) {
+                    setState(() {
+                      _pageInfo = data.pageInfo;
+                      _list.addAll(data.data);
+                    });
+                    _refreshController.loadComplete();
+                  } else {
+                    _refreshController.loadNoData();
+                  }
+                }).onError((e, s) {
+                  _refreshController.loadFailed();
+                }).whenComplete(() {});
+              },
+        controller: _refreshController,
+        child: ListView.separated(
+          padding: widget.padding,
+          itemCount: _list.length,
+          itemBuilder: (context, index) =>
+              widget.itemBuilder(context, _list[index], index),
+          separatorBuilder: (context, index) =>
+              widget.separator ?? const SizedBox.shrink(),
+        ),
+      ),
     );
   }
 }

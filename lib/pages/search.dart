@@ -47,6 +47,13 @@ class _SearchPageState extends State<SearchPage>
     }
   }
 
+  Future<QLList<QLRepository>> _onLoadData(QLPageInfo? pageInfo) async {
+    if (pageInfo == null || !pageInfo.hasNextPage) return const QLList.empty();
+
+    return APIWrap.instance
+        .searchRepo(_controller.text.trim(), nextCursor: pageInfo.endCursor);
+  }
+
   Future<void> _showInfo(String msg,
           {String? error, InfoBarSeverity? severity}) =>
       showInfoDialog(msg, context: context, error: error, severity: severity);
@@ -63,17 +70,11 @@ class _SearchPageState extends State<SearchPage>
           child: TextBox(
             controller: _controller,
             placeholder: '请输入一个要搜索的仓库关键字，支持github搜索的表达式',
-            onEditingComplete: _searching
-                ? null
-                : () {
-                    _doSearch(_controller.text.trim());
-                  },
+            onEditingComplete:
+                _searching ? null : () => _doSearch(_controller.text.trim()),
             suffix: IconButton(
-              icon: const Icon(FluentIcons.clear),
-              onPressed: () {
-                _controller.clear();
-              },
-            ),
+                icon: const Icon(FluentIcons.clear),
+                onPressed: () => _controller.clear()),
           ),
         ),
       ),
@@ -81,7 +82,10 @@ class _SearchPageState extends State<SearchPage>
       Expanded(
           child: _searching
               ? const Center(child: ProgressRing())
-              : RepoListView(repos: _repos, showOpenIssues: false)),
+              : RepoListView(
+                  repos: _repos,
+                  showOpenIssues: false,
+                  onLoading: _onLoadData)),
       // AutoSuggestBox(
       //   placeholder: '输入要搜索的',
       //   onChanged: (val, reason) {

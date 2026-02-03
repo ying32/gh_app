@@ -208,49 +208,27 @@ class RepoListView extends StatelessWidget {
     super.key,
     required this.repos,
     this.showOpenIssues = true,
+    this.onLoading,
   });
 
   final QLList<QLRepository> repos;
   final bool showOpenIssues;
+  final AsyncNextQLListGetter<QLRepository>? onLoading;
 
   @override
   Widget build(BuildContext context) {
     if (repos.isEmpty) return const SizedBox.shrink();
-    // const padding = EdgeInsets.symmetric(horizontal: 6);
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.separated(
-            itemCount: repos.length,
-            // controller: scrollController,
-            padding: EdgeInsetsDirectional.only(
-              bottom: kPageDefaultVerticalPadding,
-              // start: PageHeader.horizontalPadding(context),
-              end: PageHeader.horizontalPadding(context),
-            ),
-            itemBuilder: (context, index) {
-              final repo = repos[index];
-              return RepoListItem(repo, showOpenIssues: showOpenIssues);
-            },
-            separatorBuilder: (BuildContext context, int index) =>
-                const SizedBox(
-                    height: 8), // Divider(size: 1, direction: Axis.horizontal),
-          ),
-        ),
-        if (repos.pageInfo != null && repos.totalCount > 0)
-          Padding(
-            padding: EdgeInsetsDirectional.only(
-              bottom: 8.0,
-              top: 8.0,
-              // start: PageHeader.horizontalPadding(context),
-              end: PageHeader.horizontalPadding(context),
-            ),
-            child: PaginationBar(
-                pageInfo: repos.pageInfo!,
-                totalCount: repos.totalCount,
-                pageSize: repos.pageSize),
-          ),
-      ],
+    return ListViewRefresher(
+      initData: repos,
+      separator: const SizedBox(height: 8),
+      padding: EdgeInsetsDirectional.only(
+        bottom: kPageDefaultVerticalPadding,
+        // start: PageHeader.horizontalPadding(context),
+        end: PageHeader.horizontalPadding(context),
+      ),
+      itemBuilder: (context, item, index) =>
+          RepoListItem(item, showOpenIssues: showOpenIssues),
+      onLoading: onLoading,
     );
   }
 }

@@ -239,46 +239,26 @@ class ReleasesPage extends StatelessWidget {
 
   final QLRepository repo;
 
+  Future<QLList<QLRelease>> _onLoadData(QLPageInfo? pageInfo) async {
+    if (pageInfo == null || !pageInfo.hasNextPage) return const QLList.empty();
+    return APIWrap.instance.repoReleases(repo, nextCursor: pageInfo.endCursor);
+  }
+
   @override
   Widget build(BuildContext context) {
     return APIFutureBuilder(
         future: APIWrap.instance.repoReleases(repo),
         builder: (_, snapshot) {
-          final releases = snapshot.data;
-          if (releases.isEmpty) {
-            return const Center(
-              child: Text('没有数据'),
-            );
-          }
-          return Column(
-            children: [
-              Expanded(
-                child: ListView.separated(
-                    itemCount: releases.length,
-                    padding: EdgeInsetsDirectional.only(
-                      bottom: kPageDefaultVerticalPadding,
-                      // start: PageHeader.horizontalPadding(context),
-                      end: PageHeader.horizontalPadding(context),
-                    ),
-                    itemBuilder: (context, index) =>
-                        _RepoReleaseItem(releases[index], repo: repo),
-                    separatorBuilder: (BuildContext context, int index) =>
-                        const SizedBox(height: 30)),
-              ),
-              if (snapshot.pageInfo != null && snapshot.totalCount > 0)
-                Padding(
-                  padding: EdgeInsetsDirectional.only(
-                    bottom: 8.0,
-                    top: 8.0,
-                    // start: PageHeader.horizontalPadding(context),
-                    end: PageHeader.horizontalPadding(context),
-                  ),
-                  child: PaginationBar(
-                      pageInfo: snapshot.pageInfo!,
-                      totalCount: snapshot.totalCount,
-                      pageSize: snapshot.pageSize),
-                ),
-            ],
+          return ListViewRefresher(
+            initData: snapshot,
+            separator: const SizedBox(height: 30),
+            padding: EdgeInsetsDirectional.only(
+              bottom: kPageDefaultVerticalPadding,
+              // start: PageHeader.horizontalPadding(context),
+              end: PageHeader.horizontalPadding(context),
+            ),
+            itemBuilder: (_, item, __) => _RepoReleaseItem(item, repo: repo),
+            onLoading: _onLoadData,
           );
         });
   }
