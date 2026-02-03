@@ -449,7 +449,7 @@ class QLQueries {
                }
              }
           }
-          issues(states: OPEN) { totalCount }
+          ${isStarred ? '' : 'issues(states: OPEN) { totalCount }'}
         }
       } 
   }
