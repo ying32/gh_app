@@ -221,7 +221,7 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
           TextBox(
             controller: _controller,
             //maxLines: null,
-            placeholder: '输入一个github仓库、用户等页面链接',
+            placeholder: '可以输入一个github仓库、issues、pull requests、releases页面链接',
             expands: false,
             onEditingComplete: _onGoTo,
           ),

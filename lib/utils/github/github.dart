@@ -339,8 +339,12 @@ class APIWrap {
     final segments = uri.pathSegments.where((e) => e.isNotEmpty).toList();
     if (segments.length < 2) return null;
     // 最少2个
+    var repoName = segments[1];
+    if (repoName.endsWith(".git")) {
+      repoName = repoName.substring(0, repoName.length - 4);
+    }
     final repo = QLRepository(
-        name: segments[1], owner: QLRepositoryOwner(login: segments[0]));
+        name: repoName, owner: QLRepositoryOwner(login: segments[0]));
     if (segments.length == 2) {
       return repo;
     } else if (segments.length > 2) {

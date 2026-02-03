@@ -397,13 +397,14 @@ class RepoContentsListView extends StatelessWidget {
 
   String _getReadMeFile(BuildContext context, QLObject object) {
     if (object.isFile) return '';
+    //TODO: 这个还要优化下，发现同时存在README.md和README.txt的时候倒过来匹配会取tx的那个
     // 优先匹配本地化的
     var tree = _matchReadMeFile(
         object,
         RegExp(
             r'^README[\.|-|_]?' +
                 Localizations.localeOf(context).toLanguageTag() +
-                r'[\s\S]*?\.?(?:md|txt)$',
+                r'[\s\S]*?\.?(?:md|markdown)$', //|txt
             caseSensitive: false));
     if (tree.name.isNotEmpty) {
       return tree.name;
@@ -411,7 +412,7 @@ class RepoContentsListView extends StatelessWidget {
     // 没有则匹配默认的
     tree = _matchReadMeFile(
         object,
-        RegExp(r'^README[\.|-|_]?[\s\S]*?\.?(?:md|txt)$',
+        RegExp(r'^README[\.|-|_]?[\s\S]*?\.?(?:md|markdown)$', //|txt
             caseSensitive: false));
     if (tree.name.isNotEmpty) {
       return tree.name;
