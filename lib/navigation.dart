@@ -150,7 +150,7 @@ class _LeftNav extends StatelessWidget {
                   barrierDismissible: true,
                   applicationName: appTitle,
                   applicationVersion: appVersion,
-                  applicationIcon: const ApplicationIcon(size: 40),
+                  applicationIcon: const ApplicationIcon(),
                   applicationLegalese: applicationLegalese,
                   children: [
                     const Padding(
@@ -299,7 +299,7 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
-        leading: const ApplicationIcon(size: 32),
+        leading: const ApplicationIcon(size: 40),
         automaticallyImplyLeading: false,
         title: () {
           return const DragToMoveArea(

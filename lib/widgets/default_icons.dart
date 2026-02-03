@@ -45,7 +45,7 @@ class ApplicationIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset('assets/images/logo.png',
+    return Image.asset('assets/images/logo-128x128.png',
         width: size, height: size, fit: BoxFit.scaleDown);
   }
 }
