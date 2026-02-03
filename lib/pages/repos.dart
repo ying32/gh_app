@@ -14,12 +14,17 @@ class ReposPage extends StatelessWidget {
     return APIWrap.instance.userRepos(owner, nextCursor: pageInfo.endCursor);
   }
 
+  Future<QLList<QLRepository>> _onRefreshData() async {
+    return const QLList.empty();
+    return APIWrap.instance.userRepos(owner, force: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return APIFutureBuilder(
       future: APIWrap.instance.userRepos(owner),
-      builder: (_, snapshot) =>
-          RepoListView(repos: snapshot, onLoading: _onLoadData),
+      builder: (_, snapshot) => RepoListView(
+          repos: snapshot, onLoading: _onLoadData, onRefresh: _onRefreshData),
     );
   }
 }

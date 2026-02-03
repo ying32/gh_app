@@ -1243,8 +1243,10 @@ class GitHubGraphQL {
     void Function(http.Response response)? fail,
     Map<String, String>? headers,
     JSONConverter<T>? convert,
+    bool? force,
   }) =>
-      _request(query, fail: fail, headers: headers, convert: convert);
+      _request(query,
+          fail: fail, headers: headers, convert: convert, force: force);
 
   //  "Content-Type: application/json",
   //   "Accept: application/vnd.github.v4.idl"
@@ -1257,7 +1259,9 @@ class GitHubGraphQL {
     Map<String, dynamic>? params,
     JSONConverter<T>? convert,
   }) async =>
-      _request(query, fail: fail, headers: headers, convert: convert);
+      // 对于基变，不能缓存数据
+      _request(query,
+          fail: fail, headers: headers, convert: convert, force: true);
 
   /// 忽略path字段，强制为[endpoint]，本可不这样做的，但是他内部的[request]方法在判断[path]时
   /// 附加了一个”/“符号，造成服务端识为这是一个rest API。
@@ -1268,18 +1272,28 @@ class GitHubGraphQL {
     Map<String, String>? headers,
     void Function(http.Response response)? fail,
     JSONConverter<T>? convert,
+    bool? force,
   }) async {
     final queryBody = query.jsonText;
-    final key = _cache.genKey("POST:$graphqlApiUrl:$queryBody");
-    // 已经缓存了，直接返回缓存
-    var data = await _cache.readCachedFile(key);
-    // 是否需要更新缓存
-    var needUpdate = data == null; // 数据为null则没有本地缓存
-    var needWait = data == null; // 是否需要等待
-    if (data != null && data.isNotEmpty) {
-      // 本次是否已经更新过缓存了
-      if (!_cache.isCached(key)) {
-        needUpdate = true;
+
+    // 默认的
+    var needUpdate = true;
+    var needWait = true;
+    Map<String, dynamic>? data = {};
+    var key = '';
+    // 是否需要强制更新
+    if (!(force ?? false)) {
+      key = _cache.genKey("POST:$graphqlApiUrl:$queryBody");
+      // 已经缓存了，直接返回缓存
+      data = await _cache.readCachedFile(key);
+      // 是否需要更新缓存
+      needUpdate = data == null; // 数据为null则没有本地缓存
+      needWait = data == null; // 是否需要等待
+      if (data != null && data.isNotEmpty) {
+        // 本次是否已经更新过缓存了
+        if (!_cache.isCached(key)) {
+          needUpdate = true;
+        }
       }
     }
     // 是否需要更新
@@ -1289,6 +1303,7 @@ class GitHubGraphQL {
         data =
             await _doRequest(cachedKey: key, body: queryBody, headers: headers);
       } else {
+        //TODO: 这里还要弄下，完成后通知更新
         _doRequest(cachedKey: key, body: queryBody, headers: headers);
       }
     } else {
@@ -1361,7 +1376,9 @@ class GitHubGraphQL {
           {"code": resp.statusCode, "message": resp.reasonPhrase});
     }
     // 写缓存数据
-    _cache.writeFileCache(cachedKey, resp.bodyBytes);
+    if (cachedKey.isNotEmpty && cachedKey.length == 32) {
+      _cache.writeFileCache(cachedKey, resp.bodyBytes);
+    }
     // 200的时候才写数据
     return json;
   }

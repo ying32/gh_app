@@ -208,11 +208,13 @@ class RepoListView extends StatelessWidget {
     super.key,
     required this.repos,
     this.showOpenIssues = true,
+    this.onRefresh,
     this.onLoading,
   });
 
   final QLList<QLRepository> repos;
   final bool showOpenIssues;
+  final AsyncQLListGetter<QLRepository>? onRefresh;
   final AsyncNextQLListGetter<QLRepository>? onLoading;
 
   @override
@@ -229,6 +231,7 @@ class RepoListView extends StatelessWidget {
       itemBuilder: (context, item, index) =>
           RepoListItem(item, showOpenIssues: showOpenIssues),
       onLoading: onLoading,
+      onRefresh: onRefresh,
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as m;
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
+import 'package:gh_app/widgets/dialogs.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/link.dart';
 import 'package:window_manager/window_manager.dart';
@@ -333,6 +334,7 @@ class WindowButtons extends StatelessWidget {
 // }
 
 typedef AsyncNextQLListGetter<T> = Future<QLList<T>> Function(QLPageInfo?);
+typedef AsyncQLListGetter<T> = Future<QLList<T>> Function();
 
 /// 可以上拉刷新和下拉加载的ListView包装
 class ListViewRefresher<T> extends StatefulWidget {
@@ -350,7 +352,7 @@ class ListViewRefresher<T> extends StatefulWidget {
   final Widget? separator;
   final EdgeInsetsGeometry? padding;
   final Widget Function(BuildContext, T item, int) itemBuilder;
-  final ValueChanged<RefreshController>? onRefresh;
+  final AsyncQLListGetter<T>? onRefresh;
   final AsyncNextQLListGetter<T>? onLoading;
 
   @override
@@ -400,6 +402,7 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
       child: SmartRefresher(
         enablePullDown: widget.onRefresh != null,
         enablePullUp: widget.onLoading != null,
+        //header: const ClassicHeader(releaseText: '松开刷新'),
         header: const ClassicHeader(),
         footer: const ClassicFooter(),
 
@@ -426,7 +429,29 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
         // _refreshController.refreshCompleted();
         onRefresh: widget.onRefresh == null
             ? null
-            : () => widget.onRefresh!.call(_refreshController),
+            : () {
+                widget.onRefresh!.call().then((data) {
+                  if (data.isEmpty) {
+                    _refreshController.refreshCompleted();
+                    // 没有数据，这里提示？
+                    showInfoDialog('刷新完成，没有数据', context: context);
+                  } else {
+                    setState(() {
+                      _pageInfo = data.pageInfo;
+                      _list.clear();
+                      _list.addAll(data.data);
+                    });
+                    _refreshController.refreshCompleted();
+                    showInfoDialog('刷新完成', context: context);
+                  }
+                }).onError((e, s) {
+                  _refreshController.refreshFailed();
+                  showInfoDialog('刷新失败',
+                      error: "$e",
+                      context: context,
+                      severity: InfoBarSeverity.error);
+                }).whenComplete(() {});
+              },
         // _refreshController.loadComplete();
         onLoading: widget.onLoading == null
             ? null
