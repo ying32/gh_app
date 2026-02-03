@@ -173,7 +173,7 @@ class PullRequestDetails extends StatelessWidget {
     context.read<TabviewModel>().addTab(
           PullRequestDetails(pull, repo: repo),
           key: ValueKey("${RouterTable.pulls}/${repo.fullName}/${pull.number}"),
-          title: "${repo.fullName} pull Request #${pull.number}",
+          title: "合并请求 #${pull.number} - ${repo.fullName}",
         );
   }
 }

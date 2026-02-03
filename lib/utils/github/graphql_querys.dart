@@ -401,6 +401,10 @@ class QLQueries {
       // 只有这一个参数
       sortField = 'STARRED_AT';
     }
+    // 我的仓库按星数量排序
+    if (owner.isEmpty && !isStarred) {
+      sortField = 'STARGAZERS';
+    }
 
     // 只查询user的仓库信息
     return '''query {  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {

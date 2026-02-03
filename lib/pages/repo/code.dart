@@ -21,7 +21,9 @@ class _RepoBranches extends StatelessWidget {
                 return const SizedBox(
                     height: 30,
                     width: 100,
-                    child: Center(child: ProgressRing()));
+                    child: Center(
+                        child: SizedBox(
+                            width: 30, height: 30, child: ProgressRing())));
               }
               return SingleChildScrollView(
                 child: Column(

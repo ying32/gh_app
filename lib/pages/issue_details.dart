@@ -175,7 +175,7 @@ class IssueDetailsPage extends StatelessWidget {
           IssueDetailsPage(issue, repo: repo),
           key: ValueKey(
               "${RouterTable.issues}/${repo.fullName}/${issue.number}"),
-          title: "${repo.fullName} issue #${issue.number}",
+          title: "问题 #${issue.number} - ${repo.fullName}",
         );
   }
 }

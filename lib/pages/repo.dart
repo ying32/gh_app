@@ -54,14 +54,14 @@ class _TabPagesState extends State<_TabPages> {
               // issues
               if (repo.hasIssuesEnabled)
                 Tab(
-                  text: Text('问题 ${repo.openIssuesCount}'),
+                  text: Text('问题 ${repo.openIssuesCount.toKiloString()}'),
                   icon: const DefaultIcon.issues(),
                   closeIcon: null,
                   body: RepoIssuesPage(repo),
                 ),
 
               Tab(
-                text: Text('合并请求 ${repo.openPullRequestsCount}'),
+                text: Text('合并请求 ${repo.openPullRequestsCount.toKiloString()}'),
                 icon: const DefaultIcon.pullRequest(),
                 closeIcon: null,
                 body: RepoPullRequestPage(repo),

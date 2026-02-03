@@ -267,7 +267,7 @@ class ReleasesPage extends StatelessWidget {
     context.read<TabviewModel>().addTab(
           ReleasesPage(repo: repo),
           key: ValueKey("${RouterTable.release}/${repo.fullName}"),
-          title: '${repo.fullName} Releases',
+          title: '释出 - ${repo.fullName}',
           icon: const DefaultIcon.tag(),
         );
   }
