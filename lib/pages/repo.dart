@@ -8,7 +8,6 @@ import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
-import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/issues_widgets.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
@@ -28,6 +27,9 @@ part 'repo/issues.dart';
 part 'repo/pull_request.dart';
 part 'repo/wiki.dart';
 
+/// 仓库页子页面
+enum RepoSubPage { code, issues, pullRequests, actions, wiki }
+
 class _TabPages extends StatefulWidget {
   const _TabPages();
 
@@ -36,7 +38,11 @@ class _TabPages extends StatefulWidget {
 }
 
 class _TabPagesState extends State<_TabPages> {
+  /// 当前页面
   int currentIndex = 0;
+
+  Key _getKey(QLRepository repo, RepoSubPage key) =>
+      ValueKey("${RouterTable.repo}/${repo.fullName}/$key");
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +53,7 @@ class _TabPagesState extends State<_TabPages> {
             currentIndex: currentIndex,
             tabs: [
               Tab(
+                key: _getKey(repo, RepoSubPage.code),
                 text: const Text('代码'),
                 icon: const DefaultIcon.code(),
                 closeIcon: null,
@@ -55,6 +62,7 @@ class _TabPagesState extends State<_TabPages> {
               // issues
               if (repo.hasIssuesEnabled)
                 Tab(
+                  key: _getKey(repo, RepoSubPage.issues),
                   text: Text('问题 ${repo.openIssuesCount.toKiloString()}'),
                   icon: const DefaultIcon.issues(),
                   closeIcon: null,
@@ -62,12 +70,14 @@ class _TabPagesState extends State<_TabPages> {
                 ),
 
               Tab(
+                key: _getKey(repo, RepoSubPage.pullRequests),
                 text: Text('合并请求 ${repo.openPullRequestsCount.toKiloString()}'),
                 icon: const DefaultIcon.pullRequest(),
                 closeIcon: null,
                 body: RepoPullRequestPage(repo),
               ),
               Tab(
+                key: _getKey(repo, RepoSubPage.actions),
                 text: const Text('Actions'),
                 icon: const DefaultIcon.action(),
                 closeIcon: null,
@@ -75,6 +85,7 @@ class _TabPagesState extends State<_TabPages> {
               ),
               if (repo.hasWikiEnabled)
                 Tab(
+                  key: _getKey(repo, RepoSubPage.wiki),
                   text: const Text('Wiki'),
                   icon: const DefaultIcon.wiki(),
                   closeIcon: null,
@@ -92,9 +103,10 @@ class _TabPagesState extends State<_TabPages> {
 }
 
 class RepoPage extends StatelessWidget {
-  const RepoPage(this.repo, {super.key});
+  const RepoPage(this.repo, {super.key, this.subPage});
 
   final QLRepository repo;
+  final RepoSubPage? subPage;
 
   @override
   Widget build(BuildContext context) {
@@ -116,9 +128,11 @@ class RepoPage extends StatelessWidget {
   }
 
   /// 创建一个仓库页
-  static void createNewTab(BuildContext context, QLRepository repo) {
+  static void createNewTab(BuildContext context, QLRepository repo,
+      {RepoSubPage? subPage}) {
+    // TODO: subPage待实现
     context.read<TabviewModel>().addTab(
-          RepoPage(repo),
+          RepoPage(repo, subPage: subPage),
           key: ValueKey("${RouterTable.repo}/${repo.fullName}"),
           title: repo.fullName,
         );

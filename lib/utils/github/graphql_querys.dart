@@ -449,6 +449,7 @@ class QLQueries {
                }
              }
           }
+          issues(states: OPEN) { totalCount }
         }
       } 
   }
