@@ -80,7 +80,7 @@ class _AssetsPanelState extends State<_AssetsPanel> {
       newUrl = "$newUrl/";
     }
     return url.replaceFirst(
-        "https://github.com/", AppConfig.instance.releaseFileAssetsMirrorUrl);
+        "$githubUrl/", AppConfig.instance.releaseFileAssetsMirrorUrl);
   }
 
   @override

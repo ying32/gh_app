@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/utils/config.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
@@ -125,8 +126,8 @@ class _LoginPageState extends State<LoginPage> {
                           child: IconButton(
                               icon: const Icon(Remix.token_swap_line),
                               onPressed: () {
-                                launchUrl(Uri.parse(
-                                    'https://github.com/settings/tokens'));
+                                launchUrl(
+                                    Uri.parse('$githubUrl/settings/tokens'));
                               }),
                         ),
                       )

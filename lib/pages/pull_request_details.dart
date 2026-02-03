@@ -64,7 +64,7 @@ class PullRequestDetails extends StatelessWidget {
                             : Colors.red.lighter),
                     const Spacer(),
                     IconLinkButton.linkSource(
-                        "https://github.com/${repo.fullName}/pull/${pull.number}"
+                        "$githubUrl/${repo.fullName}/pull/${pull.number}"
                         //message: '在浏览器中打开',
                         ),
                   ],

@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/theme.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -39,7 +40,7 @@ class RepoTopics extends StatelessWidget {
                     color: Colors.blue,
                   ),
                   onPressed: () {
-                    launchUrl(Uri.parse('https://github.com/topics/$e'));
+                    launchUrl(Uri.parse('$githubTopicsUrl/$e'));
                   },
                 ))
             .toList());
@@ -389,7 +390,8 @@ class RepoContentsListView extends StatelessWidget {
   }
 
   QLTree _matchReadMeFile(QLObject object, RegExp regex) {
-    return object.entries!.firstWhere((e) => regex.firstMatch(e.name) != null,
+    return object.entries!.lastWhere(
+        (e) => regex.firstMatch(e.name.replaceAll("_", "-")) != null,
         orElse: () => const QLTree());
   }
 
@@ -399,16 +401,18 @@ class RepoContentsListView extends StatelessWidget {
     var tree = _matchReadMeFile(
         object,
         RegExp(
-            r'README[\.|-|_]?' +
-                Localizations.localeOf(context).languageCode +
-                r'[\s\S]*?\.?(?:md|txt)',
+            r'^README[\.|-|_]?' +
+                Localizations.localeOf(context).toLanguageTag() +
+                r'[\s\S]*?\.?(?:md|txt)$',
             caseSensitive: false));
     if (tree.name.isNotEmpty) {
       return tree.name;
     }
     // 没有则匹配默认的
-    tree = _matchReadMeFile(object,
-        RegExp(r'README[\.|-|_]?[\s\S]*?\.?(?:md|txt)', caseSensitive: false));
+    tree = _matchReadMeFile(
+        object,
+        RegExp(r'^README[\.|-|_]?[\s\S]*?\.?(?:md|txt)$',
+            caseSensitive: false));
     if (tree.name.isNotEmpty) {
       return tree.name;
     }

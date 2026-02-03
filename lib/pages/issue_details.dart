@@ -87,7 +87,7 @@ class IssueDetailsPage extends StatelessWidget {
                     //TODO: 这里还差一个合并的标签
                     const Spacer(),
                     IconLinkButton.linkSource(
-                      "https://github.com/${repo.fullName}/issues/${issue.number}",
+                      "$githubUrl/${repo.fullName}/issues/${issue.number}",
                       //message: '在浏览器中打开',
                     ),
                   ],

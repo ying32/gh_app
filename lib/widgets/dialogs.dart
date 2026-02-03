@@ -158,7 +158,7 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
   void initState() {
     super.initState();
     if (kDebugMode) {
-      _controller.text = "https://github.com/ying32/gh_app";
+      _controller.text = "$githubUrl/ying32/gh_app";
     }
   }
 

@@ -20,8 +20,10 @@ class RouterTable {
   static const release = "/release";
 }
 
-/// 不要修改或者移除这些定义
 const githubUrl = 'https://github.com';
+const githubTopicsUrl = '$githubUrl/topics';
+
+/// 不要修改或者移除这些定义
 const myGithubUrl = '$githubUrl/ying32';
 const appRepoUrl = '$myGithubUrl/gh_app';
 const appVersion = '1.0.1';

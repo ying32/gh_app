@@ -82,6 +82,9 @@ class GithubApp extends StatelessWidget {
                 ),
           ),
           locale: appTheme.locale,
+          // supportedLocales: const [
+          //   Locale('zh', 'CN'),
+          // ],
           localizationsDelegates: const [
             RefreshLocalizations.delegate,
           ],
