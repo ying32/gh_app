@@ -15,7 +15,7 @@ class ReposPage extends StatelessWidget {
   }
 
   Future<QLList<QLRepository>> _onRefreshData() async {
-    return const QLList.empty();
+    // return const QLList.empty();
     return APIWrap.instance.userRepos(owner, force: true);
   }
 

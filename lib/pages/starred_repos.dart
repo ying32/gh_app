@@ -15,13 +15,21 @@ class StarredReposPage extends StatelessWidget {
         .userRepos(owner, nextCursor: pageInfo.endCursor, isStarred: true);
   }
 
+  Future<QLList<QLRepository>> _onRefreshData() async {
+    // return const QLList.empty();
+    return APIWrap.instance.userRepos(owner, isStarred: true, force: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return APIFutureBuilder(
       future: APIWrap.instance.userRepos(owner, isStarred: true),
       builder: (_, snapshot) {
         return RepoListView(
-            repos: snapshot, showOpenIssues: false, onLoading: _onLoadData);
+            repos: snapshot,
+            showOpenIssues: false,
+            onLoading: _onLoadData,
+            onRefresh: _onRefreshData);
       },
     );
   }

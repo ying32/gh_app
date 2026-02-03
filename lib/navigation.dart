@@ -113,7 +113,7 @@ class _LeftNav extends StatelessWidget {
     _NavItem(
       key: const ValueKey(RouterTable.stars),
       icon: const DefaultIcon.star(size: 18),
-      title: '我收藏的仓库',
+      title: '我点赞的仓库',
       body: const StarredReposPage(),
     ),
   ];
