@@ -62,6 +62,12 @@ class IssueDetailsPage extends StatelessWidget {
                         color: issue.isOpen
                             ? Colors.green.lighter
                             : Colors.red.lighter),
+                    if (issue.issueType != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: IssueType(issue.issueType!, fontSize: 14),
+                      ),
+                    //TODO: 这里还差一个合并的标签
                     const Spacer(),
                     IconLinkButton.linkSource(
                       "https://github.com/${repo.fullName}/issues/${issue.number}",
@@ -115,6 +121,18 @@ class IssueDetailsPage extends StatelessWidget {
                         padding: EdgeInsets.symmetric(vertical: 8.0),
                         child: Divider(),
                       ),
+                      if (issue.issueType != null) ...[
+                        const Text('类型'),
+                        const SizedBox(height: 10),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 5),
+                          child: IssueType(issue.issueType!),
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Divider(),
+                        ),
+                      ],
                       //
                       const Text('Projects'),
                       const SizedBox(height: 10),

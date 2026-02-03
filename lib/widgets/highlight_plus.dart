@@ -119,7 +119,7 @@ class HighlightViewPlus extends StatelessWidget {
     // 这里要优化下，先要查找语言有没有支持，有的话才继续，没有就不继续了
     final lang = _getLang;
     if (kDebugMode) {
-      print("highlight lang=$lang");
+      //print("highlight lang=$lang");
     }
     if (lang.isEmpty) {
       return SelectableText(

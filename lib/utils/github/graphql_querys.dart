@@ -513,13 +513,15 @@ class QLQueries {
                 }
                 title 
                 body
+                bodyHTML
                 comments { totalCount }
                 closedAt
                 createdAt
                 editor {
                   login avatarUrl
                 }
-                labels(first: 20) {
+                ${isIssues ? 'issueType { color description isEnabled name  }' : ''}
+                labels(first: 20, orderBy: { direction:ASC, field: NAME }) {
                    nodes {
                      name 
                      color 
@@ -735,15 +737,17 @@ class QLQueries {
                nodes {
                   author { login avatarUrl }
                   body
+                  bodyHTML
                   createdAt 
                   editor { login avatarUrl  }
                   lastEditedAt 
                   publishedAt 
                   updatedAt 
-                   url 
-                   viewerCanDelete
-                   viewerCanUpdate 
-                   viewerDidAuthor 
+                  isMinimized 
+                  url 
+                  viewerCanDelete
+                  viewerCanUpdate 
+                  viewerDidAuthor 
                 }
           }   
        }
@@ -769,4 +773,49 @@ class QLQueries {
   }
 }
 
-/// 查询指定issue
+///issue timelines
+///
+/// https://docs.github.com/zh/graphql/reference/objects#issue
+///
+///https://docs.github.com/zh/graphql/reference/objects#issuetimelineconnection
+///
+///https://docs.github.com/zh/graphql/reference/unions#issuetimelineitem
+///
+///
+/// IssueTimelineItem 可能的类型
+/// AssignedEvent
+/// ClosedEvent
+/// Commit
+/// CrossReferencedEvent
+/// DemilestonedEvent
+/// IssueComment
+/// LabeledEvent
+/// LockedEvent
+/// MilestonedEvent
+/// ReferencedEvent
+/// RenamedTitleEvent
+/// ReopenedEvent
+/// SubscribedEvent
+/// TransferredEvent
+/// UnassignedEvent
+/// UnlabeledEvent
+/// UnlockedEvent
+/// UnsubscribedEvent
+/// UserBlockedEvent
+//query {
+//    repository(owner:"zed-industries", name:"zed") {
+//        issue(number: 48231) {
+//           timeline(first: 15) {
+//             nodes {
+//              __typename
+//               ... on Commit { author { __typename name } message }
+//               ... on IssueComment { author { login } body }
+//               ... on AssignedEvent { actor  { login }   }
+//               ... on ClosedEvent  { actor  { login }   }
+//               ... on SubscribedEvent   { actor  { login }   }
+//               ... on LabeledEvent    { actor  { __typename login } label { __typename color name  } }
+//             }
+//           }
+//        }
+//    }
+// }

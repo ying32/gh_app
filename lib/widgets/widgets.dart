@@ -105,12 +105,15 @@ class TagLabel extends StatelessWidget {
   factory TagLabel.other(String text,
           {Color color = m.Colors.black,
           EdgeInsetsGeometry? padding,
-          double? radius}) =>
+          double? radius,
+          FontWeight? fontWeight}) =>
       TagLabel(
           color: color,
           padding: padding,
           radius: radius,
-          text: Text(text, style: TextStyle(fontSize: 11, color: color)));
+          text: Text(text,
+              style: TextStyle(
+                  fontSize: 11, color: color, fontWeight: fontWeight)));
 }
 
 /// 链接跳转的？？？？

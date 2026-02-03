@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' as mat;
 import 'package:http/http.dart' as http;
 
 import 'http_cache.dart';
@@ -669,6 +670,7 @@ class QLIssueOrPullRequestOrCommentBase {
     this.author,
     this.body = '',
     this.bodyHTML,
+    this.isMinimized = false,
     this.createdAt,
     this.editor,
     this.lastEditedAt,
@@ -682,6 +684,12 @@ class QLIssueOrPullRequestOrCommentBase {
   final String body;
 
   final String? bodyHTML;
+
+  /// Returns whether or not a comment has been minimized.
+  final bool isMinimized;
+
+  //Returns why the comment was minimized. One of abuse, off-topic, outdated, resolved, duplicate and spam. Note that the case and formatting of these values differs from the inputs to the MinimizeComment mutation.
+  //final String minimizedReason
 
   /// 创建时间
   final DateTime? createdAt;
@@ -702,6 +710,7 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
     super.author,
     super.body,
     super.bodyHTML,
+    super.isMinimized,
     super.createdAt,
     super.editor,
     super.lastEditedAt,
@@ -751,6 +760,54 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
   bool get isClosed => state == "CLOSED";
 }
 
+/// issues颜色
+class QLIssueTypeColor {
+  const QLIssueTypeColor([this.colorText = '']);
+
+  static const qlIssueTypeColor = {
+    'BLUE': mat.Colors.blue,
+    'GRAY': mat.Colors.grey,
+    'GREEN': mat.Colors.green,
+    'ORANGE': mat.Colors.orange,
+    'PINK': mat.Colors.pink,
+    'PURPLE': mat.Colors.purple,
+    'RED': mat.Colors.red,
+    'YELLOW': mat.Colors.yellow,
+  };
+
+  final String colorText;
+
+  /// 颜色
+  mat.Color get color =>
+      qlIssueTypeColor[colorText] ?? const mat.Color(0x00000000);
+}
+
+/// Issues类型
+///
+/// https://docs.github.com/zh/graphql/reference/objects#issuetype
+class QLIssueType {
+  const QLIssueType({
+    this.color = const QLIssueTypeColor(),
+    this.description = '',
+    this.isEnabled = false,
+    this.name = '',
+  });
+
+  /// https://docs.github.com/zh/graphql/reference/enums#issuetypecolor
+  final QLIssueTypeColor color;
+  final String description;
+  final bool isEnabled;
+  //isPrivate is deprecated.
+  // final bool isPrivate;
+  final String name;
+
+  QLIssueType.fromJson(Map<String, dynamic> input)
+      : color = QLIssueTypeColor(input['color'] ?? ''),
+        description = input['description'] ?? '',
+        isEnabled = input['isEnabled'] ?? false,
+        name = input['name'] ?? '';
+}
+
 /// issue
 class QLIssue extends QLIssueOrPullRequest {
   const QLIssue({
@@ -759,6 +816,7 @@ class QLIssue extends QLIssueOrPullRequest {
     super.title,
     super.body,
     super.bodyHTML,
+    super.isMinimized,
     super.closedAt,
     super.createdAt,
     super.editor,
@@ -770,10 +828,16 @@ class QLIssue extends QLIssueOrPullRequest {
     super.updatedAt,
     super.viewerCanClose,
     super.viewerCanReopen,
+    this.issueType,
   });
 
+  final QLIssueType? issueType;
+
   QLIssue.fromJson(Map<String, dynamic> input)
-      : super(
+      : issueType = input['issueType'] == null
+            ? null
+            : QLIssueType.fromJson(input['issueType']),
+        super(
           number: input['number'] ?? 0,
           author: input['author'] == null
               ? null
@@ -781,6 +845,7 @@ class QLIssue extends QLIssueOrPullRequest {
           title: input['title'] ?? '',
           body: input['body'] ?? '',
           bodyHTML: input['bodyHTML'],
+          isMinimized: input['isMinimized'] ?? false,
           closedAt: _parseDateTime(input['closedAt']),
           createdAt: _parseDateTime(input['createdAt']),
           editor: input['editor'] == null
@@ -809,6 +874,7 @@ class QLPullRequest extends QLIssueOrPullRequest {
     super.title,
     super.body,
     super.bodyHTML,
+    super.isMinimized,
     super.closedAt,
     super.createdAt,
     super.editor,
@@ -834,6 +900,7 @@ class QLPullRequest extends QLIssueOrPullRequest {
           title: input['title'] ?? '',
           body: input['body'] ?? '',
           bodyHTML: input['bodyHTML'],
+          isMinimized: input['isMinimized'] ?? false,
           closedAt: _parseDateTime(input['closedAt']),
           createdAt: _parseDateTime(input['createdAt']),
           editor: input['editor'] == null

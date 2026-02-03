@@ -29,6 +29,11 @@ class _IssueItem extends StatelessWidget {
       ),
       subtitle: Row(
         children: [
+          if (issue.issueType != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: IssueType(issue.issueType!),
+            ),
           Text('#${issue.number}'),
           Text(' $dotChar ${issue.author?.login ?? ''}'),
           Text(' $dotChar 打开于 ${issue.createdAt?.toLabel ?? ''}')

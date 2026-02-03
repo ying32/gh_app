@@ -153,3 +153,24 @@ class IssuesCommentsView extends StatelessWidget {
         });
   }
 }
+
+class IssueType extends StatelessWidget {
+  const IssueType(this.issueType, {super.key, this.fontSize});
+
+  final QLIssueType issueType;
+  final double? fontSize;
+
+  @override
+  Widget build(BuildContext context) {
+    return TagLabel(
+        color: issueType.color.color,
+        text: Text(
+          issueType.name,
+          style: TextStyle(
+            color: issueType.color.color,
+            fontSize: fontSize ?? 11.0,
+            fontWeight: FontWeight.w500,
+          ),
+        ));
+  }
+}
