@@ -20,8 +20,12 @@ class RouterTable {
   static const release = "/release";
 }
 
-/// 项目url
-const appRepoUrl = 'https://github.com/ying32/gh_app';
+/// 不要修改或者移除这些定义
+const githubUrl = 'https://github.com';
+const myGithubUrl = '$githubUrl/ying32';
+const appRepoUrl = '$myGithubUrl/gh_app';
+const appVersion = '1.0.1';
+const applicationLegalese = 'Copyright (c) 2026 ying32 All Rights Reserved';
 
 /// 一个点
 const dotChar = '·';

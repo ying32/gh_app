@@ -14,54 +14,50 @@ class UserInfoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Row(
-        children: [
-          SizedBox(width: 240, child: UserInfoPanel(user)),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
-            child: Divider(
-              direction: Axis.vertical,
+    return Row(
+      children: [
+        SizedBox(width: 240, child: UserInfoPanel(user)),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
+          child: Divider(
+            direction: Axis.vertical,
+          ),
+        ),
+        if (user != null && (user!.pinnedItems?.isNotEmpty ?? false))
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    '置顶的', //Pinned
+                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                  ),
+                  // child: Row(
+                  //   children: [
+                  //     Text(
+                  //       'Pinned',
+                  //       style: TextStyle(
+                  //           fontWeight: FontWeight.w500, fontSize: 16),
+                  //     ),
+                  //     Spacer(),
+                  //     Text('自定义你的Pins'),
+                  //   ],
+                  // ),
+                ),
+                Wrap(
+                  children: (user as QLUser)
+                      .pinnedItems!
+                      .map((e) => SizedBox(
+                          width: 300, child: RepoListItem(e, isPinStyle: true)))
+                      .toList(),
+                ),
+              ],
             ),
           ),
-          if (user != null && (user!.pinnedItems?.isNotEmpty ?? false))
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      '置顶的', //Pinned
-                      style:
-                          TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-                    ),
-                    // child: Row(
-                    //   children: [
-                    //     Text(
-                    //       'Pinned',
-                    //       style: TextStyle(
-                    //           fontWeight: FontWeight.w500, fontSize: 16),
-                    //     ),
-                    //     Spacer(),
-                    //     Text('自定义你的Pins'),
-                    //   ],
-                    // ),
-                  ),
-                  Wrap(
-                    children: (user as QLUser)
-                        .pinnedItems!
-                        .map((e) => SizedBox(
-                            width: 300,
-                            child: RepoListItem(e, isPinStyle: true)))
-                        .toList(),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
+      ],
     );
   }
 

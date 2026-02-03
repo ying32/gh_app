@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart' as mat;
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/graphql_test.dart';
@@ -12,6 +13,7 @@ import 'package:gh_app/pages/settings.dart';
 import 'package:gh_app/pages/starred_repos.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
@@ -137,6 +139,31 @@ class _LeftNav extends StatelessWidget {
     ),
   ];
 
+  Widget _buildAboutButton(BuildContext context) => Tooltip(
+        message: '关于',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: IconButton(
+              icon: const Icon(Remix.info_i, size: 18),
+              onPressed: () {
+                mat.showAboutDialog(
+                  barrierDismissible: true,
+                  applicationName: appTitle,
+                  applicationVersion: appVersion,
+                  applicationIcon: const ApplicationIcon(size: 40),
+                  applicationLegalese: applicationLegalese,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(child: Text(myGithubUrl)),
+                    )
+                  ],
+                  context: context,
+                );
+              }),
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -176,6 +203,11 @@ class _LeftNav extends StatelessWidget {
               child: _NavItemIconButton(e),
             )),
         const IconLinkButton.linkSource(appRepoUrl, message: '源代码'),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Divider(),
+        ),
+        _buildAboutButton(context),
         const SizedBox(height: 8),
       ],
     );
@@ -267,7 +299,7 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
     return NavigationView(
       key: viewKey,
       appBar: NavigationAppBar(
-        leading: const DefaultIcon.github(size: 32),
+        leading: const ApplicationIcon(size: 32),
         automaticallyImplyLeading: false,
         title: () {
           return const DragToMoveArea(

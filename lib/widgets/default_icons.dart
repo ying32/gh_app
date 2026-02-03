@@ -38,6 +38,18 @@ class DefaultIcons {
   static const linkSource = FluentIcons.open_source;
 }
 
+class ApplicationIcon extends StatelessWidget {
+  const ApplicationIcon({super.key, this.size = 64});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Image.asset('assets/images/logo.png',
+        width: size, height: size, fit: BoxFit.scaleDown);
+  }
+}
+
 /// 定义了一些常用的icon
 class DefaultIcon extends StatelessWidget {
   const DefaultIcon(

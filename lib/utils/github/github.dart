@@ -86,6 +86,17 @@ class APIWrap {
           : await gitHubAPI.query(QLQuery(QLQueries.queryUser()),
               convert: QLUser.fromJson));
 
+  Future<QLUser?> refreshCurrentUser({bool force = true}) async {
+    if (gitHubAPI.isAnonymous) return null;
+    try {
+      _currentUser = await gitHubAPI.query(QLQuery(QLQueries.queryUser()),
+          convert: QLUser.fromJson, force: force);
+      return _currentUser;
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// 指定用户信息
   Future<QLUser?> userInfo(String name) => gitHubAPI
       .query(QLQuery(QLQueries.queryUser(name)), convert: QLUser.fromJson);
