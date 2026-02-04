@@ -57,6 +57,7 @@ void main() async {
     windowManager.waitUntilReadyToShow(option, () async {
       await windowManager.show();
       await windowManager.focus();
+      await windowManager.setPreventClose(true);
     });
   } else {
     await windowManager.setTitle(appTitle);

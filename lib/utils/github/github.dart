@@ -442,6 +442,12 @@ class APIWrap {
               null; //segments.length >= 5 ? segments.skip(4).join("/") : null;
           return QLRepositoryWrap(repo,
               ref: ref, path: path, subPage: RepoSubPage.code);
+        // case "actions":
+        //   final runs = segments.length >= 4 ? segments[3].trim() : null;
+        //   final id = segments.length >= 5 ? segments[4].trim() : null;
+        //   return QLRepositoryWrap(repo, subPage: RepoSubPage.actions);
+        // case "commit":
+        //   final hash = segments.length >= 4 ? segments[3].trim() : null;
       }
     }
     return null;

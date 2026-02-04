@@ -322,7 +322,11 @@ class ExitAppDialog extends StatelessWidget {
           child: const Text('是'),
           onPressed: () {
             Navigator.pop(context);
-            windowManager.destroy();
+            //注：在使用不知道哪个版本开始的（window_manager-0.4.3）后，
+            //windowManager.destroy();会卡住一会儿，这里使用这种方式就可以正常了
+            windowManager.setPreventClose(false).then((_) {
+              windowManager.close();
+            });
           },
         ),
         Button(
