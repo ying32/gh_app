@@ -76,13 +76,14 @@ class NavigationPage extends StatelessWidget {
     return ChangeNotifierProvider<TabviewModel>(
         create: (_) => TabviewModel([
               Tab(
-                  key: const ValueKey(RouterTable.root),
-                  text: const Text('我的'),
-                  // semanticLabel: 'Document #$index',
-                  icon: const DefaultIcon.home(),
-                  body: const HomePage(),
-                  closeIcon: null,
-                  onClosed: null)
+                key: const ValueKey(RouterTable.root),
+                text: const Text('我的'),
+                // semanticLabel: 'Document #$index',
+                icon: const DefaultIcon.home(),
+                body: const HomePage(),
+                closeIcon: null,
+                onClosed: null,
+              )
             ]),
         child: const _InternalNavigationPage());
   }

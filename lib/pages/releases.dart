@@ -37,19 +37,16 @@ class _LinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = TextStyle(color: Colors.blue, fontWeight: FontWeight.w500);
-    Widget child = Text(title, style: style);
+    Widget child = Text(title);
     if (size != null && size! > 0) {
-      child = Row(children: [
-        child,
-        const Spacer(),
-        Text(size!.toSizeString(), style: style)
-      ]);
+      child =
+          Row(children: [child, const Spacer(), Text(size!.toSizeString())]);
     }
 
     return Tooltip(
       message: link,
       child: LinkButton(
+        style: const TextStyle(fontWeight: FontWeight.w500),
         text: Padding(
             padding: const EdgeInsets.symmetric(vertical: 5.0), child: child),
         // 这里还可以添加一个替换规则，替换成镜像啥的

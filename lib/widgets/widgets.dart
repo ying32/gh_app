@@ -130,12 +130,14 @@ class LinkButton extends StatelessWidget {
     required this.onPressed,
     this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
     this.borderRadius,
+    this.style,
   });
 
   final Widget text;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onPressed;
   final BorderRadius? borderRadius;
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +147,15 @@ class LinkButton extends StatelessWidget {
       child: mat.InkWell(
         borderRadius: borderRadius,
         onTap: onPressed,
-        child: Padding(padding: padding, child: text),
+        child: Padding(
+            padding: padding,
+            child: DefaultTextStyle(
+                style: FluentTheme.of(context)
+                    .typography
+                    .body!
+                    .copyWith(color: Colors.blue)
+                    .merge(style),
+                child: text)),
       ),
     );
   }

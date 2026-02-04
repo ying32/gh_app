@@ -4,6 +4,7 @@ import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/releases.dart';
+import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/github/github.dart';

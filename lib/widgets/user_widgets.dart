@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
@@ -139,6 +140,9 @@ class UserInfoPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (user == null) {
+      return const SizedBox.shrink();
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -146,19 +150,21 @@ class UserInfoPanel extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              UserHeadImage(user?.avatarUrl, imageSize: 60),
+              UserHeadImage(user!.avatarUrl, imageSize: 60),
               const SizedBox(width: 10.0),
               SelectionArea(child: UserNameWidget(user)),
             ],
           ),
         ),
-        SelectionArea(child: UserLineInfo(icon: null, value: user?.bio)),
+        SelectionArea(child: UserLineInfo(icon: null, value: user!.bio)),
         const SizedBox(height: 8),
-        SelectionArea(
-            child: UserLineInfo(
-                icon: null,
-                value:
-                    "${user?.status.emojiHTML.replaceAll(RegExp(r'\<\/?div\>'), '') ?? ''} ${user?.status.message ?? ''}")),
+
+        if (user!.status.emojiHTML.isNotEmpty ||
+            user!.status.message.isNotEmpty)
+          SelectionArea(
+              child: HtmlWidget(
+                  "${user!.status.emojiHTML}${user!.status.message}")),
+
         UserLineInfo(
           icon: DefaultIcons.group,
           value: Row(

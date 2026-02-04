@@ -50,8 +50,7 @@ class RepoReleases extends StatelessWidget {
           ),
           if (repo.releasesCount > 1)
             LinkButton(
-              text: Text('+ ${repo.releasesCount - 1} releases',
-                  style: TextStyle(color: Colors.blue)),
+              text: Text('+ ${repo.releasesCount - 1} releases'),
               onPressed: () {
                 // 这里先不管哈
                 ReleasesPage.createNewTab(context, repo);

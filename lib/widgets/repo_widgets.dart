@@ -35,10 +35,7 @@ class RepoTopics extends StatelessWidget {
             .map((e) => LinkButton(
                   padding: EdgeInsets.zero,
                   borderRadius: BorderRadius.circular(10),
-                  text: TagLabel.other(
-                    e,
-                    color: Colors.blue,
-                  ),
+                  text: TagLabel.other(e),
                   onPressed: () {
                     launchUrl(Uri.parse('$githubTopicsUrl/$e'));
                   },
@@ -121,10 +118,8 @@ class RepoListItem extends StatelessWidget {
                   },
                   text: Text(
                     _title,
-                    style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16.0),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16.0),
                   )),
 
               const SizedBox(width: 8.0),

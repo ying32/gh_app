@@ -17,7 +17,7 @@ void main() async {
   await AppConfig.instance.init();
   createGithub(AppConfig.instance.auth);
   if (kDebugMode) {
-    print("AppConfig.instance.auth=${AppConfig.instance.auth.toJson()}");
+    //print("AppConfig.instance.auth=${AppConfig.instance.auth.toJson()}");
   }
   // if it's not on the web, windows or android, load the accent color
   if (!kIsWeb &&
