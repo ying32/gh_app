@@ -383,6 +383,7 @@ class ListViewRefresher<T> extends StatefulWidget {
     required this.itemBuilder,
     this.separator,
     this.padding,
+    this.hideFooterWhenNotFull = true,
     this.onRefresh,
     this.onLoading,
   });
@@ -391,6 +392,7 @@ class ListViewRefresher<T> extends StatefulWidget {
   final Widget? separator;
   final EdgeInsetsGeometry? padding;
   final Widget Function(BuildContext, T item, int) itemBuilder;
+  final bool hideFooterWhenNotFull;
   final AsyncQLListGetter<T>? onRefresh;
   final AsyncNextQLListGetter<T>? onLoading;
 
@@ -437,7 +439,7 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
     //         )
     //     );
     return RefreshConfiguration(
-      hideFooterWhenNotFull: true,
+      hideFooterWhenNotFull: widget.hideFooterWhenNotFull,
       child: SmartRefresher(
         enablePullDown: widget.onRefresh != null,
         enablePullUp: widget.onLoading != null,
@@ -523,6 +525,58 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
               widget.separator ?? const SizedBox.shrink(),
         ),
       ),
+    );
+  }
+}
+
+/// 一个包装的易使用的刷新器
+class EasyListViewRefresher extends StatefulWidget {
+  const EasyListViewRefresher({
+    super.key,
+    required this.listview,
+    this.hideFooterWhenNotFull = false,
+    this.onRefresh,
+    this.onLoading,
+  });
+
+  final Widget listview;
+  final bool hideFooterWhenNotFull;
+  final ValueChanged<RefreshController>? onRefresh;
+  final ValueChanged<RefreshController>? onLoading;
+
+  @override
+  State<EasyListViewRefresher> createState() => _EasyListViewRefresherState();
+}
+
+class _EasyListViewRefresherState extends State<EasyListViewRefresher> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  @override
+  void dispose() {
+    // 其实可以不调用的
+    _refreshController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshConfiguration(
+      hideFooterWhenNotFull: widget.hideFooterWhenNotFull,
+      child: SmartRefresher(
+          enablePullDown: widget.onRefresh != null,
+          enablePullUp: widget.onLoading != null,
+          //header: const ClassicHeader(releaseText: '松开刷新'),
+          header: const ClassicHeader(),
+          footer: const ClassicFooter(),
+          onRefresh: widget.onRefresh == null
+              ? null
+              : () => widget.onRefresh!.call(_refreshController),
+          onLoading: widget.onLoading == null
+              ? null
+              : () => widget.onLoading!.call(_refreshController),
+          controller: _refreshController,
+          child: widget.listview),
     );
   }
 }
