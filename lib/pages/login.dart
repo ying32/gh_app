@@ -48,7 +48,6 @@ class _LoginPageState extends State<LoginPage> {
             _showInfo('AccessToken不能为空', severity: InfoBarSeverity.error);
             return;
           }
-          //TODO: 这里还要处理状态，先不管了，以后再弄吧
           final auth = AuthField(_authType, token);
           AppConfig.instance.auth = auth;
           createGithub(auth);
@@ -103,7 +102,6 @@ class _LoginPageState extends State<LoginPage> {
                       child: ComboBox(
                           value: _authType,
                           items: AuthType.values
-                              //TODO: 这里过滤掉匿名和使用帐号密码登录方式
                               .where((e) => e != AuthType.anonymous)
                               .map((e) => ComboBoxItem(
                                     value: e,

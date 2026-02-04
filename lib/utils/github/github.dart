@@ -339,30 +339,35 @@ class APIWrap {
     final segments = uri.pathSegments.where((e) => e.isNotEmpty).toList();
     if (segments.length < 2) return null;
     // 最少2个
-    var repoName = segments[1];
+    final login = segments[0].trim();
+    var repoName = segments[1].trim();
     if (repoName.endsWith(".git")) {
       repoName = repoName.substring(0, repoName.length - 4);
     }
-    final repo = QLRepository(
-        name: repoName, owner: QLRepositoryOwner(login: segments[0]));
+    final repo =
+        QLRepository(name: repoName, owner: QLRepositoryOwner(login: login));
     if (segments.length == 2) {
       return repo;
     } else if (segments.length > 2) {
-      final val = segments[2];
-      switch (val) {
+      final field3 = segments[2].trim();
+      switch (field3) {
         case "issues" || "pull":
           if (segments.length >= 4) {
             final number = int.tryParse(segments[3], radix: 10) ?? -1;
             if (number > 0) {
-              if (val == "issues") {
+              if (field3 == "issues") {
                 return QLIssueWrap(QLIssue(number: number), repo);
-              } else if (val == "pull") {
+              } else if (field3 == "pull") {
                 return QLPullRequestWrap(QLPullRequest(number: number), repo);
               }
             }
+          } else {
+            // TODO: 打开对应的 issues或者pullRequests子页
           }
         case "releases":
           return QLReleaseWrap(repo);
+        case "blob":
+          break;
       }
     }
     return null;

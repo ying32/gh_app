@@ -191,7 +191,7 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
           context: context, severity: InfoBarSeverity.error);
       return;
     }
-    if (u.host != "github.com") {
+    if (u.host != githubHost) {
       showInfoDialog('请输入一个github仓库链接',
           context: context, severity: InfoBarSeverity.error);
       return;

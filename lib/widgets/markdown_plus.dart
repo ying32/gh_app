@@ -28,7 +28,6 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
 
   void _convertMarkdown() async {
     // https://pub.dev/packages/markdown
-    //TODO： 这里要优化下
     _body = md.markdownToHtml(
       widget.body,
       extensionSet: md.ExtensionSet.gitHubWeb,
@@ -36,7 +35,6 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
     if (mounted) {
       setState(() {});
     }
-    //print("body=$_body");
   }
 
   @override
@@ -56,7 +54,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
             if (lang?.startsWith("language-") ?? false) {
               lang = lang!.substring(9);
             }
-            //TODO: 这里要突出显示下
+            // 没有指定语法时，直接只突出显示
             if (lang == null || lang.isEmpty) {
               return Container(
                   padding:

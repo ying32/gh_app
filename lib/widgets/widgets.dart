@@ -259,7 +259,6 @@ class WindowButtons extends StatelessWidget {
 }
 
 /// 分页按钮，嗯，先放着
-/// TODO: 这个分页组件还没完全实现，只是简单的弄下。
 /// 另外这个感觉不能在GraphQL API里面使用吧，只适合REST API的，
 /// 估计得改下，改为上拉加载数据
 // class PaginationBar extends StatefulWidget {
