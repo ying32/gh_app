@@ -29,8 +29,8 @@ class RepoTopics extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-        runSpacing: 10.0,
-        spacing: 8.0,
+        runSpacing: 3.0,
+        spacing: 1.0,
         children: topics
             .map((e) => LinkButton(
                   padding: EdgeInsets.zero,
@@ -47,6 +47,7 @@ class RepoTopics extends StatelessWidget {
 /// 语言的圆点
 class LangCircleDot extends StatelessWidget {
   const LangCircleDot(this.lang, {super.key});
+
   final QLLanguage lang;
 
   @override
@@ -220,6 +221,7 @@ class RepoItemForkInfo extends StatelessWidget {
   const RepoItemForkInfo(this.repo, {super.key});
 
   final QLRepository repo;
+
   @override
   Widget build(BuildContext context) {
     return Padding(

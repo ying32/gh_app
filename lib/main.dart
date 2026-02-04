@@ -44,18 +44,47 @@ void main() async {
 
     final wSize =
         Platform.isWindows ? const Size(1280, 768) : const Size(1000, 720);
-    await windowManager.setTitle(appTitle);
-    await windowManager.setSize(wSize);
-    await windowManager.setMinimumSize(wSize);
-    await windowManager.center();
-    windowManager.waitUntilReadyToShow().then((_) async {
-      await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
-          windowButtonVisibility: false);
-      await windowManager.show();
-      await windowManager.focus();
-      await windowManager.setPreventClose(true);
-      await windowManager.setSkipTaskbar(false);
-    });
+
+    /// 为解决启动时黑屏问题.还需要修改macos/Runner/MainFlutterWindow.swift里面的
+    /// https://github.com/flutter/flutter/issues/142916
+    ///```swift
+    ///class MainFlutterWindow: NSWindow {
+    ///   override func awakeFromNib() {
+    ///     // ...
+    ///     let flutterViewController = FlutterViewController()
+    ///     // Add following two lines
+    ///     self.backgroundColor = NSColor.clear
+    ///     flutterViewController.backgroundColor = NSColor.clear
+    ///     // ...
+    ///   }
+    /// }
+    ///```
+    if (Platform.isMacOS) {
+      await windowManager.ensureInitialized();
+      final option = WindowOptions(
+        center: true,
+        size: wSize,
+        minimumSize: wSize,
+        title: appTitle,
+      );
+      windowManager.waitUntilReadyToShow(option, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    } else {
+      await windowManager.setTitle(appTitle);
+      await windowManager.setSize(wSize);
+      await windowManager.setMinimumSize(wSize);
+      await windowManager.center();
+      windowManager.waitUntilReadyToShow().then((_) async {
+        await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
+            windowButtonVisibility: false);
+        await windowManager.show();
+        await windowManager.focus();
+        await windowManager.setPreventClose(true);
+        await windowManager.setSkipTaskbar(false);
+      });
+    }
   }
 
   runApp(const GithubApp());

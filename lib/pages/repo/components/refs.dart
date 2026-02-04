@@ -32,7 +32,10 @@ class _RepoBranches extends StatelessWidget {
                         .map((e) => Tooltip(
                               message: e.name,
                               child: LinkButton(
-                                  style: TextStyle(color: appTheme.color),
+                                  style: TextStyle(
+                                      color: context.isDark
+                                          ? Colors.white
+                                          : Colors.grey),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                     context.read<RepoModel>().ref =

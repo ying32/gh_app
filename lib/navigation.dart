@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/tabview_model.dart';
@@ -30,6 +32,7 @@ class _NavItem {
     required this.icon,
     required this.body,
   });
+
   ValueKey key;
   String title;
   Widget icon;
@@ -63,6 +66,33 @@ class _NavItemIconButton extends StatelessWidget {
                         icon: item.icon);
                   }),
       ),
+    );
+  }
+}
+
+class _UserHeadImageButton extends StatelessWidget {
+  const _UserHeadImageButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<CurrentUserModel, QLUser?>(
+      selector: (_, model) => model.user,
+      builder: (context, user, __) {
+        if (user == null) {
+          if (Platform.isMacOS) {
+            return const ApplicationIcon(size: 40);
+          }
+          return const SizedBox.shrink();
+        }
+        return UserHeadImage(
+          user.avatarUrl,
+          imageSize: 40,
+          tooltip: user.name.isEmpty ? user.login : user.name,
+          onPressed: () {
+            launchUrl(Uri.parse(user.url));
+          },
+        );
+      },
     );
   }
 }
@@ -146,6 +176,7 @@ class _LeftNav extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        if (Platform.isMacOS) const _UserHeadImageButton(),
         ..._currentUserItems.map((e) => _NavItemIconButton(e)),
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -243,8 +274,6 @@ class _InternalNavigationPage extends StatefulWidget {
 
 class _InternalNavigationPageState extends State<_InternalNavigationPage>
     with WindowListener {
-  final viewKey = GlobalKey(debugLabel: 'Navigation View Key');
-
   // String? _lastClipboardText;
 
   @override
@@ -273,58 +302,51 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
   @override
   Widget build(BuildContext context) {
     return NavigationView(
-      key: viewKey,
       appBar: NavigationAppBar(
-        leading: const ApplicationIcon(size: 40),
+        height: Platform.isMacOS ? 30.0 : 50.0,
+        leading: !Platform.isMacOS ? const ApplicationIcon(size: 40) : null,
         automaticallyImplyLeading: false,
-        title: () {
-          return const DragToMoveArea(
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                appTitle,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-            ),
-          );
-        }(),
-        actions: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          Selector<CurrentUserModel, QLUser?>(
-            selector: (_, model) => model.user,
-            builder: (context, user, __) {
-              if (user == null) return const SizedBox.shrink();
-              return UserHeadImage(
-                user.avatarUrl,
-                imageSize: 40,
-                tooltip: user.name.isEmpty ? user.login : user.name,
-                onPressed: () {
-                  launchUrl(Uri.parse(user.url));
-                },
-              );
-            },
-          ),
-          const SizedBox(width: 10),
-          if (kDebugMode)
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(end: 8.0),
-                child: ToggleSwitch(
-                  content: const Text('深色模式'),
-                  checked: FluentTheme.of(context).brightness.isDark,
-                  onChanged: (v) {
-                    if (v) {
-                      appTheme.mode = ThemeMode.dark;
-                    } else {
-                      appTheme.mode = ThemeMode.light;
-                    }
-                  },
+        title: Platform.isMacOS
+            ? null
+            : const DragToMoveArea(
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: Text(
+                      appTitle,
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          const SizedBox(width: 10),
-          const WindowButtons(),
-        ]),
+        actions: Platform.isMacOS
+            ? null
+            : Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                const _UserHeadImageButton(),
+                const SizedBox(width: 10),
+                if (kDebugMode)
+                  Align(
+                    alignment: AlignmentDirectional.centerEnd,
+                    child: Padding(
+                      padding: const EdgeInsetsDirectional.only(end: 8.0),
+                      child: ToggleSwitch(
+                        content: const Text('深色模式'),
+                        checked: FluentTheme.of(context).brightness.isDark,
+                        onChanged: (v) {
+                          if (v) {
+                            appTheme.mode = ThemeMode.dark;
+                          } else {
+                            appTheme.mode = ThemeMode.light;
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                const SizedBox(width: 10),
+                const WindowButtons(),
+              ]),
       ),
       content: Selector<CurrentUserModel, QLUser?>(
           selector: (_, model) => model.user,
@@ -338,6 +360,7 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
 
   @override
   void onWindowClose() {
+    // macos下没有效果？
     ExitAppDialog.show(context, mounted);
   }
 
