@@ -312,6 +312,7 @@ class QLRepository {
   QLRepository({
     this.name = '',
     this.owner,
+    this.parent,
     this.forksCount = 0,
     this.stargazersCount = 0,
     this.isPrivate = false,
@@ -357,6 +358,9 @@ class QLRepository {
 
   /// 仓库所有者
   final QLRepositoryOwner? owner;
+
+  /// 父仓库，一般为fork来的
+  final QLRepository? parent;
 
   /// 被fork的总数
   final int forksCount;
@@ -530,6 +534,9 @@ class QLRepository {
           : List.of(input['repositoryTopics']?['nodes'])
               .map((e) => "${e['topic']?['name'] ?? ''}")
               .toList(),
+      parent: input['parent'] == null
+          ? null
+          : QLRepository.fromJson(input['parent']),
     );
   }
 }

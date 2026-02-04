@@ -10,27 +10,38 @@ import 'package:url_launcher/link.dart';
 
 /// 用户头像
 class UserHeadImage extends StatelessWidget {
-  const UserHeadImage(this.avatarUrl, {super.key, this.imageSize = 64});
+  const UserHeadImage(
+    this.avatarUrl, {
+    super.key,
+    this.imageSize = 64,
+    this.onPressed,
+  });
 
   final String? avatarUrl;
   final double imageSize;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return avatarUrl == null
-        ? const SizedBox.shrink()
-        : ClipOval(
-            child: Container(
-              color: Colors.black.withOpacity(0.08),
-              child: CachedNetworkImageEx(
-                avatarUrl!,
-                fit: BoxFit.cover,
-                width: imageSize,
-                height: imageSize,
-                errorWidget: DefaultIcon.github(size: imageSize),
-              ),
-            ),
-          );
+    if (avatarUrl == null) {
+      return const SizedBox.shrink();
+    }
+    Widget child = CachedNetworkImageEx(
+      avatarUrl!,
+      fit: BoxFit.cover,
+      width: imageSize,
+      height: imageSize,
+      errorWidget: DefaultIcon.github(size: imageSize),
+    );
+    if (onPressed != null) {
+      child = IconButton(onPressed: onPressed, icon: child);
+    }
+    return ClipOval(
+      child: Container(
+        color: Colors.black.withOpacity(0.08),
+        child: child,
+      ),
+    );
   }
 }
 

@@ -209,10 +209,19 @@ class QLQueries {
         login
         avatarUrl
       }
+      #nameWithOwner 
       description
       primaryLanguage {
         color
         name
+      }
+      parent {
+        #nameWithOwner 
+        name 
+        owner {
+          login
+          avatarUrl
+        }
       }
       archivedAt
       updatedAt

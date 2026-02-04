@@ -35,7 +35,7 @@ class RepoTopics extends StatelessWidget {
             .map((e) => LinkButton(
                   padding: EdgeInsets.zero,
                   borderRadius: BorderRadius.circular(10),
-                  text: TagLabel.other(e),
+                  text: TagLabel.other(e, color: Colors.blue),
                   onPressed: () {
                     launchUrl(Uri.parse('$githubTopicsUrl/$e'));
                   },

@@ -171,8 +171,7 @@ class _TopBar1 extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Button(
-            onPressed:
-                repo.forkingAllowed == true && !repo.isFork ? _onFork : null,
+            onPressed: repo.forkingAllowed == true ? _onFork : null,
             child: IconText(
               icon: DefaultIcons.fork,
               text: Text('${repo.forksCount.toKiloString()} 分叉'),

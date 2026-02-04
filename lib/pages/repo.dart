@@ -167,51 +167,76 @@ class RepoPage extends StatelessWidget {
 class _InternalRepoPage extends StatelessWidget {
   const _InternalRepoPage({super.key});
 
+  Widget _buildForkInfo(QLRepository repo) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+        child: Row(
+          children: [
+            const Text('forked 自 '),
+            LinkButton(text: Text('${repo.parent?.fullName}'), onPressed: () {})
+          ],
+        ),
+      );
+
+  Widget _buildHeader(QLRepository repo) => SizedBox(
+        height: 80,
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: UserHeadImage(
+                repo.owner?.avatarUrl,
+                imageSize: 35,
+                onPressed: () {
+                  if (repo.isInOrganization) {
+                    //UserInfoPage.createNewTab(context, user)
+                  } else {
+                    //UserInfoPage.createNewTab(context, user);
+                  }
+                },
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SelectableText(repo.fullName,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 20)),
+                if (repo.isFork && repo.parent != null) _buildForkInfo(repo),
+              ],
+            ),
+            if (repo.isPrivate)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: DefaultIcon.repositoryPrivate(),
+              ),
+            if (repo.isArchived)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 4),
+                child: TagLabel.archived(),
+              ),
+            const Spacer(),
+            IconLinkButton.linkSource(repo.url, message: '在浏览器中打开')
+          ],
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     return Selector<RepoModel, QLRepository>(
       selector: (_, model) => model.repo,
       builder: (_, repo, __) {
-        return ScaffoldPage(
-          header: PageHeader(
-            title: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: IconButton(
-                    icon: UserHeadImage(repo.owner?.avatarUrl, imageSize: 50),
-                    onPressed: () {
-                      if (repo.isInOrganization) {
-                        //UserInfoPage.createNewTab(context, user)
-                      } else {
-                        //UserInfoPage.createNewTab(context, user);
-                      }
-                    },
-                  ),
-                ),
-                SelectableText(repo.fullName),
-                if (repo.isPrivate)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: DefaultIcon.repositoryPrivate(),
-                  ),
-                if (repo.isArchived)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: TagLabel.archived(),
-                  ),
-                const Spacer(),
-                IconLinkButton.linkSource(repo.url, message: '在浏览器中打开')
-              ],
-            ),
+        return Padding(
+          padding: EdgeInsetsDirectional.only(
+            bottom: kPageDefaultVerticalPadding,
+            // start: PageHeader.horizontalPadding(context),
+            end: PageHeader.horizontalPadding(context),
           ),
-          content: Padding(
-            padding: EdgeInsetsDirectional.only(
-              bottom: kPageDefaultVerticalPadding,
-              // start: PageHeader.horizontalPadding(context),
-              end: PageHeader.horizontalPadding(context),
-            ),
-            child: const _TabPages(),
+          child: Column(
+            children: [
+              _buildHeader(repo),
+              const Expanded(child: _TabPages()),
+            ],
           ),
         );
       },
