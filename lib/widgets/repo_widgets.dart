@@ -137,7 +137,8 @@ class RepoListItem extends StatelessWidget {
               if (!isPinStyle) IconLinkButton.linkSource(repo.url),
             ],
           ),
-
+          // fork信息
+          if (repo.isFork && repo.parent != null) RepoItemForkInfo(repo),
           // 描述
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -210,6 +211,24 @@ class RepoListItem extends StatelessWidget {
           ),
         ],
         // ),
+      ),
+    );
+  }
+}
+
+class RepoItemForkInfo extends StatelessWidget {
+  const RepoItemForkInfo(this.repo, {super.key});
+
+  final QLRepository repo;
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      child: Row(
+        children: [
+          const Text('forked 自 '),
+          LinkButton(text: Text('${repo.parent?.fullName}'), onPressed: () {})
+        ],
       ),
     );
   }

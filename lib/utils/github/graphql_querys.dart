@@ -75,6 +75,15 @@ class QLQueries {
           defaultBranchRef {
             name
           }
+          isFork
+          parent {
+            #nameWithOwner 
+            name 
+            owner {
+              login
+              avatarUrl
+            }
+          }  
         }
       } 
     }
@@ -149,6 +158,15 @@ class QLQueries {
           defaultBranchRef {
             name
           }
+          isFork
+          parent {
+            #nameWithOwner 
+            name 
+            owner {
+              login
+              avatarUrl
+            }
+          }  
         }
       } 
     }
@@ -451,6 +469,15 @@ class QLQueries {
           licenseInfo {
              name 
           }
+          isFork
+          parent {
+            #nameWithOwner 
+            name 
+            owner {
+              login
+              avatarUrl
+            }
+          }
           repositoryTopics(first: 20) {
              totalCount
              nodes {
@@ -704,6 +731,15 @@ class QLQueries {
               name
             }
             pushedAt
+            isFork
+            parent {
+              #nameWithOwner 
+              name 
+              owner {
+                login
+                avatarUrl
+              }
+            }
           }
         }
       }

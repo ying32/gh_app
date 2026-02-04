@@ -167,16 +167,6 @@ class RepoPage extends StatelessWidget {
 class _InternalRepoPage extends StatelessWidget {
   const _InternalRepoPage({super.key});
 
-  Widget _buildForkInfo(QLRepository repo) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
-        child: Row(
-          children: [
-            const Text('forked 自 '),
-            LinkButton(text: Text('${repo.parent?.fullName}'), onPressed: () {})
-          ],
-        ),
-      );
-
   Widget _buildHeader(QLRepository repo) => SizedBox(
         height: 80,
         child: Row(
@@ -202,7 +192,7 @@ class _InternalRepoPage extends StatelessWidget {
                 SelectableText(repo.fullName,
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 20)),
-                if (repo.isFork && repo.parent != null) _buildForkInfo(repo),
+                if (repo.isFork && repo.parent != null) RepoItemForkInfo(repo),
               ],
             ),
             if (repo.isPrivate)
