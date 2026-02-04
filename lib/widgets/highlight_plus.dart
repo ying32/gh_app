@@ -8,17 +8,16 @@ import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:path/path.dart' as path_lib;
 
-/// 修改自：flutter_highlight-0.7.0\lib\flutter_highlight.dart
-
+// TODO: 这个还要优化下，对于大点的文件显示就有问题
 class HighlightViewPlus extends StatelessWidget {
-  HighlightViewPlus(
+  const HighlightViewPlus(
     String input, {
     super.key,
     required this.fileName,
     this.isDiff = false,
     this.language,
     int tabSize = 8, // TODO: https://github.com/flutter/flutter/issues/50087
-  }) : source = input.replaceAll('\t', ' ' * tabSize);
+  }) : source = input; //input.replaceAll('\t', ' ' * tabSize);
 
   final String source;
   final String fileName;
@@ -58,6 +57,7 @@ class HighlightViewPlus extends StatelessWidget {
   //当 language不为null时，则查询下这个的，
   static final _langAlias = {
     "golang": "go",
+    "delphi": "pascal",
   };
 
   /// 这个正则还要重新弄下，这个识别不太好

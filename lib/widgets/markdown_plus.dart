@@ -5,6 +5,7 @@ import 'package:gh_app/widgets/highlight_plus.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'dialogs.dart';
 
@@ -86,17 +87,25 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
           try {
             final uri = Uri.tryParse(link);
             if (uri != null) {
-              // 没有host当对目录的
-              if (uri.host.isEmpty && uri.path.isNotEmpty) {
-                context.read<PathModel>().path = uri.path;
-              } else {
-                onDefaultLinkAction(context, link);
+              switch (uri.scheme.trim().toLowerCase()) {
+                case "" || "http" || "https":
+                  // 没有host当对目录的
+                  if (uri.host.isEmpty && uri.path.isNotEmpty) {
+                    context.read<PathModel>().path = uri.path;
+                  } else {
+                    onDefaultLinkAction(context, link);
+                  }
+                //case "mailto" || "file" || "ft"
+                default:
+                  launchUrl(uri);
+                  break;
               }
+              //print("uri scheme=${uri.scheme}, host=${uri.host}");
             }
           } catch (e) {
-            onDefaultLinkAction(context, link);
+            //onDefaultLinkAction(context, link);
           }
-          //print("click=$link");
+          // print("click=$link");
           return true;
         },
       ),
