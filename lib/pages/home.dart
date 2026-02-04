@@ -5,9 +5,29 @@ import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
+
+  void _onRefresh(BuildContext context, RefreshController controller) async {
+    try {
+      final user = await APIWrap.instance.refreshCurrentUser();
+      if (user != null) {
+        //ignore: use_build_context_synchronously
+        context.read<CurrentUserModel>().user = user;
+      }
+      controller.refreshCompleted();
+    } on GitHubGraphQLError catch (e) {
+      if (e.isBadCredentials) {
+        //ignore: use_build_context_synchronously
+        context.read<CurrentUserModel>().clearLogin();
+      }
+      controller.refreshFailed();
+    } catch (e) {
+      controller.refreshFailed();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,31 +41,14 @@ class HomePage extends StatelessWidget {
       child: Card(
         child: Selector<CurrentUserModel, QLUser?>(
             selector: (_, model) => model.user,
-            builder: (_, user, __) => EasyListViewRefresher(
-                  onRefresh: (controller) async {
-                    try {
-                      final user = await APIWrap.instance.refreshCurrentUser();
-                      if (user != null) {
-                        //ignore: use_build_context_synchronously
-                        context.read<CurrentUserModel>().user = user;
-                      }
-                      controller.refreshCompleted();
-                    } on GitHubGraphQLError catch (e) {
-                      if (e.isBadCredentials) {
-                        //ignore: use_build_context_synchronously
-                        context.read<CurrentUserModel>().clearLogin();
-                      }
-                      controller.refreshFailed();
-                    } catch (e) {
-                      controller.refreshFailed();
-                    }
-                  },
-                  listview: ListView(
-                    children: [
-                      if (user != null) UserInfoPage(user),
-                    ],
-                  ),
-                )),
+            builder: (_, user, __) => user == null
+                ? const Center(child: ProgressRing())
+                : EasyListViewRefresher(
+                    onRefresh: (controller) => _onRefresh(context, controller),
+                    listview: ListView(
+                      children: [UserInfoPage(user)],
+                    ),
+                  )),
       ),
     );
   }
