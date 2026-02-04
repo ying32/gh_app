@@ -5,7 +5,6 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/pages/repo.dart';
-import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
@@ -112,11 +111,7 @@ class RepoListItem extends StatelessWidget {
                   child: UserHeadImage(repo.owner!.avatarUrl, imageSize: 35),
                 ),
               LinkButton(
-                  onPressed: () {
-                    RepoPage.createNewTab(context, repo);
-
-                    //pushRoute(context, RouterTable.repo, extra: repo);
-                  },
+                  onPressed: () => RepoPage.createNewTab(context, repo),
                   text: Text(
                     _title,
                     style: const TextStyle(
@@ -145,7 +140,7 @@ class RepoListItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: SelectableText(
               repo.description,
-              style: TextStyle(color: appTheme.color.lightest),
+              style: TextStyle(color: context.textColor200),
             ),
           ),
 
@@ -166,15 +161,16 @@ class RepoListItem extends StatelessWidget {
               Padding(
                   padding: padding,
                   child: Text(repo.primaryLanguage.name,
-                      style: TextStyle(color: appTheme.color.lightest))),
-              // 授权协议
+                      style: TextStyle(color: context.textColor200))),
+              // 许可协议
               if (!isPinStyle && repo.license.name.isNotEmpty) ...[
                 IconText(
-                    icon: DefaultIcons.license,
-                    padding: padding,
-                    iconColor: appTheme.color.lightest,
-                    text: Text(repo.license.name,
-                        style: TextStyle(color: appTheme.color.lightest))),
+                  icon: DefaultIcons.license,
+                  padding: padding,
+                  iconColor: context.textColor200,
+                  text: Text(repo.license.name,
+                      style: TextStyle(color: context.textColor200)),
+                ),
               ],
               // fork数
               HyperlinkButton(
@@ -206,7 +202,7 @@ class RepoListItem extends StatelessWidget {
                 Padding(
                   padding: padding,
                   child: Text(repo.pushedAt?.toLabel ?? '',
-                      style: TextStyle(color: appTheme.color.lightest)),
+                      style: TextStyle(color: context.textColor200)),
                 ),
             ],
           ),

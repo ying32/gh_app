@@ -6,7 +6,6 @@ import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/utils.dart';
-import 'package:system_theme/system_theme.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
@@ -26,9 +25,9 @@ void main() async {
     //print("AppConfig.instance.auth=${AppConfig.instance.auth.toJson()}");
   }
 
-  if (Platform.isWindows) {
-    SystemTheme.accentColor.load();
-  }
+  // if (Platform.isWindows) {
+  //   SystemTheme.accentColor.load();
+  // }
 
   // 这个在macos下需要提前
   // 为解决macos下启动时黑屏问题

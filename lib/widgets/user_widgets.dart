@@ -1,6 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
-import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -80,8 +79,8 @@ class UserNameWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       _displayName,
-      style: TextStyle(
-          fontWeight: FontWeight.w500, color: appTheme.color.lightest),
+      style:
+          TextStyle(fontWeight: FontWeight.w500, color: context.textColor200),
     );
   }
 }
@@ -168,6 +167,7 @@ class UserInfoPanel extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 头像和名字
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
@@ -178,9 +178,12 @@ class UserInfoPanel extends StatelessWidget {
             ],
           ),
         ),
-        SelectionArea(child: UserLineInfo(icon: null, value: user!.bio)),
+        // 签名信息
+        SelectionArea(
+            child: UserLineInfo(
+                icon: null, value: user!.bio, textColor: context.textColor200)),
         const SizedBox(height: 8),
-
+        // 心情
         if (user!.status.emojiHTML.isNotEmpty ||
             user!.status.message.isNotEmpty)
           SelectionArea(
@@ -218,9 +221,18 @@ class UserInfoPanel extends StatelessWidget {
             ],
           ),
         ),
-        UserLineInfo(icon: DefaultIcons.organization, value: user?.company),
-        UserLineInfo(icon: DefaultIcons.twitter, value: user?.twitterUsername),
-        UserLineInfo(icon: DefaultIcons.location, value: user?.location),
+        UserLineInfo(
+            icon: DefaultIcons.organization,
+            value: user?.company,
+            textColor: context.textColor200),
+        UserLineInfo(
+            icon: DefaultIcons.twitter,
+            value: user?.twitterUsername,
+            textColor: context.textColor200),
+        UserLineInfo(
+            icon: DefaultIcons.location,
+            value: user?.location,
+            textColor: context.textColor200),
         UserLineInfo(
             icon: DefaultIcons.mail,
             value: user?.email,

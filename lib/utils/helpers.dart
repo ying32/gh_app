@@ -81,4 +81,6 @@ extension BuildContextHelper on BuildContext {
 
   /// 当前主题平台定义
   //TargetPlatform get platform => theme.;
+  Color get textColor => isDark ? Colors.white : Colors.grey;
+  Color get textColor200 => textColor.withAlpha(200);
 }
