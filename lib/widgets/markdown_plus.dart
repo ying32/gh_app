@@ -92,7 +92,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
                 case "" || "http" || "https":
                   // 没有host当对目录的
                   if (uri.host.isEmpty && uri.path.isNotEmpty) {
-                    context.read<PathModel>().path = uri.path;
+                    context.read<RepoModel>().path = uri.path;
                   } else {
                     onDefaultLinkAction(context, link);
                   }

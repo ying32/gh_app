@@ -116,16 +116,21 @@ class RepoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-        providers: [
-          ChangeNotifierProvider<RepoModel>(
-              create: (_) => RepoModel(repo, subPage: subPage, ref: ref),
-              child: const _InternalRepoPage()),
-          ChangeNotifierProvider<PathModel>(
-              create: (_) => PathModel(path ?? '')),
-          ChangeNotifierProvider<RepoBranchModel>(
-              create: (_) => RepoBranchModel(ref)),
-        ],
+    // return MultiProvider(
+    //     providers: [
+    //       ChangeNotifierProvider<RepoModel>(
+    //           create: (_) => RepoModel(repo, subPage: subPage, ref: ref),
+    //           child: const _InternalRepoPage()),
+    //     ],
+    //     child: WrapInit(
+    //         onInit: (context) {
+    //           APIWrap.instance.userRepo(repo).then((e) {
+    //             context.read<RepoModel>().repo = e!;
+    //           });
+    //         },
+    //         child: const _InternalRepoPage()));
+    return ChangeNotifierProvider<RepoModel>(
+        create: (_) => RepoModel(repo, subPage: subPage, ref: ref),
         child: WrapInit(
             onInit: (context) {
               APIWrap.instance.userRepo(repo).then((e) {

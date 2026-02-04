@@ -11,10 +11,10 @@ class _RepoBranches extends StatelessWidget {
 
     return DropdownPanelButton(
       flyout: ChangeNotifierProvider.value(
-        value: context.read<RepoBranchModel>(),
+        value: context.read<RepoModel>(),
         child: FlyoutContent(
           constraints: const BoxConstraints(maxWidth: 300.0, maxHeight: 300),
-          child: Selector<RepoBranchModel, QLList<QLRef>>(
+          child: Selector<RepoModel, QLList<QLRef>>(
             selector: (_, model) => model.refs,
             builder: (_, refs, __) {
               if (refs.isEmpty) {
@@ -34,9 +34,7 @@ class _RepoBranches extends StatelessWidget {
                               child: LinkButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                    context
-                                            .read<RepoBranchModel>()
-                                            .selectedBranch =
+                                    context.read<RepoModel>().ref =
                                         e.name == repo.defaultBranchRef.name
                                             ? null
                                             : e.name;
@@ -46,9 +44,7 @@ class _RepoBranches extends StatelessWidget {
                                     child: Row(
                                       children: [
                                         if (e.name ==
-                                            (context
-                                                    .read<RepoBranchModel>()
-                                                    .selectedBranch ??
+                                            (context.read<RepoModel>().ref ??
                                                 repo.defaultBranchRef.name))
                                           const Padding(
                                             padding: EdgeInsets.symmetric(
@@ -83,9 +79,9 @@ class _RepoBranches extends StatelessWidget {
       ),
       onOpen: () {
         // 下拉时
-        if (context.read<RepoBranchModel>().refs.isEmpty) {
+        if (context.read<RepoModel>().refs.isEmpty) {
           APIWrap.instance.repoRefs(repo).then((res) {
-            context.read<RepoBranchModel>().refs = res;
+            context.read<RepoModel>().refs = res;
           });
         }
       },
@@ -93,8 +89,8 @@ class _RepoBranches extends StatelessWidget {
         height: 32,
         child: IconText(
           icon: DefaultIcons.branch,
-          text: Selector<RepoBranchModel, String?>(
-              selector: (_, model) => model.selectedBranch,
+          text: Selector<RepoModel, String?>(
+              selector: (_, model) => model.ref,
               builder: (_, selectedBranch, __) =>
                   Text(selectedBranch ?? repo.defaultBranchRef.name)),
         ),
@@ -281,16 +277,14 @@ class RepoCodePage extends StatelessWidget {
                     //     context.read<PathModel>().path = value;
                     //   },
                     // ),
-                    child: Selector2<RepoBranchModel, PathModel,
-                            (String?, String)>(
-                        selector: (_, ref, path) =>
-                            (ref.selectedBranch, path.path),
+                    child: Selector<RepoModel, (String?, String)>(
+                        selector: (_, model) => (model.ref, model.path),
                         builder: (_, value, __) {
                           return RepoContentsListView(
                             path: value.$2,
                             ref: value.$1,
                             onPathChange: (value) {
-                              context.read<PathModel>().path = value;
+                              context.read<RepoModel>().path = value;
                             },
                           );
                         }),
