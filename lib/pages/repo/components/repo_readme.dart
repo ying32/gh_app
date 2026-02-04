@@ -41,7 +41,7 @@ class RepoReadMe extends StatelessWidget {
             errorWidget: const SizedBox.shrink(),
             future: APIWrap.instance.repoReadMe(repo, filename, ref: ref),
             builder: (_, snapshot) {
-              return MarkdownBlockPlusDefaultAction(snapshot);
+              return MarkdownBlockPlus(snapshot);
             },
           ),
         ],

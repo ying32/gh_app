@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart' as m;
+import 'package:flutter/material.dart' as mat;
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
@@ -89,23 +91,23 @@ class TagLabel extends StatelessWidget {
   }
 
   const TagLabel.archived({super.key, this.padding, this.radius})
-      : color = m.Colors.orange,
+      : color = mat.Colors.orange,
         opacity = null,
         text = const Text('已归档 ',
-            style: TextStyle(fontSize: 11, color: m.Colors.orange));
+            style: TextStyle(fontSize: 11, color: mat.Colors.orange));
 
   const TagLabel.private({super.key, this.padding, this.radius})
-      : color = m.Colors.black,
+      : color = mat.Colors.black,
         opacity = null,
         text = const Text('私有 ', style: TextStyle(fontSize: 11));
 
   const TagLabel.public({super.key, this.padding, this.radius})
-      : color = m.Colors.black,
+      : color = mat.Colors.black,
         opacity = null,
         text = const Text('公开 ', style: TextStyle(fontSize: 11));
 
   factory TagLabel.other(String text,
-          {Color color = m.Colors.black,
+          {Color color = mat.Colors.black,
           EdgeInsetsGeometry? padding,
           double? radius,
           FontWeight? fontWeight}) =>
@@ -137,10 +139,10 @@ class LinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return m.Material(
+    return mat.Material(
       // color: Colors.transparent,
-      type: m.MaterialType.transparency,
-      child: m.InkWell(
+      type: mat.MaterialType.transparency,
+      child: mat.InkWell(
         borderRadius: borderRadius,
         onTap: onPressed,
         child: Padding(padding: padding, child: text),
@@ -646,5 +648,50 @@ class _DropdownPanelButtonState extends State<DropdownPanelButton> {
         ),
       ),
     );
+  }
+}
+
+/// 重新封装的，一来是简化，二来是方便替换或者其它啥的
+class CachedNetworkImageEx extends StatelessWidget {
+  const CachedNetworkImageEx(
+    this.imgUrl, {
+    super.key,
+    this.width,
+    this.height,
+    this.errorWidget,
+    this.fit,
+    this.alignment = Alignment.center,
+    this.tooltip,
+  });
+
+  final String imgUrl;
+  final double? width;
+  final double? height;
+  final BoxFit? fit;
+  final Widget? errorWidget;
+  final Alignment alignment;
+  final String? tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = CachedNetworkImage(
+      imageUrl: imgUrl,
+      errorListener: (e) {
+        if (kDebugMode) {
+          //print("CachedNetworkImageEx error=$e");
+        }
+      },
+      width: width,
+      height: height,
+      fit: fit,
+      alignment: alignment,
+      errorWidget: (context, url, error) =>
+          errorWidget ??
+          const Icon(Remix.image_2_fill, color: mat.Colors.orange),
+    );
+    if (tooltip != null) {
+      child = Tooltip(message: tooltip, child: child);
+    }
+    return child;
   }
 }

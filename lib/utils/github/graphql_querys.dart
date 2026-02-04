@@ -515,7 +515,7 @@ class QLQueries {
                 }
                 title 
                 body
-                bodyHTML
+                #bodyHTML
                 comments { totalCount }
                 closedAt
                 createdAt
@@ -739,7 +739,7 @@ class QLQueries {
                nodes {
                   author { login avatarUrl }
                   body
-                  bodyHTML
+                  #bodyHTML
                   createdAt 
                   editor { login avatarUrl  }
                   lastEditedAt 

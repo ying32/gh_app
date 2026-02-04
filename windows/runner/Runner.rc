@@ -90,10 +90,10 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.ying32" "\0"
-            VALUE "FileDescription", "gh_app" "\0"
+            VALUE "FileDescription", "Github桌面版" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "gh_app" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.ying32. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 ying32. All rights reserved." "\0"
             VALUE "OriginalFilename", "gh_app.exe" "\0"
             VALUE "ProductName", "gh_app" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

@@ -60,7 +60,7 @@ dependencies:
   #google_fonts: 6.1.0
   shared_preferences: ^2.3.3
   cached_network_image: any
-  path: ^1.8.3
+  path: ^1.9.0
   path_provider: ^2.1.5
   file_icon: ^1.0.0
   #vscode_material_icon_theme: ^5.26.0
@@ -69,8 +69,9 @@ dependencies:
   #highlight: any
   #flutter_syntax_view: ^4.1.7
   #flutter_markdown: ^0.7.3+2
-  markdown: ^7.2.1
-  markdown_widget: ^2.3.2+8
+  markdown: ^7.3.0
+  # 不要他的这个了，使用markdown中markdownToHtml配合flutter_widget_from_html_core来显示
+  #markdown_widget: ^2.3.2+8
 
   # 语法高亮
   dart_prism: ^0.2.1

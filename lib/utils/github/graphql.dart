@@ -691,7 +691,7 @@ class QLIssueOrPullRequestOrCommentBase {
   const QLIssueOrPullRequestOrCommentBase({
     this.author,
     this.body = '',
-    this.bodyHTML,
+    //this.bodyHTML,
     this.isMinimized = false,
     this.createdAt,
     this.editor,
@@ -705,7 +705,7 @@ class QLIssueOrPullRequestOrCommentBase {
   /// 内容
   final String body;
 
-  final String? bodyHTML;
+  //final String? bodyHTML;
 
   /// Returns whether or not a comment has been minimized.
   final bool isMinimized;
@@ -731,7 +731,7 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
   const QLIssueOrPullRequest({
     super.author,
     super.body,
-    super.bodyHTML,
+    //super.bodyHTML,
     super.isMinimized,
     super.createdAt,
     super.editor,
@@ -837,7 +837,7 @@ class QLIssue extends QLIssueOrPullRequest {
     super.author,
     super.title,
     super.body,
-    super.bodyHTML,
+    //super.bodyHTML,
     super.isMinimized,
     super.closedAt,
     super.createdAt,
@@ -866,7 +866,7 @@ class QLIssue extends QLIssueOrPullRequest {
               : QLActor.fromJson(input['author']),
           title: input['title'] ?? '',
           body: input['body'] ?? '',
-          bodyHTML: input['bodyHTML'],
+          //bodyHTML: input['bodyHTML'],
           isMinimized: input['isMinimized'] ?? false,
           closedAt: _parseDateTime(input['closedAt']),
           createdAt: _parseDateTime(input['createdAt']),
@@ -895,7 +895,7 @@ class QLPullRequest extends QLIssueOrPullRequest {
     super.author,
     super.title,
     super.body,
-    super.bodyHTML,
+    //super.bodyHTML,
     super.isMinimized,
     super.closedAt,
     super.createdAt,
@@ -921,7 +921,7 @@ class QLPullRequest extends QLIssueOrPullRequest {
               : QLActor.fromJson(input['author']),
           title: input['title'] ?? '',
           body: input['body'] ?? '',
-          bodyHTML: input['bodyHTML'],
+          //bodyHTML: input['bodyHTML'],
           isMinimized: input['isMinimized'] ?? false,
           closedAt: _parseDateTime(input['closedAt']),
           createdAt: _parseDateTime(input['createdAt']),
@@ -947,7 +947,7 @@ class QLComment extends QLIssueOrPullRequestOrCommentBase {
   const QLComment({
     super.author,
     super.body,
-    super.bodyHTML,
+    //super.bodyHTML,
     super.createdAt,
     super.editor,
     super.lastEditedAt,
@@ -976,7 +976,7 @@ class QLComment extends QLIssueOrPullRequestOrCommentBase {
               ? null
               : QLActor.fromJson(input['author']),
           body: input['body'] ?? '',
-          bodyHTML: input['bodyHTML'],
+          //bodyHTML: input['bodyHTML'],
           createdAt: _parseDateTime(input['createdAt']),
           editor: input['editor'] == null
               ? null

@@ -27,7 +27,7 @@ const githubTopicsUrl = '$githubUrl/topics';
 const myGithubUrl = '$githubUrl/ying32';
 const appRepoUrl = '$myGithubUrl/gh_app';
 const appVersion = '1.0.1';
-const applicationLegalese = 'Copyright (c) 2026 ying32 All Rights Reserved';
+const applicationLegalese = 'Copyright (C) 2026 ying32. All rights reserved.';
 
 /// 一个点
 const dotChar = '·';

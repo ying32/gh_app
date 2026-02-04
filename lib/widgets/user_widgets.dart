@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
@@ -22,13 +21,12 @@ class UserHeadImage extends StatelessWidget {
         : ClipOval(
             child: Container(
               color: Colors.black.withOpacity(0.08),
-              child: CachedNetworkImage(
-                imageUrl: avatarUrl!,
+              child: CachedNetworkImageEx(
+                avatarUrl!,
                 fit: BoxFit.cover,
                 width: imageSize,
                 height: imageSize,
-                errorWidget: (_, __, ___) =>
-                    DefaultIcon.github(size: imageSize),
+                errorWidget: DefaultIcon.github(size: imageSize),
               ),
             ),
           );

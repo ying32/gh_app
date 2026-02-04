@@ -29,7 +29,7 @@ class HighlightViewPlus extends StatelessWidget {
   static final _extHighlights = {
     "xml": {"iml", "manifest", "dproj"},
     "c": {"rc"},
-    "json": {"arb", "firebaserc"},
+    "json": {"arb", "firebaserc", "jsonc"},
     "pascal": {
       "fmx",
       "lfm",

@@ -219,7 +219,7 @@ class _RepoReleaseItem extends StatelessWidget {
               ),
 
               if (item.description.isNotEmpty)
-                MarkdownBlockPlus(data: item.description),
+                MarkdownBlockPlus(item.description),
               // item.assets
               const SizedBox(height: 10),
               if (item.assetsCount > 0) _AssetsPanel(item, repo),

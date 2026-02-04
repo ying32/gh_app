@@ -1,6 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
-import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -8,7 +6,6 @@ import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 
-import 'dialogs.dart';
 import 'markdown_plus.dart';
 
 /// issues的标签
@@ -118,19 +115,20 @@ class IssueCommentItem extends StatelessWidget {
                 ),
                 // 优先显示html格式的
                 //TODO: 发现个问题，使用HTML的，代码高亮没有了，如果使用markdown的HTML代码他又没解析，还得另想办法
-                if (item?.bodyHTML?.isNotEmpty ?? false)
-                  SelectionArea(
-                    child: HtmlWidget(
-                      item!.bodyHTML!,
-                      baseUrl: Uri.tryParse(githubUrl),
-                      onTapUrl: (link) {
-                        onDefaultLinkAction(context, link);
-                        return true;
-                      },
-                    ),
-                  )
-                else if (item?.body.isNotEmpty ?? false)
-                  MarkdownBlockPlus(data: item!.body),
+                // if (item?.bodyHTML?.isNotEmpty ?? false)
+                //   SelectionArea(
+                //     child: HtmlWidget(
+                //       item!.bodyHTML!,
+                //       baseUrl: Uri.tryParse(githubUrl),
+                //       onTapUrl: (link) {
+                //         onDefaultLinkAction(context, link);
+                //         return true;
+                //       },
+                //     ),
+                //   )
+                // else
+                if (item?.body.isNotEmpty ?? false)
+                  MarkdownBlockPlus(item!.body),
               ],
             )),
           ),

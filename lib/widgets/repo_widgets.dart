@@ -351,7 +351,7 @@ class RepoFileContentView extends StatelessWidget {
       /// utf8数据  //utf8.decode(data);
       final ext = p.extension(filename).toLowerCase();
       if (ext == ".md" || ext == ".markdown") {
-        return MarkdownBlockPlusDefaultAction(body);
+        return MarkdownBlockPlus(body);
       }
       return HighlightViewPlus(body, fileName: filename);
     } catch (e) {
