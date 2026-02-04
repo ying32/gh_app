@@ -176,7 +176,8 @@ class _LeftNav extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        if (Platform.isMacOS) const _UserHeadImageButton(),
+        // if (Platform.isMacOS)
+        const _UserHeadImageButton(),
         ..._currentUserItems.map((e) => _NavItemIconButton(e)),
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -303,29 +304,25 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
   Widget build(BuildContext context) {
     return NavigationView(
       appBar: NavigationAppBar(
-        height: Platform.isMacOS ? 30.0 : 50.0,
-        leading: !Platform.isMacOS ? const ApplicationIcon(size: 40) : null,
+        height: Platform.isMacOS ? 30.0 : 40.0,
+        // leading: !Platform.isMacOS
+        //     ? const Center(child: _UserHeadImageButton())
+        //     : null,
         automaticallyImplyLeading: false,
         title: Platform.isMacOS
             ? null
             : const DragToMoveArea(
                 child: Align(
                   alignment: AlignmentDirectional.centerStart,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8.0),
-                    child: Text(
-                      appTitle,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
+                  child: Text(
+                    appTitle,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                 ),
               ),
         actions: Platform.isMacOS
             ? null
             : Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                const _UserHeadImageButton(),
-                const SizedBox(width: 10),
                 if (kDebugMode)
                   Align(
                     alignment: AlignmentDirectional.centerEnd,
@@ -344,7 +341,6 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
                       ),
                     ),
                   ),
-                const SizedBox(width: 10),
                 const WindowButtons(),
               ]),
       ),
