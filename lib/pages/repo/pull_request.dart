@@ -61,6 +61,11 @@ class RepoPullRequestPage extends StatelessWidget {
         .repoPullRequests(repo, nextCursor: pageInfo.endCursor);
   }
 
+  Future<QLList<QLPullRequest>> _onRefreshData() async {
+    // return const QLList.empty();
+    return APIWrap.instance.repoPullRequests(repo, force: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return APIFutureBuilder(
@@ -82,6 +87,7 @@ class RepoPullRequestPage extends StatelessWidget {
             ),
             itemBuilder: (_, item, __) => _PullRequestItem(item, repo: repo),
             onLoading: _onLoadData,
+            onRefresh: _onRefreshData,
           ),
         );
 

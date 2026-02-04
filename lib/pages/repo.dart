@@ -4,7 +4,6 @@ import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/releases.dart';
-import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/github/github.dart';
@@ -215,23 +214,33 @@ class _InternalRepoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, QLRepository>(
-      selector: (_, model) => model.repo,
-      builder: (_, repo, __) {
-        return Padding(
-          padding: EdgeInsetsDirectional.only(
-            bottom: kPageDefaultVerticalPadding,
-            // start: PageHeader.horizontalPadding(context),
-            end: PageHeader.horizontalPadding(context),
-          ),
-          child: Column(
-            children: [
-              _buildHeader(context, repo),
-              const Expanded(child: _TabPages()),
-            ],
-          ),
-        );
+    return EasyListViewRefresher(
+      onRefresh: (controller) {
+        APIWrap.instance.userRepo(context.read<RepoModel>().repo).then((e) {
+          context.read<RepoModel>().repo = e!;
+          controller.refreshCompleted();
+        }).onError((e, s) {
+          controller.refreshFailed();
+        });
       },
+      listview: Selector<RepoModel, QLRepository>(
+        selector: (_, model) => model.repo,
+        builder: (_, repo, __) {
+          return Padding(
+            padding: EdgeInsetsDirectional.only(
+              bottom: kPageDefaultVerticalPadding,
+              // start: PageHeader.horizontalPadding(context),
+              end: PageHeader.horizontalPadding(context),
+            ),
+            child: Column(
+              children: [
+                _buildHeader(context, repo),
+                const Expanded(child: _TabPages()),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

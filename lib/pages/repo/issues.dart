@@ -66,6 +66,11 @@ class RepoIssuesPage extends StatelessWidget {
     return APIWrap.instance.repoIssues(repo, nextCursor: pageInfo.endCursor);
   }
 
+  Future<QLList<QLIssue>> _onRefreshData() async {
+    // return const QLList.empty();
+    return APIWrap.instance.repoIssues(repo, force: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     return APIFutureBuilder(
@@ -87,22 +92,9 @@ class RepoIssuesPage extends StatelessWidget {
             ),
             itemBuilder: (_, item, __) => _IssueItem(item),
             onLoading: _onLoadData,
+            onRefresh: _onRefreshData,
           ),
         );
-
-        // return Card(
-        //   padding: EdgeInsets.zero,
-        //   child: ListView.separated(
-        //       itemCount: snapshot.length,
-        //       itemBuilder: (_, index) => _IssueItem(snapshot[index]),
-        //       separatorBuilder: (_, index) => const Divider(
-        //             size: 1,
-        //             direction: Axis.horizontal,
-        //             style: DividerThemeData(
-        //                 verticalMargin: EdgeInsets.zero,
-        //                 horizontalMargin: EdgeInsets.zero),
-        //           )),
-        // );
       },
     );
   }
