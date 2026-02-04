@@ -37,52 +37,42 @@ dependencies:
   intl: any
   # 从4.13开始需要更高的版本，3.38?还是3.36?
   fluent_ui: 4.8.7
-  #fluent_ui: 4.10.0
-
-  # 改用graphql了，所以这个不需要了
-  # 这个是github接口，9.25.0 需要dart 3.5
-  #github: 9.24.0
 
   crypto: ^3.0.3
   encrypt: ^5.0.3
-
+  # 状态管理器
   provider: ^6.0.5
   system_theme: ^2.3.1
   window_manager: 0.4.3
-  flutter_acrylic: ^1.0.0+2
-  #url_strategy: ^0.2.0
   url_launcher: ^6.1.7
   #clipboard: ^0.1.3
   #email_validator: ^2.1.17
   http: ^1.1.0
   #go_router: ^10.0.0
-  #google_fonts: 6.1.0
+  # 配置文件
   shared_preferences: ^2.3.3
+  # 带缓存的图片显示
   cached_network_image: any
   path: ^1.9.0
+  # 目录获取
   path_provider: ^2.1.5
+  # 文件类型图标
   file_icon: ^1.0.0
   #vscode_material_icon_theme: ^5.26.0
-
-  #flutter_highlight: ^0.7.0
-  #highlight: any
-  #flutter_syntax_view: ^4.1.7
-  #flutter_markdown: ^0.7.3+2
+  # markdown解析和转html
   markdown: ^7.3.0
   # 不要他的这个了，使用markdown中markdownToHtml配合flutter_widget_from_html_core来显示
   #markdown_widget: ^2.3.2+8
-
   # 语法高亮
   dart_prism: ^0.2.1
   flutter_prism: ^0.2.2
   #markdown_viewer: ^0.6.2
-
+  # 下拉刷新+上拉加载
   pull_to_refresh: ^2.0.0
-
-  #flutter_widget_from_html: 0.15.3
+  # HTML显示组件
   flutter_widget_from_html_core: ^0.15.2
 
-dependency_overrides:
+#dependency_overrides:
 
 
 dev_dependencies:
@@ -95,18 +85,13 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
-
-  # 闪屏配置，新版本用不了
-  flutter_native_splash: 2.3.7
-
+  # 闪屏配置
+  #flutter_native_splash: 2.3.7
   # icon产生工具
   icons_launcher: ^2.1.7
-
-  # dart run gh_app:pasercss
+  # dart run gh_app:prism2dart
   # css解析，用于prism-themes生成dart导入
   csslib: ^1.0.2
-
-
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
