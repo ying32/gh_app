@@ -73,12 +73,16 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
           } else if (el.localName == "img" && el.attributes['src'] != null) {
             // 这里替换 img
             //print("=============img=${el.attributes}");
-            return CachedNetworkImageEx(
-              el.attributes['src']!,
-              width: double.tryParse(el.attributes['width'] ?? ''),
-              height: double.tryParse(el.attributes['height'] ?? ''),
-              tooltip: el.attributes['alt'],
-              //alignment: Alignment.centerLeft,
+            final imgUrl = el.attributes['src'];
+            return GestureDetector(
+              onDoubleTap: () => showImageDialog(context, imgUrl),
+              child: CachedNetworkImageEx(
+                imgUrl!,
+                width: double.tryParse(el.attributes['width'] ?? ''),
+                height: double.tryParse(el.attributes['height'] ?? ''),
+                tooltip: el.attributes['alt'],
+                //alignment: Alignment.centerLeft,
+              ),
             );
           }
           return null;

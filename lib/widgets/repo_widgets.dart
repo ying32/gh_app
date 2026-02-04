@@ -227,7 +227,11 @@ class RepoItemForkInfo extends StatelessWidget {
       child: Row(
         children: [
           const Text('forked 自 '),
-          LinkButton(text: Text('${repo.parent?.fullName}'), onPressed: () {})
+          LinkButton(
+              text: Text('${repo.parent?.fullName}'),
+              onPressed: () {
+                RepoPage.createNewTab(context, repo.parent!);
+              })
         ],
       ),
     );

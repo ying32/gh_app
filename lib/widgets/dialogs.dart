@@ -7,6 +7,7 @@ import 'package:gh_app/pages/releases.dart';
 import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
+import 'package:gh_app/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -28,6 +29,20 @@ Future<void> showInfoDialog(String msg,
         severity: severity ?? InfoBarSeverity.success,
       );
     });
+
+/// 显示图片对话框
+void showImageDialog(BuildContext context, String? imageURL) {
+  if (imageURL == null || imageURL.isEmpty) return;
+  showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return GestureDetector(
+          onTap: () => closeDialog(context),
+          child: CachedNetworkImageEx(imageURL),
+        );
+      });
+}
 
 /// 跳转github仓库
 /// TODO: 这个先实现，后面再重构

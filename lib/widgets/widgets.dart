@@ -2,12 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as mat;
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/link.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 /// 带icon前缀的文本
@@ -141,21 +143,44 @@ class LinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return MaterialStyleButton(
+      onPressed: onPressed,
+      borderRadius: borderRadius,
+      child: DefaultTextStyle(
+          style: FluentTheme.of(context)
+              .typography
+              .body!
+              .copyWith(color: Colors.blue)
+              .merge(style),
+          child: text),
+    );
+  }
+}
+
+/// 重新包装的
+class MaterialStyleButton extends StatelessWidget {
+  const MaterialStyleButton({
+    super.key,
+    required this.child,
+    required this.onPressed,
+    this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
+    this.borderRadius,
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  final VoidCallback? onPressed;
+  final BorderRadius? borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
     return mat.Material(
       // color: Colors.transparent,
       type: mat.MaterialType.transparency,
       child: mat.InkWell(
         borderRadius: borderRadius,
         onTap: onPressed,
-        child: Padding(
-            padding: padding,
-            child: DefaultTextStyle(
-                style: FluentTheme.of(context)
-                    .typography
-                    .body!
-                    .copyWith(color: Colors.blue)
-                    .merge(style),
-                child: text)),
+        child: Padding(padding: padding, child: child),
       ),
     );
   }
@@ -702,5 +727,42 @@ class CachedNetworkImageEx extends StatelessWidget {
       child = Tooltip(message: tooltip, child: child);
     }
     return child;
+  }
+}
+
+class AppAboutButton extends StatelessWidget {
+  const AppAboutButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: '关于',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: IconButton(
+            icon: const Icon(Remix.info_i, size: 18),
+            onPressed: () {
+              mat.showAboutDialog(
+                barrierDismissible: true,
+                applicationName: appTitle,
+                applicationVersion: appVersion,
+                applicationIcon: const ApplicationIcon(),
+                applicationLegalese: applicationLegalese,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                        child: LinkButton(
+                            onPressed: () {
+                              launchUrl(Uri.parse(myGithubUrl));
+                            },
+                            text: const Text(myGithubUrl))),
+                  )
+                ],
+                context: context,
+              );
+            }),
+      ),
+    );
   }
 }

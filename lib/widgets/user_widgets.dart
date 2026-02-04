@@ -26,22 +26,29 @@ class UserHeadImage extends StatelessWidget {
     if (avatarUrl == null) {
       return const SizedBox.shrink();
     }
-    Widget child = CachedNetworkImageEx(
-      avatarUrl!,
-      fit: BoxFit.cover,
-      width: imageSize,
-      height: imageSize,
-      errorWidget: DefaultIcon.github(size: imageSize),
-    );
-    if (onPressed != null) {
-      child = IconButton(onPressed: onPressed, icon: child);
-    }
-    return ClipOval(
+
+    Widget child = ClipOval(
       child: Container(
         color: Colors.black.withOpacity(0.08),
-        child: child,
+        child: CachedNetworkImageEx(
+          avatarUrl!,
+          fit: BoxFit.cover,
+          width: imageSize,
+          height: imageSize,
+          errorWidget: DefaultIcon.github(size: imageSize),
+        ),
       ),
     );
+    if (onPressed != null) {
+      // child = LinkButton(onPressed: onPressed, text: child);
+      child = MaterialStyleButton(
+        onPressed: onPressed,
+        padding: EdgeInsets.zero,
+        borderRadius: BorderRadius.circular(imageSize / 2),
+        child: child,
+      );
+    }
+    return child;
   }
 }
 

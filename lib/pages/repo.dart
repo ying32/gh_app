@@ -11,6 +11,7 @@ import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/default_icons.dart';
+import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/issues_widgets.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
@@ -167,24 +168,24 @@ class RepoPage extends StatelessWidget {
 class _InternalRepoPage extends StatelessWidget {
   const _InternalRepoPage({super.key});
 
-  Widget _buildHeader(QLRepository repo) => SizedBox(
-        height: 80,
+  Widget _buildHeader(BuildContext context, QLRepository repo) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: UserHeadImage(
-                repo.owner?.avatarUrl,
-                imageSize: 35,
-                onPressed: () {
-                  if (repo.isInOrganization) {
-                    //UserInfoPage.createNewTab(context, user)
-                  } else {
-                    //UserInfoPage.createNewTab(context, user);
-                  }
-                },
-              ),
+            UserHeadImage(
+              repo.owner?.avatarUrl,
+              imageSize: 45,
+              onPressed: () {
+                // 随便整的
+                showImageDialog(context, repo.owner!.avatarUrl);
+                if (repo.isInOrganization) {
+                  //UserInfoPage.createNewTab(context, user)
+                } else {
+                  //UserInfoPage.createNewTab(context, user);
+                }
+              },
             ),
+            const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -224,7 +225,7 @@ class _InternalRepoPage extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _buildHeader(repo),
+              _buildHeader(context, repo),
               const Expanded(child: _TabPages()),
             ],
           ),
