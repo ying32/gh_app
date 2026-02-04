@@ -3,7 +3,7 @@ import 'dart:ui' as ui;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_prism/flutter_prism.dart';
-import 'package:gh_app/utils/build_context_helper.dart';
+import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:path/path.dart' as path_lib;

@@ -1,9 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 
 /// 仓库模型
 class RepoModel extends ChangeNotifier {
-  RepoModel(this._repo);
+  RepoModel(this._repo, {this.subPage, this.ref});
 
   /// 当前仓库信息
   QLRepository _repo;
@@ -14,13 +15,18 @@ class RepoModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  final RepoSubPage? subPage;
+  final String? ref;
 }
 
 class PathModel extends ChangeNotifier {
-  PathModel([this._path = ""]);
+  PathModel([String path = '']) {
+    this.path = path;
+  }
 
   /// 当前仓库信息
-  String _path;
+  String _path = '';
   String get path => _path;
   set path(String value) {
     if (value != _path) {
@@ -56,6 +62,7 @@ class ReadMeModel extends ChangeNotifier {
 
 ///
 class RepoBranchModel extends ChangeNotifier {
+  RepoBranchModel(this._selectedBranch);
   String? _selectedBranch;
   String? get selectedBranch => _selectedBranch;
   set selectedBranch(String? value) {

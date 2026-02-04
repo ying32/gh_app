@@ -23,18 +23,26 @@ class TabviewModel extends ChangeNotifier {
     }
   }
 
+  int indexOf(Key? key) => tabs.indexWhere((e) => e.key == key);
+
+  void goToTab(int index) {
+    if (index >= 0 && index < tabs.length) {
+      if (index == currentIndex) return;
+      currentIndex = index;
+      notifyListeners();
+    }
+  }
+
   /// 添加
-  void addTab(Widget child,
+  bool addTab(Widget child,
       {required ValueKey? key,
       required String title,
       Widget? icon,
       bool canClose = true}) {
-    final index = tabs.indexWhere((e) => e.key == key);
+    final index = indexOf(key);
     if (index != -1) {
-      if (index == currentIndex) return;
-      currentIndex = index;
-      notifyListeners();
-      return;
+      goToTab(index);
+      return false;
     }
     late Tab tab;
     tab = Tab(
@@ -49,5 +57,6 @@ class TabviewModel extends ChangeNotifier {
     tabs.add(tab);
     currentIndex = tabs.length - 1;
     notifyListeners();
+    return true;
   }
 }

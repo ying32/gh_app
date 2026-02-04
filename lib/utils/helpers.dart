@@ -1,3 +1,5 @@
+import 'package:fluent_ui/fluent_ui.dart';
+
 /// 1KB Kilobyte
 const k1KB = 1024;
 
@@ -62,4 +64,21 @@ extension DateTimeHelper on DateTime {
       _ => "",
     };
   }
+}
+
+extension BuildContextHelper on BuildContext {
+  /// 主题
+  FluentThemeData get theme => FluentTheme.of(this);
+
+  /// 是否为暗黑模式
+  bool get isDark => theme.brightness == Brightness.dark;
+
+  /// 是否为明亮模式
+  bool get isLight => theme.brightness == Brightness.light;
+
+  /// 主题主色
+  Color? get primaryColor => theme.accentColor;
+
+  /// 当前主题平台定义
+  //TargetPlatform get platform => theme.;
 }

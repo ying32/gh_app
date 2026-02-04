@@ -1,10 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/releases.dart';
-import 'package:gh_app/utils/build_context_helper.dart';
 import 'package:gh_app/utils/consts.dart';
+import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -26,9 +27,6 @@ part 'repo/components/repo_releases.dart';
 part 'repo/issues.dart';
 part 'repo/pull_request.dart';
 part 'repo/wiki.dart';
-
-/// 仓库页子页面
-enum RepoSubPage { code, issues, pullRequests, actions, wiki }
 
 class _TabPages extends StatefulWidget {
   const _TabPages();
@@ -103,20 +101,30 @@ class _TabPagesState extends State<_TabPages> {
 }
 
 class RepoPage extends StatelessWidget {
-  const RepoPage(this.repo, {super.key, this.subPage});
+  const RepoPage(
+    this.repo, {
+    super.key,
+    this.subPage,
+    this.ref,
+    this.path,
+  });
 
   final QLRepository repo;
   final RepoSubPage? subPage;
+  final String? ref;
+  final String? path;
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
         providers: [
           ChangeNotifierProvider<RepoModel>(
-              create: (_) => RepoModel(repo), child: const _InternalRepoPage()),
-          ChangeNotifierProvider<PathModel>(create: (_) => PathModel()),
+              create: (_) => RepoModel(repo, subPage: subPage, ref: ref),
+              child: const _InternalRepoPage()),
+          ChangeNotifierProvider<PathModel>(
+              create: (_) => PathModel(path ?? '')),
           ChangeNotifierProvider<RepoBranchModel>(
-              create: (_) => RepoBranchModel()),
+              create: (_) => RepoBranchModel(ref)),
         ],
         child: WrapInit(
             onInit: (context) {
@@ -129,18 +137,29 @@ class RepoPage extends StatelessWidget {
 
   /// 创建一个仓库页
   static void createNewTab(BuildContext context, QLRepository repo,
-      {RepoSubPage? subPage}) {
+      {RepoSubPage? subPage, String? ref, String? path}) {
     // TODO: subPage待实现
+    if (kDebugMode) {
+      print("subPage=$subPage, ref=$ref, path=$path");
+    }
+    //TODO: 这里还要优化下？
+    final tabView = context.read<TabviewModel>();
+    final tabKey = ValueKey("${RouterTable.repo}/${repo.fullName}");
+    final index = tabView.indexOf(tabKey);
+    if (index != -1) {
+      tabView.goToTab(index);
+      return;
+    }
     context.read<TabviewModel>().addTab(
-          RepoPage(repo, subPage: subPage),
-          key: ValueKey("${RouterTable.repo}/${repo.fullName}"),
+          RepoPage(repo, subPage: subPage, ref: ref, path: path),
+          key: tabKey,
           title: repo.fullName,
         );
   }
 }
 
 class _InternalRepoPage extends StatelessWidget {
-  const _InternalRepoPage();
+  const _InternalRepoPage({super.key});
 
   @override
   Widget build(BuildContext context) {

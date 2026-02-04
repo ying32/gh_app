@@ -87,6 +87,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
           try {
             final uri = Uri.tryParse(link);
             if (uri != null) {
+              //print("uri=$uri");
               switch (uri.scheme.trim().toLowerCase()) {
                 case "" || "http" || "https":
                   // 没有host当对目录的

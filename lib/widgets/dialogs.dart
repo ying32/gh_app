@@ -7,7 +7,6 @@ import 'package:gh_app/pages/releases.dart';
 import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
-import 'package:gh_app/utils/github/graphql.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -32,31 +31,31 @@ Future<void> showInfoDialog(String msg,
 
 /// 跳转github仓库
 /// TODO: 这个先实现，后面再重构
-bool goToRepoByUri(
+bool goToRepoPageByUri(
   Uri uri, {
   required BuildContext context,
   required ValueChanged<dynamic> onSuccess,
   ValueChanged<dynamic>? onFailed,
   VoidCallback? onComplete,
-  bool useDialog = true,
+  bool useLoading = true,
 }) {
   final res = APIWrap.instance.tryParseGithubUrl(uri);
   if (res == null) {
-    if (useDialog) {
+    if (useLoading) {
       launchUrl(uri);
     }
     return false;
   }
-  if (useDialog) {
+  if (useLoading) {
     LoadingDialog.show(context);
   }
-  if (res is QLRepository) {
-    APIWrap.instance.userRepo(res).then((e) {
-      onSuccess(e!);
+  if (res is QLRepositoryWrap) {
+    APIWrap.instance.userRepo(res.repo).then((e) {
+      onSuccess(res.copyWith(repo: e));
     }).onError((e, s) {
       onFailed?.call(e);
     }).whenComplete(() {
-      if (useDialog) {
+      if (useLoading) {
         closeDialog(context);
       }
       onComplete?.call();
@@ -68,7 +67,7 @@ bool goToRepoByUri(
     }).onError((e, s) {
       onFailed?.call(e);
     }).whenComplete(() {
-      if (useDialog) {
+      if (useLoading) {
         closeDialog(context);
       }
       onComplete?.call();
@@ -82,21 +81,21 @@ bool goToRepoByUri(
     }).onError((e, s) {
       onFailed?.call(e);
     }).whenComplete(() {
-      if (useDialog) {
+      if (useLoading) {
         closeDialog(context);
       }
       onComplete?.call();
     });
     return true;
   } else if (res is QLReleaseWrap) {
-    if (useDialog) {
+    if (useLoading) {
       closeDialog(context);
     }
     onSuccess(res);
     onComplete?.call();
     return true;
   } else {
-    if (useDialog) {
+    if (useLoading) {
       closeDialog(context);
       launchUrl(uri);
     }
@@ -106,8 +105,9 @@ bool goToRepoByUri(
 }
 
 void goMainTabView(BuildContext context, dynamic value) {
-  if (value is QLRepository) {
-    RepoPage.createNewTab(context, value);
+  if (value is QLRepositoryWrap) {
+    RepoPage.createNewTab(context, value.repo,
+        subPage: value.subPage, ref: value.ref, path: value.path);
   } else if (value is QLIssueWrap) {
     IssueDetailsPage.createNewTab(context, value.repo, value.issue);
   } else if (value is QLPullRequestWrap) {
@@ -121,7 +121,7 @@ void goMainTabView(BuildContext context, dynamic value) {
 void onDefaultLinkAction(BuildContext context, String link) {
   final uri = Uri.tryParse(link);
   if (uri == null) return;
-  goToRepoByUri(uri, context: context, onSuccess: (value) {
+  goToRepoPageByUri(uri, context: context, onSuccess: (value) {
     goMainTabView(context, value);
   });
 }
@@ -206,7 +206,8 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
       print("segments=$segments");
     }
     setState(() => _loading = true);
-    goToRepoByUri(u, useDialog: false, context: context, onSuccess: (value) {
+    goToRepoPageByUri(u, useLoading: false, context: context,
+        onSuccess: (value) {
       _close();
       widget.onSuccess?.call(value);
     }, onFailed: (e) {

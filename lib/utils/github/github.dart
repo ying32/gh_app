@@ -1,4 +1,5 @@
 import 'package:gh_app/utils/consts.dart';
+import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/utils.dart';
 
 import 'graphql.dart';
@@ -43,6 +44,24 @@ bool createGithub(AuthField value) {
 
 void clearGithubInstance() {
   gitHubAPI = GitHubGraphQL();
+}
+
+/// 一些包装，用于处理链接跳转的
+
+class QLRepositoryWrap {
+  const QLRepositoryWrap(
+    this.repo, {
+    this.ref,
+    this.path,
+    this.subPage,
+  });
+  final QLRepository repo;
+  final String? ref;
+  final String? path;
+  final RepoSubPage? subPage;
+
+  QLRepositoryWrap copyWith({QLRepository? repo}) =>
+      QLRepositoryWrap(repo ?? this.repo, ref: ref, path: path);
 }
 
 class QLIssueWrap {
@@ -347,27 +366,36 @@ class APIWrap {
     final repo =
         QLRepository(name: repoName, owner: QLRepositoryOwner(login: login));
     if (segments.length == 2) {
-      return repo;
+      return QLRepositoryWrap(repo);
     } else if (segments.length > 2) {
-      final field3 = segments[2].trim();
-      switch (field3) {
+      final func = segments[2].trim();
+      switch (func) {
         case "issues" || "pull":
-          if (segments.length >= 4) {
-            final number = int.tryParse(segments[3], radix: 10) ?? -1;
-            if (number > 0) {
-              if (field3 == "issues") {
-                return QLIssueWrap(QLIssue(number: number), repo);
-              } else if (field3 == "pull") {
-                return QLPullRequestWrap(QLPullRequest(number: number), repo);
-              }
+          // 编号
+          final number = (segments.length >= 4
+                  ? int.tryParse(segments[3], radix: 10)
+                  : null) ??
+              0;
+          if (number > 0) {
+            if (func == "issues") {
+              return QLIssueWrap(QLIssue(number: number), repo);
+            } else if (func == "pull") {
+              return QLPullRequestWrap(QLPullRequest(number: number), repo);
             }
           } else {
-            // TODO: 打开对应的 issues或者pullRequests子页
+            return QLRepositoryWrap(repo,
+                subPage: func == "issues"
+                    ? RepoSubPage.issues
+                    : RepoSubPage.pullRequests);
           }
         case "releases":
           return QLReleaseWrap(repo);
         case "blob":
-          break;
+          //TODO 只实现跳转仓库
+          final ref = segments.length >= 4 ? segments[3].trim() : null;
+          final path = segments.length >= 5 ? segments.skip(4).join("/") : null;
+          return QLRepositoryWrap(repo,
+              ref: ref, path: path, subPage: RepoSubPage.code);
       }
     }
     return null;
