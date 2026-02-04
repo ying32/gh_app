@@ -166,7 +166,7 @@ class RepoPage extends StatelessWidget {
 }
 
 class _InternalRepoPage extends StatelessWidget {
-  const _InternalRepoPage({super.key});
+  const _InternalRepoPage();
 
   Widget _buildHeader(BuildContext context, QLRepository repo) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),

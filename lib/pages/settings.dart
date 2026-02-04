@@ -1,8 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/widgets/dialogs.dart';
-import 'package:provider/provider.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -30,7 +28,6 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final appTheme = context.watch<AppTheme>();
     const spacer = SizedBox(height: 10.0);
     const biggerSpacer = SizedBox(height: 40.0);
 

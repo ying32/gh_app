@@ -60,8 +60,13 @@ class _LoginPageState extends State<LoginPage> {
             }
             _showInfo('登录成功');
           } on GitHubGraphQLError catch (e) {
-            clearGithubInstance();
-            _showInfo('登录失败', error: "需要认证信息", severity: InfoBarSeverity.error);
+            if (e.isBadCredentials) {
+              clearGithubInstance();
+              _showInfo('登录失败',
+                  error: "需要认证信息", severity: InfoBarSeverity.error);
+              return;
+            }
+            _showInfo('登录失败', error: "$e", severity: InfoBarSeverity.error);
           } catch (e) {
             _showInfo('登录失败', error: "$e", severity: InfoBarSeverity.error);
           }

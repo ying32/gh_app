@@ -63,7 +63,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
                   decoration: BoxDecoration(
                       color: Colors.grey.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8)),
-                  child: Text(el.text ?? ''));
+                  child: Text(el.text));
             }
             // 代码块
             //print("e=${el.localName},lang=$lang, text=${el.text}");

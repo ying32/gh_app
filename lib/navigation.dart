@@ -71,7 +71,7 @@ class _NavItemIconButton extends StatelessWidget {
 }
 
 class _UserHeadImageButton extends StatelessWidget {
-  const _UserHeadImageButton({super.key});
+  const _UserHeadImageButton();
 
   @override
   Widget build(BuildContext context) {

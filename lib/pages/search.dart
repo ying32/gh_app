@@ -17,7 +17,7 @@ class _SearchPageState extends State<SearchPage>
   String? selectedCat;
   bool _searching = false;
 
-  final List<String> _suggests = ['搜索仓库', '搜索作者', '搜索组织'];
+  //final List<String> _suggests = ['搜索仓库', '搜索作者', '搜索组织'];
   QLList<QLRepository> _repos = const QLList.empty();
 
   @override
