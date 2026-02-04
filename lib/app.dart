@@ -15,6 +15,8 @@ class CustomMaterialScrollBehavior extends FluentScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
+        // macos
+        PointerDeviceKind.trackpad,
       };
 }
 

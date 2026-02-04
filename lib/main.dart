@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fluent_ui/fluent_ui.dart' hide Page;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_acrylic/flutter_acrylic.dart' as flutter_acrylic;
@@ -19,7 +21,7 @@ void main() async {
   if (kDebugMode) {
     //print("AppConfig.instance.auth=${AppConfig.instance.auth.toJson()}");
   }
-  // if it's not on the web, windows or android, load the accent color
+
   if (!kIsWeb &&
       [
         TargetPlatform.windows,
@@ -29,11 +31,13 @@ void main() async {
   }
 
   if (isDesktop) {
-    await flutter_acrylic.Window.initialize();
+    // 这个在macos下需要提前
+    await WindowManager.instance.ensureInitialized();
     if (defaultTargetPlatform == TargetPlatform.windows) {
+      // 这个只能windows下使用，否则会有问题
+      await flutter_acrylic.Window.initialize();
       await flutter_acrylic.Window.hideWindowControls();
     }
-    await WindowManager.instance.ensureInitialized();
 
     // WindowOptions windowOptions = const WindowOptions(
     //   title: 'GitHub桌面板',
@@ -50,14 +54,17 @@ void main() async {
     //   await windowManager.focus();
     //   await windowManager.setPreventClose(true);
     // });
+    final wSize =
+        Platform.isWindows ? const Size(1280, 768) : const Size(1000, 720);
     await windowManager.setTitle(appTitle);
-    await windowManager.setSize(const Size(1280, 768));
-    await windowManager.setMinimumSize(const Size(1280, 768));
+    await windowManager.setSize(wSize);
+    await windowManager.setMinimumSize(wSize);
     await windowManager.center();
     windowManager.waitUntilReadyToShow().then((_) async {
       await windowManager.setTitleBarStyle(TitleBarStyle.hidden,
           windowButtonVisibility: false);
       await windowManager.show();
+      await windowManager.focus();
       await windowManager.setPreventClose(true);
       await windowManager.setSkipTaskbar(false);
     });
