@@ -14,11 +14,13 @@ class UserHeadImage extends StatelessWidget {
     this.avatarUrl, {
     super.key,
     this.imageSize = 64,
+    this.tooltip,
     this.onPressed,
   });
 
   final String? avatarUrl;
   final double imageSize;
+  final String? tooltip;
   final VoidCallback? onPressed;
 
   @override
@@ -26,7 +28,6 @@ class UserHeadImage extends StatelessWidget {
     if (avatarUrl == null) {
       return const SizedBox.shrink();
     }
-
     Widget child = ClipOval(
       child: Container(
         color: Colors.black.withOpacity(0.08),
@@ -47,6 +48,9 @@ class UserHeadImage extends StatelessWidget {
         borderRadius: BorderRadius.circular(imageSize / 2),
         child: child,
       );
+    }
+    if (tooltip != null) {
+      child = Tooltip(message: tooltip, child: child);
     }
     return child;
   }

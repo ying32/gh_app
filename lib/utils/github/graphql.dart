@@ -1182,6 +1182,9 @@ class GitHubGraphQLError {
 
   @override
   String toString() => jsonEncode(error);
+
+  bool get isBadCredentials =>
+      error['message'] == 'Bad credentials' || error['status'] == 401;
 }
 
 /// 代码提取自 github-9.24.0\lib\src\common\github.dart - GitHub类。

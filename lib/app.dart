@@ -30,9 +30,11 @@ class AppProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        // 当前用户信息
         ChangeNotifierProvider<CurrentUserModel>(
           create: (_) => CurrentUserModel(null),
         ),
+        // 主题
         ChangeNotifierProvider<AppTheme>(
           create: (_) => appTheme,
         ),

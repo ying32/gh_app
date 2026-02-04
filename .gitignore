@@ -44,3 +44,5 @@ app.*.map.json
 GeneratedPluginRegistrant*
 generated_plugin*
 *.lock
+Generated.xcconfig
+flutter_export_environment.sh

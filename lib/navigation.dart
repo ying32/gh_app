@@ -5,6 +5,7 @@ import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/graphql_test.dart';
 import 'package:gh_app/pages/home.dart';
 import 'package:gh_app/pages/issues.dart';
+import 'package:gh_app/pages/login.dart';
 import 'package:gh_app/pages/pulls.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
@@ -145,13 +146,7 @@ class _LeftNav extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Selector<CurrentUserModel, QLUser?>(
-          selector: (_, model) => model.user,
-          builder: (_, user, __) => Column(
-              children: _currentUserItems
-                  .map((e) => _NavItemIconButton(e, disabled: user == null))
-                  .toList(growable: false)),
-        ),
+        ..._currentUserItems.map((e) => _NavItemIconButton(e)),
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
           child: Divider(),
@@ -259,6 +254,13 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
     // 获取当前user
     APIWrap.instance.currentUser.then((e) {
       context.read<CurrentUserModel>().user = e;
+    }).onError((e, s) {
+      if (e is GitHubGraphQLError && e.isBadCredentials) {
+        context.read<CurrentUserModel>().clearLogin();
+        if (mounted) {
+          setState(() {});
+        }
+      }
     });
   }
 
@@ -291,17 +293,13 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
             selector: (_, model) => model.user,
             builder: (context, user, __) {
               if (user == null) return const SizedBox.shrink();
-              return Row(
-                children: [
-                  UserHeadImage(user.avatarUrl, imageSize: 40),
-                  const SizedBox(width: 8.0),
-                  LinkButton(
-                    text: UserNameWidget(user, onlyNickName: true),
-                    onPressed: () {
-                      launchUrl(Uri.parse(user.url));
-                    },
-                  ),
-                ],
+              return UserHeadImage(
+                user.avatarUrl,
+                imageSize: 40,
+                tooltip: user.name.isEmpty ? user.login : user.name,
+                onPressed: () {
+                  launchUrl(Uri.parse(user.url));
+                },
               );
             },
           ),
@@ -328,7 +326,13 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
           const WindowButtons(),
         ]),
       ),
-      content: const _MainTabView(),
+      content: Selector<CurrentUserModel, QLUser?>(
+          selector: (_, model) => model.user,
+          builder: (_, user, __) {
+            return gitHubAPI.isAnonymous
+                ? const LoginPage()
+                : const _MainTabView();
+          }),
     );
   }
 

@@ -5,9 +5,8 @@ import 'package:fluent_ui/fluent_ui.dart' as fui;
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 
-/// Checks if the current environment is a desktop environment.
+/// 是否为桌面环境
 bool get isDesktop {
-  if (kIsWeb) return false;
   return [
     TargetPlatform.windows,
     TargetPlatform.linux,

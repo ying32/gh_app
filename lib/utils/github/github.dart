@@ -103,17 +103,13 @@ class APIWrap {
       _currentUser ??= (gitHubAPI.isAnonymous
           ? null
           : await gitHubAPI.query(QLQuery(QLQueries.queryUser()),
-              convert: QLUser.fromJson));
+              convert: QLUser.fromJson, force: true));
 
   Future<QLUser?> refreshCurrentUser({bool force = true}) async {
     if (gitHubAPI.isAnonymous) return null;
-    try {
-      _currentUser = await gitHubAPI.query(QLQuery(QLQueries.queryUser()),
-          convert: QLUser.fromJson, force: force);
-      return _currentUser;
-    } catch (e) {
-      return null;
-    }
+    _currentUser = await gitHubAPI.query(QLQuery(QLQueries.queryUser()),
+        convert: QLUser.fromJson, force: force);
+    return _currentUser;
   }
 
   /// 指定用户信息
@@ -394,6 +390,13 @@ class APIWrap {
           //TODO 只实现跳转仓库
           final ref = segments.length >= 4 ? segments[3].trim() : null;
           final path = segments.length >= 5 ? segments.skip(4).join("/") : null;
+          return QLRepositoryWrap(repo,
+              ref: ref, path: path, subPage: RepoSubPage.code);
+        case "tree":
+          //TODO 只实现跳转仓库
+          final ref = segments.length >= 4 ? segments[3].trim() : null;
+          const path =
+              null; //segments.length >= 5 ? segments.skip(4).join("/") : null;
           return QLRepositoryWrap(repo,
               ref: ref, path: path, subPage: RepoSubPage.code);
       }

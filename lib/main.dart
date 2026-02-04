@@ -13,6 +13,11 @@ import 'package:window_manager/window_manager.dart';
 import 'app.dart';
 
 void main() async {
+  if (!isDesktop) {
+    // 不允许在非桌面情况下运行
+    exit(1);
+  }
+
   WidgetsFlutterBinding.ensureInitialized();
 
   // 加载配置
@@ -22,16 +27,14 @@ void main() async {
     //print("AppConfig.instance.auth=${AppConfig.instance.auth.toJson()}");
   }
 
-  if (!kIsWeb &&
-      [
-        TargetPlatform.windows,
-        TargetPlatform.android,
-      ].contains(defaultTargetPlatform)) {
+  if (Platform.isWindows) {
     SystemTheme.accentColor.load();
   }
 
   if (isDesktop) {
     // 这个在macos下需要提前
+    // 为解决macos下启动时黑屏问题
+    // https://github.com/flutter/flutter/issues/142916
     await WindowManager.instance.ensureInitialized();
     if (defaultTargetPlatform == TargetPlatform.windows) {
       // 这个只能windows下使用，否则会有问题
@@ -39,21 +42,6 @@ void main() async {
       await flutter_acrylic.Window.hideWindowControls();
     }
 
-    // WindowOptions windowOptions = const WindowOptions(
-    //   title: 'GitHub桌面板',
-    //   size: Size(1200, 720),
-    //   minimumSize: Size(500, 600),
-    //   center: true,
-    //   backgroundColor: Colors.transparent,
-    //   skipTaskbar: false,
-    //   titleBarStyle: TitleBarStyle.hidden,
-    //   windowButtonVisibility: false,
-    // );
-    // windowManager.waitUntilReadyToShow(windowOptions, () async {
-    //   await windowManager.show();
-    //   await windowManager.focus();
-    //   await windowManager.setPreventClose(true);
-    // });
     final wSize =
         Platform.isWindows ? const Size(1280, 768) : const Size(1000, 720);
     await windowManager.setTitle(appTitle);

@@ -59,8 +59,10 @@ class _LoginPageState extends State<LoginPage> {
               });
             }
             _showInfo('登录成功');
-          } catch (e) {
+          } on GitHubGraphQLError catch (e) {
             clearGithubInstance();
+            _showInfo('登录失败', error: "需要认证信息", severity: InfoBarSeverity.error);
+          } catch (e) {
             _showInfo('登录失败', error: "$e", severity: InfoBarSeverity.error);
           }
         case AuthType.oauth2:
@@ -133,11 +135,9 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               if (_authType != AuthType.oauth2)
-                InfoLabel(
-                  label: _authTypeStrings[_authType.index],
-                  child: TextBox(
-                    controller: _tokenController,
-                  ),
+                TextBox(
+                  placeholder: '你的 ${_authTypeStrings[_authType.index]}',
+                  controller: _tokenController,
                 ),
               InfoLabel(
                 label: '',

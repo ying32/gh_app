@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 
 class CurrentUserModel extends ChangeNotifier {
@@ -12,5 +13,11 @@ class CurrentUserModel extends ChangeNotifier {
       _user = value;
       notifyListeners();
     }
+  }
+
+  void clearLogin() {
+    _user = null;
+    clearGithubInstance();
+    notifyListeners();
   }
 }
