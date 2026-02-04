@@ -20,7 +20,8 @@ class RouterTable {
   static const release = "/release";
 }
 
-const githubUrl = 'https://github.com';
+const githubHost = 'github.com';
+const githubUrl = 'https://$githubHost';
 const githubTopicsUrl = '$githubUrl/topics';
 
 /// 不要修改或者移除这些定义

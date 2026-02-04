@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/pull_request_details.dart';
 import 'package:gh_app/pages/releases.dart';
@@ -160,6 +161,13 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
     if (kDebugMode) {
       _controller.text = "$githubUrl/ying32/gh_app";
     }
+    Clipboard.getData('text/plain').then((e) {
+      if (e == null || e.text == null || e.text!.isEmpty) return;
+      final u = Uri.tryParse(e.text!);
+      if (u == null) return;
+      if (u.host != githubHost) return;
+      _controller.text = e.text!;
+    });
   }
 
   @override
