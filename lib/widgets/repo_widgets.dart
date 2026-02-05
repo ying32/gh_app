@@ -457,8 +457,8 @@ class RepoTreeEntriesView extends StatelessWidget {
                   context, object, context.read<RepoModel>().repo);
             }),
         // readme
-        const RepoReadMe(),
         const SizedBox(height: 8.0),
+        const RepoReadMe(),
       ],
     );
   }

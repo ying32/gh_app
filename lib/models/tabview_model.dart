@@ -51,7 +51,9 @@ class TabviewModel extends ChangeNotifier {
       // semanticLabel: 'Document #$index',
       icon: icon ?? const DefaultIcon.repository(),
       body: child,
-      closeIcon: canClose ? FluentIcons.chrome_close : null,
+      closeIcon: canClose
+          ? const Icon(FluentIcons.chrome_close)
+          : const SizedBox(width: 24),
       onClosed: !canClose ? null : () => _doClose(tab),
     );
     tabs.add(tab);

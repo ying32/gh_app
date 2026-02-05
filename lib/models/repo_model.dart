@@ -1,4 +1,4 @@
-import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
@@ -147,5 +147,40 @@ class RepoModel extends ChangeNotifier {
     if (_object == value) return;
     _object = value;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    if (kDebugMode) {
+      print("dispose RepoModel");
+    }
+    super.dispose();
+  }
+}
+
+/// 仓库列表
+class RepoListModel extends ChangeNotifier {
+  RepoListModel(
+      {this.isStarred = false,
+      this.owner = '',
+      QLList<QLRepository> repos = const QLList.empty()})
+      : _repos = repos;
+
+  final String owner;
+  final bool isStarred;
+  QLList<QLRepository> _repos;
+  QLList<QLRepository> get repos => _repos;
+  set repos(QLList<QLRepository> value) {
+    if (_repos == value) return;
+    _repos = value;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    if (kDebugMode) {
+      print("dispose RepoListModel: owner=$owner, isStarred=$isStarred");
+    }
+    super.dispose();
   }
 }

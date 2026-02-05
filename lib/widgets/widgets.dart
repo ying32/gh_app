@@ -200,6 +200,7 @@ class IconLinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //TODO: Tooltip 会造成n多问题？？？？真是个奇怪的问题
     return Tooltip(
       message: message ?? link,
       child: IconButton(
@@ -214,6 +215,8 @@ class IconLinkButton extends StatelessWidget {
       : icon = const DefaultIcon.linkSource(size: 18);
 }
 
+typedef ContextBuilder = void Function(BuildContext context);
+
 /// 初始加载数据
 class WrapInit extends StatefulWidget {
   const WrapInit({
@@ -223,7 +226,8 @@ class WrapInit extends StatefulWidget {
   });
 
   final Widget child;
-  final ValueChanged<BuildContext> onInit;
+
+  final ContextBuilder onInit;
 
   @override
   State<WrapInit> createState() => _WrapInitState();
@@ -634,6 +638,18 @@ class APIFutureBuilder<T> extends StatelessWidget {
   }
 }
 
+/// 加载进度指示器
+class LoadingRing extends StatelessWidget {
+  const LoadingRing({super.key, this.child});
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(child: child ?? const ProgressRing());
+  }
+}
+
 /// 改自 fluent_ui-4.8.7\lib\src\controls\inputs\split_button.dart
 class DropdownPanelButton extends StatefulWidget {
   const DropdownPanelButton({
@@ -688,7 +704,12 @@ class _DropdownPanelButtonState extends State<DropdownPanelButton> {
         borderRadius: BorderRadius.circular(4.0),
         child: DecoratedBox(
           decoration: ShapeDecoration(
-              shape: ButtonThemeData.shapeBorder(context, {ButtonStates.none})),
+            shape: ButtonThemeData.shapeBorder(
+              context,
+              {WidgetState.pressed},
+              // {WidgetState.none},
+            ),
+          ),
           child: IntrinsicHeight(
             child: HoverButton(
               onPressed: showFlyout,
@@ -699,7 +720,8 @@ class _DropdownPanelButtonState extends State<DropdownPanelButton> {
                     color: ButtonThemeData.buttonColor(
                       context,
                       flyoutController.isOpen
-                          ? {ButtonStates.pressing}
+                          //? {WidgetState.pressing}
+                          ? {WidgetState.pressed}
                           : states,
                       transparentWhenNone: true,
                     ),

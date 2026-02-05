@@ -71,6 +71,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
                 child:
                     HighlightViewPlus(el.text, fileName: '', language: lang));
           } else if (el.localName == "img" && el.attributes['src'] != null) {
+            //return SizedBox();
             // 这里替换 img
             //print("=============img=${el.attributes}");
             final imgUrl = el.attributes['src'];

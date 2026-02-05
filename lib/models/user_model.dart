@@ -20,4 +20,7 @@ class CurrentUserModel extends ChangeNotifier {
     clearGithubInstance();
     notifyListeners();
   }
+
+  /// 我的仓库
+  /// 我星的仓库
 }

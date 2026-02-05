@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   intl: any
   # 从4.13开始需要更高的版本，3.38?还是3.36?
-  fluent_ui: 4.8.7
+  fluent_ui: 4.9.2
 
   crypto: ^3.0.3
   encrypt: ^5.0.3

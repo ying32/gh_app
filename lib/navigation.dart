@@ -12,7 +12,6 @@ import 'package:gh_app/pages/pulls.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
-import 'package:gh_app/pages/starred_repos.dart';
 import 'package:gh_app/theme.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
@@ -79,10 +78,7 @@ class _UserHeadImageButton extends StatelessWidget {
       selector: (_, model) => model.user,
       builder: (context, user, __) {
         if (user == null) {
-          if (Platform.isMacOS) {
-            return const ApplicationIcon(size: 40);
-          }
-          return const SizedBox.shrink();
+          return const ApplicationIcon(size: 40);
         }
         return UserHeadImage(
           user.avatarUrl,
@@ -124,29 +120,29 @@ class _LeftNav extends StatelessWidget {
   /// 需要登录才能使用的
   final List<_NavItem> _currentUserItems = [
     _NavItem(
-      key: const ValueKey(RouterTable.issues),
+      key: const ValueKey("${RouterTable.issues}/viewer"),
       icon: const DefaultIcon.issues(size: 18),
       title: '问题',
       body: const IssuesPage(),
     ),
     _NavItem(
-      key: const ValueKey(RouterTable.pulls),
+      key: const ValueKey("${RouterTable.pulls}/viewer"),
       icon: const DefaultIcon.pullRequest(size: 18),
       title: '合并请求',
       // body: const PullRequestPage(),
       body: const PullPage(),
     ),
     _NavItem(
-      key: const ValueKey(RouterTable.repos),
+      key: const ValueKey("${RouterTable.repos}/viewer"),
       icon: const DefaultIcon.repository(size: 18),
       title: '我的仓库',
       body: const ReposPage(),
     ),
     _NavItem(
-      key: const ValueKey(RouterTable.stars),
+      key: const ValueKey("${RouterTable.stars}/viewer"),
       icon: const DefaultIcon.star(size: 18),
       title: '我点赞的仓库',
-      body: const StarredReposPage(),
+      body: const ReposPage(isStarred: true),
     ),
   ];
 

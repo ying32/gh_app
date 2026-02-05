@@ -95,6 +95,7 @@ class _TabPagesState extends State<_TabPages> {
             onChanged: (index) {
               setState(() => currentIndex = index);
             },
+            shortcutsEnabled: false,
             tabWidthBehavior: TabWidthBehavior.sizeToContent,
             closeButtonVisibility: CloseButtonVisibilityMode.never,
           );
@@ -118,19 +119,6 @@ class RepoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // return MultiProvider(
-    //     providers: [
-    //       ChangeNotifierProvider<RepoModel>(
-    //           create: (_) => RepoModel(repo, subPage: subPage, ref: ref),
-    //           child: const _InternalRepoPage()),
-    //     ],
-    //     child: WrapInit(
-    //         onInit: (context) {
-    //           APIWrap.instance.userRepo(repo).then((e) {
-    //             context.read<RepoModel>().repo = e!;
-    //           });
-    //         },
-    //         child: const _InternalRepoPage()));
     return ChangeNotifierProvider<RepoModel>(
         create: (_) => RepoModel(repo, subPage: subPage, ref: ref),
         child: WrapInit(

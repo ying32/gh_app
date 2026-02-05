@@ -155,7 +155,7 @@ class RepoCodePage extends StatelessWidget {
                 children: [
                   // 内容树
                   Expanded(child: RepoTreeEntriesView()),
-                  SizedBox(height: 10.0),
+                  SizedBox(width: 10.0),
 
                   // 右边
                   SizedBox(width: 300, child: _CodePageRight())
