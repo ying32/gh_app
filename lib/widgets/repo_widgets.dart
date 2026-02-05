@@ -369,7 +369,8 @@ class RepoFileContentView extends StatelessWidget {
       if (ext == ".md" || ext == ".markdown") {
         return MarkdownBlockPlus(body);
       }
-      return HighlightViewPlus(body, fileName: filename);
+      return HighlightViewPlus(body,
+          fileName: filename, byteSize: file.byteSize);
     } catch (e) {
       return Text("Error: $e");
     }
@@ -421,9 +422,12 @@ class RepoTreeEntriesView extends StatelessWidget {
       // blob不为null时
       if (object.blob != null && object.blob!.text != null) {
         return Card(
-          child: RepoFileContentView(
-            object.blob!,
-            filename: p.basename(context.read<RepoModel>().path),
+          child: SizedBox(
+            width: double.infinity,
+            child: RepoFileContentView(
+              object.blob!,
+              filename: p.basename(context.read<RepoModel>().path),
+            ),
           ),
         );
       }
@@ -443,6 +447,7 @@ class RepoTreeEntriesView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.max,
       children: [
         // 监视文件对象改变
         Selector<RepoModel, QLObject?>(

@@ -81,7 +81,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
                 imgUrl!,
                 width: double.tryParse(el.attributes['width'] ?? ''),
                 height: double.tryParse(el.attributes['height'] ?? ''),
-                tooltip: el.attributes['alt'],
+                alt: el.attributes['alt'],
                 //alignment: Alignment.centerLeft,
               ),
             );

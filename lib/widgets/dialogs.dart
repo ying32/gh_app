@@ -39,7 +39,7 @@ void showImageDialog(BuildContext context, String? imageURL) {
       builder: (BuildContext context) {
         return GestureDetector(
           onTap: () => closeDialog(context),
-          child: CachedNetworkImageEx(imageURL),
+          child: Center(child: CachedNetworkImageEx(imageURL)),
         );
       });
 }
@@ -339,9 +339,9 @@ class ExitAppDialog extends StatelessWidget {
     );
   }
 
-  static void show(BuildContext context, bool mounted) {
+  static void show(BuildContext context) {
     windowManager.isPreventClose().then((isPreventClose) {
-      if (isPreventClose && mounted) {
+      if (isPreventClose) {
         showDialog(context: context, builder: (_) => const ExitAppDialog());
       }
     });

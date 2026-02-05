@@ -200,14 +200,18 @@ class IconLinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //TODO: Tooltip 会造成n多问题？？？？真是个奇怪的问题
-    return Tooltip(
-      message: message ?? link,
-      child: IconButton(
-        icon: icon,
-        onPressed: () => launchUrl(Uri.parse(link)),
-      ),
+    return IconButton(
+      icon: icon,
+      onPressed: () => launchUrl(Uri.parse(link)),
     );
+    //TODO: Tooltip 会造成n多问题？？？？真是个奇怪的问题，而且不是所有都有这问题
+    // return Tooltip(
+    //   message: message ?? link,
+    //   child: IconButton(
+    //     icon: icon,
+    //     onPressed: () => launchUrl(Uri.parse(link)),
+    //   ),
+    // );
   }
 
   /// 使用[DefaultIcon.linkSource]图标的
@@ -764,7 +768,7 @@ class CachedNetworkImageEx extends StatelessWidget {
     this.errorWidget,
     this.fit,
     this.alignment = Alignment.center,
-    this.tooltip,
+    this.alt,
   });
 
   final String imgUrl;
@@ -773,28 +777,34 @@ class CachedNetworkImageEx extends StatelessWidget {
   final BoxFit? fit;
   final Widget? errorWidget;
   final Alignment alignment;
-  final String? tooltip;
+  final String? alt;
 
   @override
   Widget build(BuildContext context) {
     Widget child = CachedNetworkImage(
-      imageUrl: imgUrl,
-      errorListener: (e) {
-        if (kDebugMode) {
-          //print("CachedNetworkImageEx error=$e");
-        }
-      },
-      width: width,
-      height: height,
-      fit: fit,
-      alignment: alignment,
-      errorWidget: (context, url, error) =>
-          errorWidget ??
-          const Icon(Remix.image_2_fill, color: mat.Colors.orange),
-    );
-    if (tooltip != null) {
-      child = Tooltip(message: tooltip, child: child);
-    }
+        imageUrl: imgUrl,
+        errorListener: (e) {
+          if (kDebugMode) {
+            //print("CachedNetworkImageEx error=$e");
+          }
+        },
+        width: width,
+        height: height,
+        fit: fit,
+        alignment: alignment,
+        errorWidget: (context, url, error) {
+          return errorWidget ??
+              Row(
+                children: [
+                  const Icon(Remix.image_2_fill, color: mat.Colors.orange),
+                  if (alt != null) Text(alt!),
+                ],
+              );
+        });
+    //TODO: tooltip这东西影响貌似挺大啊，完全摸不着头脑，八杆子打不着的位置啊，真是个奇怪的问题，而且不是所有都有这问题
+    // if (alt != null) {
+    //   // child = Tooltip(message: tooltip, child: child);
+    // }
     return child;
   }
 }

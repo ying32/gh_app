@@ -352,20 +352,6 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
 
   @override
   void onWindowClose() {
-    // macos下没有效果？
-    ExitAppDialog.show(context, mounted);
-  }
-
-  @override
-  void onWindowFocus() {
-    // Clipboard.getData('text/plain').then((e) {
-    //   if (_lastClipboardText != e?.text) {
-    //     _lastClipboardText = e?.text;
-    //     // TODO: 待写。这里检测，当解析出来的是github链接，弹出跳转提示
-    //     if (kDebugMode) {
-    //       print("_lastClipboardText=$_lastClipboardText");
-    //     }
-    //   }
-    // });
+    ExitAppDialog.show(context);
   }
 }

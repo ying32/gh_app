@@ -195,6 +195,7 @@ class _InternalRepoPage extends StatelessWidget {
                 child: TagLabel.archived(),
               ),
             const Spacer(),
+            // 这东西竟然会引起一堆问题？？？
             IconLinkButton.linkSource(repo.url, message: '在浏览器中打开')
           ],
         ),

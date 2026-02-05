@@ -72,6 +72,10 @@ dependencies:
   # HTML显示组件
   flutter_widget_from_html_core: ^0.15.2
 
+  # 先放着用不用再说
+  # pretty_diff_text: ^2.1.0
+
+
 #dependency_overrides:
 
 
