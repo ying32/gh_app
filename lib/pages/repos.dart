@@ -21,7 +21,7 @@ class ReposPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => RepoListModel(owner: owner, isStarred: isStarred),
-      child: WrapInit(
+      child: WantKeepAlive(
           onInit: (context) {
             APIWrap.instance
                 .userRepos(owner, isStarred: isStarred)

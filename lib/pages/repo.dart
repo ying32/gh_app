@@ -121,7 +121,7 @@ class RepoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<RepoModel>(
         create: (_) => RepoModel(repo, subPage: subPage, ref: ref),
-        child: WrapInit(
+        child: WantKeepAlive(
             onInit: (context) {
               APIWrap.instance.userRepo(repo).then((e) {
                 context.read<RepoModel>().repo = e!;

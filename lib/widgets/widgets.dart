@@ -222,22 +222,25 @@ class IconLinkButton extends StatelessWidget {
 typedef ContextBuilder = void Function(BuildContext context);
 
 /// 初始加载数据
-class WrapInit extends StatefulWidget {
-  const WrapInit({
+class WantKeepAlive extends StatefulWidget {
+  const WantKeepAlive({
     super.key,
     required this.child,
     required this.onInit,
+    this.wantKeepAlive = true,
   });
 
   final Widget child;
 
   final ContextBuilder onInit;
+  final bool wantKeepAlive;
 
   @override
-  State<WrapInit> createState() => _WrapInitState();
+  State<WantKeepAlive> createState() => _WantKeepAliveState();
 }
 
-class _WrapInitState extends State<WrapInit> {
+class _WantKeepAliveState extends State<WantKeepAlive>
+    with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
@@ -246,7 +249,14 @@ class _WrapInitState extends State<WrapInit> {
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  /// 桌面版，不需像移动端那样小心谨慎，cpu内存够用的，而且逻辑上也符合些
+  @override
+  bool get wantKeepAlive => widget.wantKeepAlive;
 }
 
 /// icon样式的弹出菜单
