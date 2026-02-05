@@ -528,6 +528,8 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
               },
         controller: _refreshController,
         child: ListView.separated(
+          // 我只是页面要保持，这个貌似就不用设置了哈
+          // addAutomaticKeepAlives: true,
           padding: widget.padding,
           itemCount: _list.length,
           itemBuilder: (context, index) => kDebugMode
