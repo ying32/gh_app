@@ -7,6 +7,7 @@ import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
@@ -427,6 +428,8 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
 
   @override
   void dispose() {
+    _refreshController.dispose();
+
     super.dispose();
   }
 
@@ -493,6 +496,7 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
                       _list.clear();
                       _list.addAll(data.data);
                     });
+                    _refreshController.resetNoData();
                     _refreshController.refreshCompleted();
                     showInfoDialog('刷新完成', context: context);
                   }
@@ -502,17 +506,13 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
                       error: "$e",
                       context: context,
                       severity: InfoBarSeverity.error);
-                }).whenComplete(() {});
+                });
               },
         // _refreshController.loadComplete();
         onLoading: widget.onLoading == null
             ? null
             : () {
                 widget.onLoading!.call(_pageInfo).then((data) {
-                  if (kDebugMode) {
-                    print(
-                        "=======================${_pageInfo?.hasNextPage}, ${_pageInfo?.endCursor}");
-                  }
                   if (data.isNotEmpty) {
                     setState(() {
                       _pageInfo = data.pageInfo;
@@ -524,14 +524,22 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
                   }
                 }).onError((e, s) {
                   _refreshController.loadFailed();
-                }).whenComplete(() {});
+                });
               },
         controller: _refreshController,
         child: ListView.separated(
           padding: widget.padding,
           itemCount: _list.length,
-          itemBuilder: (context, index) =>
-              widget.itemBuilder(context, _list[index], index),
+          itemBuilder: (context, index) => kDebugMode
+              ? Row(
+                  children: [
+                    Expanded(
+                        child:
+                            widget.itemBuilder(context, _list[index], index)),
+                    Text('index=$index')
+                  ],
+                )
+              : widget.itemBuilder(context, _list[index], index),
           separatorBuilder: (context, index) =>
               widget.separator ?? const SizedBox.shrink(),
         ),
@@ -854,4 +862,25 @@ class AppAboutButton extends StatelessWidget {
       ),
     );
   }
+}
+
+/// QList专用选择器
+class SelectorQLList<A, S> extends Selector0<QLList<S>?> {
+  SelectorQLList({
+    super.key,
+    required ValueWidgetBuilder<QLList<S>> builder,
+    required QLList<S>? Function(BuildContext, A) selector,
+    super.shouldRebuild,
+    super.child,
+  }) : super(
+            selector: (context) => selector(context, Provider.of(context)),
+            builder: (context, QLList<S>? value, Widget? child) {
+              if (value == null) {
+                return const LoadingRing();
+              }
+              if (value.isEmpty) {
+                return const Center(child: Text('没有数据'));
+              }
+              return builder(context, value, child);
+            });
 }

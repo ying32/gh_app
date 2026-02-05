@@ -149,6 +149,33 @@ class RepoModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// issues
+  QLList<QLIssue>? _issues;
+  QLList<QLIssue>? get issues => _issues;
+  set issues(QLList<QLIssue>? value) {
+    if (_issues == value) return;
+    _issues = value;
+    notifyListeners();
+  }
+
+  /// pullRequests
+  QLList<QLPullRequest>? _pullRequests;
+  QLList<QLPullRequest>? get pullRequests => _pullRequests;
+  set pullRequests(QLList<QLPullRequest>? value) {
+    if (_pullRequests == value) return;
+    _pullRequests = value;
+    notifyListeners();
+  }
+
+  /// releases
+  QLList<QLRelease>? _releases;
+  QLList<QLRelease>? get releases => _releases;
+  set releases(QLList<QLRelease>? value) {
+    if (_releases == value) return;
+    _releases = value;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     if (kDebugMode) {
@@ -161,16 +188,14 @@ class RepoModel extends ChangeNotifier {
 /// 仓库列表
 class RepoListModel extends ChangeNotifier {
   RepoListModel(
-      {this.isStarred = false,
-      this.owner = '',
-      QLList<QLRepository> repos = const QLList.empty()})
+      {this.isStarred = false, this.owner = '', QLList<QLRepository>? repos})
       : _repos = repos;
 
   final String owner;
   final bool isStarred;
-  QLList<QLRepository> _repos;
-  QLList<QLRepository> get repos => _repos;
-  set repos(QLList<QLRepository> value) {
+  QLList<QLRepository>? _repos;
+  QLList<QLRepository>? get repos => _repos;
+  set repos(QLList<QLRepository>? value) {
     if (_repos == value) return;
     _repos = value;
     notifyListeners();

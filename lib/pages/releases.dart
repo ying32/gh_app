@@ -1,4 +1,5 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/utils/consts.dart';
@@ -82,7 +83,7 @@ class _AssetsPanelState extends State<_AssetsPanel> {
   @override
   Widget build(BuildContext context) {
     return Expander(
-      headerBackgroundColor: ButtonState.all(Colors.transparent),
+      headerBackgroundColor: WidgetStateProperty.all(Colors.transparent),
       initiallyExpanded: false,
       header: Row(
         children: [
@@ -235,28 +236,40 @@ class ReleasesPage extends StatelessWidget {
 
   final QLRepository repo;
 
-  Future<QLList<QLRelease>> _onLoadData(QLPageInfo? pageInfo) async {
-    if (pageInfo == null || !pageInfo.hasNextPage) return const QLList.empty();
-    return APIWrap.instance.repoReleases(repo, nextCursor: pageInfo.endCursor);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return APIFutureBuilder(
-        future: APIWrap.instance.repoReleases(repo),
-        builder: (_, snapshot) {
-          return ListViewRefresher(
-            initData: snapshot,
-            separator: const SizedBox(height: 30),
-            padding: EdgeInsetsDirectional.only(
-              bottom: kPageDefaultVerticalPadding,
-              // start: PageHeader.horizontalPadding(context),
-              end: PageHeader.horizontalPadding(context),
-            ),
-            itemBuilder: (_, item, __) => _RepoReleaseItem(item, repo: repo),
-            onLoading: _onLoadData,
-          );
-        });
+    return ChangeNotifierProvider(
+      create: (_) => RepoModel(repo),
+      child: WantKeepAlive(
+          onInit: (context) {
+            APIWrap.instance.repoReleases(repo).then((data) {
+              context.read<RepoModel>().releases = data;
+            });
+          },
+          child: SelectorQLList<RepoModel, QLRelease>(
+              selector: (_, model) => model.releases,
+              builder: (_, releases, __) {
+                return ListViewRefresher(
+                  initData: releases,
+                  separator: const SizedBox(height: 30),
+                  padding: EdgeInsetsDirectional.only(
+                    bottom: kPageDefaultVerticalPadding,
+                    // start: PageHeader.horizontalPadding(context),
+                    end: PageHeader.horizontalPadding(context),
+                  ),
+                  itemBuilder: (_, item, __) {
+                    return _RepoReleaseItem(item, repo: repo);
+                  },
+                  onLoading: (QLPageInfo? pageInfo) async {
+                    if (pageInfo == null || !pageInfo.hasNextPage) {
+                      return const QLList.empty();
+                    }
+                    return APIWrap.instance
+                        .repoReleases(repo, nextCursor: pageInfo.endCursor);
+                  },
+                );
+              })),
+    );
   }
 
   static void createNewTab(BuildContext context, QLRepository repo) {

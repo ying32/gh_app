@@ -55,57 +55,47 @@ class RepoPullRequestPage extends StatelessWidget {
 
   final QLRepository repo;
 
-  Future<QLList<QLPullRequest>> _onLoadData(QLPageInfo? pageInfo) async {
-    if (pageInfo == null || !pageInfo.hasNextPage) return const QLList.empty();
-    return APIWrap.instance
-        .repoPullRequests(repo, nextCursor: pageInfo.endCursor);
-  }
-
-  Future<QLList<QLPullRequest>> _onRefreshData() async {
-    // return const QLList.empty();
-    return APIWrap.instance.repoPullRequests(repo, force: true);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return APIFutureBuilder(
-      future: APIWrap.instance.repoPullRequests(repo),
-      builder: (context, snapshot) {
-        return Card(
-          child: ListViewRefresher(
-            initData: snapshot,
-            separator: const Divider(
-                size: 1,
-                direction: Axis.horizontal,
-                style: DividerThemeData(
-                    verticalMargin: EdgeInsets.zero,
-                    horizontalMargin: EdgeInsets.zero)),
-            padding: EdgeInsetsDirectional.only(
-              bottom: kPageDefaultVerticalPadding,
-              // start: PageHeader.horizontalPadding(context),
-              end: PageHeader.horizontalPadding(context),
-            ),
-            itemBuilder: (_, item, __) => _PullRequestItem(item, repo: repo),
-            onLoading: _onLoadData,
-            onRefresh: _onRefreshData,
-          ),
-        );
-
-        // return Card(
-        //   padding: EdgeInsets.zero,
-        //   child: ListView.separated(
-        //       itemCount: snapshot.length,
-        //       itemBuilder: (_, index) =>
-        //           _PullRequestItem(snapshot[index], repo: repo),
-        //       separatorBuilder: (_, index) => const Divider(
-        //             size: 1,
-        //             direction: Axis.horizontal,
-        //             style: DividerThemeData(
-        //                 verticalMargin: EdgeInsets.zero,
-        //                 horizontalMargin: EdgeInsets.zero),
-        //           )),
-        // );
-      },
-    );
+    return WantKeepAlive(
+        onInit: (context) {
+          APIWrap.instance.repoPullRequests(repo).then((data) {
+            context.read<RepoModel>().pullRequests = data;
+          });
+        },
+        child: SelectorQLList<RepoModel, QLPullRequest>(
+          selector: (_, model) => model.pullRequests,
+          builder: (_, pulls, __) {
+            return Card(
+              child: ListViewRefresher(
+                initData: pulls,
+                separator: const Divider(
+                    size: 1,
+                    direction: Axis.horizontal,
+                    style: DividerThemeData(
+                        verticalMargin: EdgeInsets.zero,
+                        horizontalMargin: EdgeInsets.zero)),
+                padding: EdgeInsetsDirectional.only(
+                  bottom: kPageDefaultVerticalPadding,
+                  // start: PageHeader.horizontalPadding(context),
+                  end: PageHeader.horizontalPadding(context),
+                ),
+                itemBuilder: (_, item, __) =>
+                    _PullRequestItem(item, repo: repo),
+                onLoading: (QLPageInfo? pageInfo) async {
+                  if (pageInfo == null || !pageInfo.hasNextPage) {
+                    return const QLList.empty();
+                  }
+                  return APIWrap.instance
+                      .repoPullRequests(repo, nextCursor: pageInfo.endCursor);
+                },
+                onRefresh: () async {
+                  // return const QLList.empty();
+                  return APIWrap.instance.repoPullRequests(repo, force: true);
+                },
+              ),
+            );
+          },
+        ));
   }
 }

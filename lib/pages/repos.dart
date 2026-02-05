@@ -39,12 +39,9 @@ class _ReposPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoListModel, QLList<QLRepository>>(
+    return SelectorQLList<RepoListModel, QLRepository>(
       selector: (_, model) => model.repos,
       builder: (context, repos, __) {
-        if (repos.isEmpty) {
-          return const LoadingRing();
-        }
         final model = context.read<RepoListModel>();
         return RepoListView(
             repos: repos,
@@ -56,7 +53,6 @@ class _ReposPage extends StatelessWidget {
                   isStarred: model.isStarred, nextCursor: pageInfo.endCursor);
             },
             onRefresh: () async {
-              // return const QLList.empty();
               return APIWrap.instance.userRepos(model.owner,
                   isStarred: model.isStarred, force: true);
             });

@@ -54,8 +54,8 @@ class QLList<T> {
 
   /// 内部数据
   List<T> get data => _data;
-  operator [](index) => _data[index];
-  //operator []=(index, value) => data[index] = value;
+  T operator [](index) => _data[index];
+  operator []=(index, T value) => data[index] = value;
   bool get isEmpty => _data.isEmpty;
   bool get isNotEmpty => _data.isNotEmpty;
   int get length => _data.length;

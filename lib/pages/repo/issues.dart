@@ -61,41 +61,46 @@ class RepoIssuesPage extends StatelessWidget {
 
   final QLRepository repo;
 
-  Future<QLList<QLIssue>> _onLoadData(QLPageInfo? pageInfo) async {
-    if (pageInfo == null || !pageInfo.hasNextPage) return const QLList.empty();
-    return APIWrap.instance.repoIssues(repo, nextCursor: pageInfo.endCursor);
-  }
-
-  Future<QLList<QLIssue>> _onRefreshData() async {
-    // return const QLList.empty();
-    return APIWrap.instance.repoIssues(repo, force: true);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return APIFutureBuilder(
-      future: APIWrap.instance.repoIssues(repo),
-      builder: (context, snapshot) {
-        return Card(
-          child: ListViewRefresher(
-            initData: snapshot,
-            separator: const Divider(
-                size: 1,
-                direction: Axis.horizontal,
-                style: DividerThemeData(
-                    verticalMargin: EdgeInsets.zero,
-                    horizontalMargin: EdgeInsets.zero)),
-            padding: EdgeInsetsDirectional.only(
-              bottom: kPageDefaultVerticalPadding,
-              // start: PageHeader.horizontalPadding(context),
-              end: PageHeader.horizontalPadding(context),
-            ),
-            itemBuilder: (_, item, __) => _IssueItem(item),
-            onLoading: _onLoadData,
-            onRefresh: _onRefreshData,
-          ),
-        );
+    return WantKeepAlive(
+      onInit: (context) {
+        APIWrap.instance.repoIssues(repo).then((data) {
+          context.read<RepoModel>().issues = data;
+        });
       },
+      child: SelectorQLList<RepoModel, QLIssue>(
+          selector: (_, model) => model.issues,
+          builder: (_, issues, __) {
+            return Card(
+              child: ListViewRefresher(
+                initData: issues,
+                separator: const Divider(
+                    size: 1,
+                    direction: Axis.horizontal,
+                    style: DividerThemeData(
+                        verticalMargin: EdgeInsets.zero,
+                        horizontalMargin: EdgeInsets.zero)),
+                padding: EdgeInsetsDirectional.only(
+                  bottom: kPageDefaultVerticalPadding,
+                  // start: PageHeader.horizontalPadding(context),
+                  end: PageHeader.horizontalPadding(context),
+                ),
+                itemBuilder: (_, item, __) => _IssueItem(item),
+                onLoading: (QLPageInfo? pageInfo) async {
+                  if (pageInfo == null || !pageInfo.hasNextPage) {
+                    return const QLList.empty();
+                  }
+                  return APIWrap.instance
+                      .repoIssues(repo, nextCursor: pageInfo.endCursor);
+                },
+                onRefresh: () async {
+                  // return const QLList.empty();
+                  return APIWrap.instance.repoIssues(repo, force: true);
+                },
+              ),
+            );
+          }),
     );
   }
 }
