@@ -377,19 +377,12 @@ class RepoFileContentView extends StatelessWidget {
 }
 
 /// 仓库目录列表
-class RepoContentsListView extends StatelessWidget {
-  const RepoContentsListView({
+class RepoTreeEntriesView extends StatelessWidget {
+  const RepoTreeEntriesView({
     super.key,
-    this.path = "",
-    this.ref,
-    required this.onPathChange,
   });
 
-  final String path;
-  final String? ref;
-  final ValueChanged<String> onPathChange;
-
-  Widget _buildItem(QLTree file) {
+  Widget _buildItem(BuildContext context, QLTree file) {
     return ListTile(
       leading: SizedBox(
         width: 24,
@@ -398,28 +391,28 @@ class RepoContentsListView extends StatelessWidget {
             : DefaultIcon.folder(color: Colors.blue.lighter),
       ),
       title: Text(file.name),
-      //trailing: const SizedBox.shrink(),
       onPressed: () {
-        onPathChange.call(file.path);
+        context.read<RepoModel>().path = file.path;
       },
     );
   }
 
   // 构建目录，这个还可以再优化的，不使用Column，暂时先这样吧
-  Widget _buildTree(List<QLTree> entries) => Card(
+  Widget _buildTree(BuildContext context, List<QLTree> entries) => Card(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...entries.where((e) => e.isDir).map((e) => _buildItem(e)),
-            ...entries.where((e) => e.isFile).map((e) => _buildItem(e)),
+            ...entries.where((e) => e.isDir).map((e) => _buildItem(context, e)),
+            ...entries
+                .where((e) => e.isFile)
+                .map((e) => _buildItem(context, e)),
           ],
         ),
       );
 
   Widget _buildContent(
       BuildContext context, QLObject object, QLRepository repo) {
-    //return   print("=============仓库内容APIFutureBuilder刷新");
     // 如果数据是文件，则显示内容
     if (object.isFile) {
       if (kDebugMode) {
@@ -430,7 +423,7 @@ class RepoContentsListView extends StatelessWidget {
         return Card(
           child: RepoFileContentView(
             object.blob!,
-            filename: p.basename(path),
+            filename: p.basename(context.read<RepoModel>().path),
           ),
         );
       }
@@ -441,31 +434,32 @@ class RepoContentsListView extends StatelessWidget {
     if (object.entries == null) {
       return const SizedBox.shrink();
     }
-
     // 返回目录结构
-    return Column(
-      children: [
-        _buildTree(object.entries!),
-        const SizedBox(height: 10.0),
-        //if (readmeFile.isNotEmpty)
-        const RepoReadMe(),
-      ],
-    );
+    return _buildTree(context, object.entries!);
   }
 
   @override
   Widget build(BuildContext context) {
-    final model = context.read<RepoModel>();
-    final repo = model.repo;
-    return Selector<RepoModel, QLObject?>(
-        selector: (_, model) => model.object,
-        builder: (_, object, __) {
-          if (object == null) {
-            return SizedBox(
-                height: MediaQuery.of(context).size.height / 2,
-                child: const Center(child: ProgressRing()));
-          }
-          return _buildContent(context, object, repo);
-        });
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        // 监视文件对象改变
+        Selector<RepoModel, QLObject?>(
+            selector: (_, model) => model.object,
+            builder: (_, object, __) {
+              if (object == null) {
+                return SizedBox(
+                    height: MediaQuery.of(context).size.height / 2,
+                    child: const Center(child: ProgressRing()));
+              }
+              return _buildContent(
+                  context, object, context.read<RepoModel>().repo);
+            }),
+        // readme
+        const RepoReadMe(),
+        const SizedBox(height: 8.0),
+      ],
+    );
   }
 }

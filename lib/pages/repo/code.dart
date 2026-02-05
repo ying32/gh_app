@@ -147,30 +147,18 @@ class RepoCodePage extends StatelessWidget {
           child: Card(child: RepoBreadcrumbBar()),
         ),
         Expanded(
+          //TODO: 待优化
           child: ListView(
-            children: [
+            children: const [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Selector<RepoModel, (String?, String)>(
-                        selector: (_, model) => (model.ref, model.path),
-                        builder: (_, value, __) {
-                          print("=路径改变=$value");
-                          // 内容改变，
-                          return RepoContentsListView(
-                            path: value.$2,
-                            ref: value.$1,
-                            onPathChange: (value) {
-                              final model = context.read<RepoModel>();
-                              model.path = value;
-                            },
-                          );
-                        }),
-                  ),
-                  const SizedBox(width: 8.0),
+                  // 内容树
+                  Expanded(child: RepoTreeEntriesView()),
+                  SizedBox(height: 10.0),
+
                   // 右边
-                  const SizedBox(width: 300, child: _CodePageRight())
+                  SizedBox(width: 300, child: _CodePageRight())
                 ],
               ),
             ],
