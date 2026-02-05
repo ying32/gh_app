@@ -5,7 +5,7 @@ import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:url_launcher/link.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// 用户头像
 class UserHeadImage extends StatelessWidget {
@@ -104,16 +104,12 @@ class UserLineInfo extends StatelessWidget {
   Widget _build(Widget child) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: isLink && value is String
-            ? Link(
-                uri: Uri.parse(isEmail ? "mailto:$value" : value),
-                builder: (context, open) => Semantics(
-                  link: true,
-                  child: LinkButton(
-                    onPressed: () => open?.call(),
-                    text: child,
-                    padding: EdgeInsets.zero,
-                  ),
-                ),
+            ? LinkButton(
+                onPressed: () {
+                  launchUrl(Uri.parse(isEmail ? "mailto:$value" : value));
+                },
+                text: child,
+                padding: EdgeInsets.zero,
               )
             : child,
       );

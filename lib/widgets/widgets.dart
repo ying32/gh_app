@@ -8,7 +8,6 @@ import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:url_launcher/link.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -201,17 +200,11 @@ class IconLinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Link(
-      uri: Uri.parse(link),
-      builder: (context, followLink) => Semantics(
-        link: true,
-        child: Tooltip(
-          message: message ?? link,
-          child: IconButton(
-            icon: icon,
-            onPressed: () => followLink?.call(),
-          ),
-        ),
+    return Tooltip(
+      message: message ?? link,
+      child: IconButton(
+        icon: icon,
+        onPressed: () => launchUrl(Uri.parse(link)),
       ),
     );
   }
