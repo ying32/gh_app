@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+
+import 'package:file_icon/file_icon.dart';
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
@@ -11,11 +14,13 @@ import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
+import 'package:gh_app/widgets/highlight_plus.dart';
 import 'package:gh_app/widgets/issues_widgets.dart';
 import 'package:gh_app/widgets/markdown_plus.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
+import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
 
 import 'pull_request_details.dart';
@@ -23,9 +28,12 @@ import 'pull_request_details.dart';
 part 'repo/action.dart';
 part 'repo/code.dart';
 part 'repo/components/about.dart';
+part 'repo/components/breadcrumb_bar.dart';
+part 'repo/components/file_content_view.dart';
 part 'repo/components/readme.dart';
 part 'repo/components/refs.dart';
 part 'repo/components/releases.dart';
+part 'repo/components/tree_entries_view.dart';
 part 'repo/issues.dart';
 part 'repo/pull_request.dart';
 part 'repo/wiki.dart';
