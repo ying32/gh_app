@@ -57,7 +57,7 @@ class _TabPagesState extends State<_TabPages> {
                 text: const Text('代码'),
                 icon: const DefaultIcon.code(),
                 closeIcon: null,
-                body: RepoCodePage(repo),
+                body: const RepoCodePage(),
               ),
               // issues
               if (repo.hasIssuesEnabled)

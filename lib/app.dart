@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:fluent_ui/fluent_ui.dart';
@@ -16,7 +17,7 @@ class CustomMaterialScrollBehavior extends FluentScrollBehavior {
         PointerDeviceKind.touch,
         PointerDeviceKind.mouse,
         // macos
-        PointerDeviceKind.trackpad,
+        if (Platform.isMacOS) PointerDeviceKind.trackpad,
       };
 }
 

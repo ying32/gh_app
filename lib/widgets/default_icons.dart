@@ -11,7 +11,7 @@ class DefaultIcons {
   static const star = Remix.star_line;
   static const search = Remix.search_line;
   static const settings = Remix.settings_line;
-  static const tags = Remix.price_tag_2_line;
+  static const tags = Remix.price_tag_3_line;
   static const releases = Remix.price_tag_3_line;
   static const commit = Remix.git_commit_line;
   static const verifiedBadge = Remix.verified_badge_line;

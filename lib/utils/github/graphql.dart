@@ -1126,6 +1126,12 @@ class QLObject {
             : List.from(input['entries'])
                 .map((e) => QLTree.fromJson(e))
                 .toList();
+
+  /// 返回一个错误
+  QLObject.error(Object? err)
+      : entries = null,
+        _hasEntries = false,
+        blob = QLBlob(byteSize: 1, isBinary: false, text: '$err', oid: '');
 }
 
 ///

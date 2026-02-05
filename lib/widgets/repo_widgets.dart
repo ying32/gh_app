@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/pages/repo.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
@@ -406,44 +405,6 @@ class RepoContentsListView extends StatelessWidget {
     );
   }
 
-  QLTree _matchReadMeFile(QLObject object, RegExp regex) {
-    return object.entries!.lastWhere(
-        (e) => regex.firstMatch(e.name.replaceAll("_", "-")) != null,
-        orElse: () => const QLTree());
-  }
-
-  String _getReadMeFile(BuildContext context, QLObject object) {
-    if (object.isFile) return '';
-    // 优先匹配本地化的
-    var tree = _matchReadMeFile(
-        object,
-        RegExp(
-            r'^README[\.|-|_]?' +
-                Localizations.localeOf(context).toLanguageTag() +
-                r'[\s\S]*?\.?(?:md|markdown)$',
-            caseSensitive: false));
-    if (tree.name.isNotEmpty) {
-      return tree.name;
-    }
-    // 没有则匹配默认的
-    tree = _matchReadMeFile(
-        object,
-        RegExp(r'^README[\.|-|_]?[\s\S]*?\.?(?:md|markdown)$',
-            caseSensitive: false));
-    if (tree.name.isNotEmpty) {
-      return tree.name;
-    }
-    // 如果没有，匹配下txt的README文件
-    tree = _matchReadMeFile(
-        object,
-        RegExp(r'^README[\.|-|_]?[\s\S]*?\.?txt$', //|txt
-            caseSensitive: false));
-    if (tree.name.isNotEmpty) {
-      return tree.name;
-    }
-    return '';
-  }
-
   // 构建目录，这个还可以再优化的，不使用Column，暂时先这样吧
   Widget _buildTree(List<QLTree> entries) => Card(
         child: Column(
@@ -456,48 +417,55 @@ class RepoContentsListView extends StatelessWidget {
         ),
       );
 
+  Widget _buildContent(
+      BuildContext context, QLObject object, QLRepository repo) {
+    //return   print("=============仓库内容APIFutureBuilder刷新");
+    // 如果数据是文件，则显示内容
+    if (object.isFile) {
+      if (kDebugMode) {
+        print("file isBinary =${object.blob?.isBinary}");
+      }
+      // blob不为null时
+      if (object.blob != null && object.blob!.text != null) {
+        return Card(
+          child: RepoFileContentView(
+            object.blob!,
+            filename: p.basename(path),
+          ),
+        );
+      }
+      //TODO: 这里待完善
+      return const Text('还没做内容的哈');
+      //return RepoContentView(contents.file!);
+    }
+    if (object.entries == null) {
+      return const SizedBox.shrink();
+    }
+
+    // 返回目录结构
+    return Column(
+      children: [
+        _buildTree(object.entries!),
+        const SizedBox(height: 10.0),
+        //if (readmeFile.isNotEmpty)
+        const RepoReadMe(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final repo = context.read<RepoModel>().repo;
-    return APIFutureBuilder(
-      waitingWidget: SizedBox(
-          height: MediaQuery.of(context).size.height / 2,
-          child: const Center(child: ProgressRing())),
-      future: APIWrap.instance.repoContents(repo, path, ref: ref),
-      builder: (_, object) {
-        // 如果数据是文件，则显示内容
-        if (object!.isFile) {
-          if (kDebugMode) {
-            print("file isBinary =${object.blob?.isBinary}");
+    final model = context.read<RepoModel>();
+    final repo = model.repo;
+    return Selector<RepoModel, QLObject?>(
+        selector: (_, model) => model.object,
+        builder: (_, object, __) {
+          if (object == null) {
+            return SizedBox(
+                height: MediaQuery.of(context).size.height / 2,
+                child: const Center(child: ProgressRing()));
           }
-          // blob不为null时
-          if (object.blob != null && object.blob!.text != null) {
-            return Card(
-              child: RepoFileContentView(
-                object.blob!,
-                filename: p.basename(path),
-              ),
-            );
-          }
-          //TODO: 这里待完善
-          return const Text('还没做内容的哈');
-          //return RepoContentView(contents.file!);
-        }
-        if (object.entries == null) {
-          return const SizedBox.shrink();
-        }
-        // 找readme文件，仅限根目录下，其实按情况其它的目录也可以查找下。
-        final readmeFile = path.isEmpty ? _getReadMeFile(context, object) : '';
-        // 返回目录结构
-        return Column(
-          children: [
-            _buildTree(object.entries!),
-            const SizedBox(height: 10.0),
-            if (readmeFile.isNotEmpty)
-              RepoReadMe(repo: repo, ref: ref, filename: readmeFile),
-          ],
-        );
-      },
-    );
+          return _buildContent(context, object, repo);
+        });
   }
 }

@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/defines.dart';
+import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 
 /// 仓库模型
@@ -16,6 +17,7 @@ class RepoModel extends ChangeNotifier {
     if (value != _repo) {
       _repo = value;
       notifyListeners();
+      updateFileObject();
     }
   }
 
@@ -28,6 +30,7 @@ class RepoModel extends ChangeNotifier {
     if (_ref == value) return;
     _ref = value;
     notifyListeners();
+    updateFileObject();
   }
 
   /// 分支列表
@@ -46,6 +49,8 @@ class RepoModel extends ChangeNotifier {
   set path(String value) {
     if (value != _path) {
       _path = value;
+      // 改变路径，此时也需要置空对象
+
       //_segmentedPaths.clear();
       _segmentedPaths = [''];
       if (_path.isEmpty || _path == "/") {
@@ -55,7 +60,78 @@ class RepoModel extends ChangeNotifier {
         _segmentedPaths = "/$_path".split("/");
       }
       notifyListeners();
+      updateFileObject();
     }
+  }
+
+  /// 更新内容对象
+  void updateFileObject() {
+    object = null; // 更新前先置null，通知接收的
+    readmeContent = '';
+    APIWrap.instance.repoContents(repo, path, ref: ref).then((e) {
+      object = e;
+      // 更新readme
+      if (_path.isEmpty && object != null) {
+        // 找readme文件，仅限根目录下，其实按情况其它的目录也可以查找下。
+        final readmeFile = path.isEmpty ? _getReadMeFile(object!) : '';
+        if (readmeFile.isNotEmpty) {
+          APIWrap.instance.repoReadMe(repo, readmeFile, ref: ref).then((data) {
+            readmeContent = data;
+          }).onError((e, s) {
+            readmeContent = '';
+          });
+        }
+      }
+    }).onError((e, _) {
+      QLObject.error(e);
+    });
+  }
+
+  QLTree _matchReadMeFile(QLObject object, RegExp regex) {
+    return object.entries!.lastWhere(
+        (e) => regex.firstMatch(e.name.replaceAll("_", "-")) != null,
+        orElse: () => const QLTree());
+  }
+
+  String _getReadMeFile(QLObject object) {
+    if (object.isFile) return '';
+    // 优先匹配本地化的
+    // var tree = _matchReadMeFile(
+    //     object,
+    //     RegExp(
+    //         r'^README[\.|-|_]?' +
+    //             Localizations.localeOf(context).toLanguageTag() +
+    //             r'[\s\S]*?\.?(?:md|markdown)$',
+    //         caseSensitive: false));
+    // if (tree.name.isNotEmpty) {
+    //   return tree.name;
+    // }
+    // 没有则匹配默认的
+    var tree = _matchReadMeFile(
+        object,
+        RegExp(r'^README[\.|-|_]?[\s\S]*?\.?(?:md|markdown)$',
+            caseSensitive: false));
+    if (tree.name.isNotEmpty) {
+      return tree.name;
+    }
+    // 如果没有，匹配下txt的README文件
+    tree = _matchReadMeFile(
+        object,
+        RegExp(r'^README[\.|-|_]?[\s\S]*?\.?txt$', //|txt
+            caseSensitive: false));
+    if (tree.name.isNotEmpty) {
+      return tree.name;
+    }
+    return '';
+  }
+
+  /// readme
+  String _readmeContent = '';
+  String get readmeContent => _readmeContent;
+  set readmeContent(String value) {
+    if (_readmeContent == value) return;
+    _readmeContent = value;
+    notifyListeners();
   }
 
   /// 如果使用Consumer来监听就不可以使用final了
@@ -63,4 +139,13 @@ class RepoModel extends ChangeNotifier {
 
   /// 已分割的路径
   List<String> get segmentedPaths => _segmentedPaths;
+
+  ///========================object=================================
+  QLObject? _object;
+  QLObject? get object => _object;
+  set object(QLObject? value) {
+    if (_object == value) return;
+    _object = value;
+    notifyListeners();
+  }
 }

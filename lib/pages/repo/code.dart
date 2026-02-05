@@ -47,19 +47,6 @@ class _TopBar1 extends StatelessWidget {
   Widget _buildChild(QLRepository repo) {
     Widget child = Row(
       children: [
-        // Title(
-        //     color: appTheme.color.lightest, child: Text(_repo.name)),
-        // const Spacer(),
-        // Padding(
-        //   padding: const EdgeInsets.symmetric(horizontal: 4),
-        //   child: Button(
-        //     child: const IconText(
-        //       icon: Remix.layout_top_fill,
-        //       text:  Text('Pin/UnPin'),
-        //     ),
-        //     onPressed: () => debugPrint('pressed button'),
-        //   ),
-        // ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Button(
@@ -147,19 +134,13 @@ class _CodePageRight extends StatelessWidget {
 
 /// 代码页面
 class RepoCodePage extends StatelessWidget {
-  const RepoCodePage(this.repo, {super.key});
-
-  final QLRepository repo;
+  const RepoCodePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         const Divider(size: 1),
-        // const Padding(
-        //   padding: EdgeInsets.symmetric(vertical: 8.0),
-        //   child: _TopBar1(),
-        // ),
         const _TopBar2(),
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -172,21 +153,17 @@ class RepoCodePage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    // child: RepoContentsListView(
-                    //   path: context.watch<PathModel>().path,
-                    //   ref: context.watch<RepoBranchModel>().selectedBranch,
-                    //   onPathChange: (value) {
-                    //     context.read<PathModel>().path = value;
-                    //   },
-                    // ),
                     child: Selector<RepoModel, (String?, String)>(
                         selector: (_, model) => (model.ref, model.path),
                         builder: (_, value, __) {
+                          print("=路径改变=$value");
+                          // 内容改变，
                           return RepoContentsListView(
                             path: value.$2,
                             ref: value.$1,
                             onPathChange: (value) {
-                              context.read<RepoModel>().path = value;
+                              final model = context.read<RepoModel>();
+                              model.path = value;
                             },
                           );
                         }),
