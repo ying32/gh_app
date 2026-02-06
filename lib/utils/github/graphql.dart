@@ -1327,16 +1327,57 @@ class QLQuery {
 
 typedef JSONConverter<T> = T Function(Map<String, dynamic>);
 
+/// 异常类型
+///
+/// ```json
+/// {
+///   "message":"Problems parsing JSON",
+///   "documentation_url":"https://docs.github.com/graphql",
+///   "status":"400"
+/// }
+///```
+/// 实际为422错误，但没有哈
+///
+/// ```json
+///{
+/// 	"errors": [
+/// 		{
+/// 			"path": [
+/// 				"query",
+/// 				"DSD"
+/// 			],
+/// 			"extensions": {
+/// 				"code": "undefinedField",
+/// 				"typeName": "Query",
+/// 				"fieldName": "DSD"
+/// 			},
+/// 			"locations": [
+/// 				{
+/// 					"line": 11,
+/// 					"column": 4
+/// 				}
+/// 			],
+/// 			"message": "Field 'DSD' doesn't exist on type 'Query'"
+/// 		}
+/// 	]
+/// }
+/// ```
 class GitHubGraphQLError {
-  const GitHubGraphQLError(this.error);
+  const GitHubGraphQLError(this.message, {required this.statusCode});
 
-  final Map<String, dynamic> error;
+  /// 错误消息
+  final dynamic message;
+
+  /// 状态码
+  final int statusCode;
 
   @override
-  String toString() => jsonEncode(error);
+  String toString() => message == null
+      ? ''
+      : (message is String ? message as String : jsonEncode(message));
 
   bool get isBadCredentials =>
-      error['message'] == 'Bad credentials' || error['status'] == 401;
+      (message is String && message == 'Bad credentials') || statusCode == 401;
 }
 
 /// 代码提取自 github-9.24.0\lib\src\common\github.dart - GitHub类。
@@ -1376,7 +1417,10 @@ class GitHubRateLimit {
       assert(rateLimitReset != null);
       final now = DateTime.now();
       final waitTime = rateLimitReset!.difference(now);
-      await Future.delayed(waitTime);
+      if (kDebugMode) {
+        print('遇到服务器请求频率限制，需要等待${waitTime.inMilliseconds}ms后继续');
+      }
+      return Future.delayed(waitTime);
     }
   }
 }
@@ -1559,23 +1603,24 @@ class GitHubGraphQL {
     // 等待结果
     final resp = await http.Response.fromStream(await _client.send(req));
     _rateLimit.updateRateLimit(resp.headers);
-    // 都没必要判断状态码了，反正他有没有错误在某些情况下都返回200。
-    // if (response.statusCode != 200) {}
+    // 解码json
     final json = jsonDecode(resp.body);
-    // 有错误，这个错误在定义了[statusCode]时会解析
+    // 有错误
     // {"message":"Problems parsing JSON","documentation_url":"https://docs.github.com/graphql","status":"400"}
+    if (json['message'] != null) {
+      throw GitHubGraphQLError(json['message'],
+          statusCode: int.tryParse("${json['status']}") ?? resp.statusCode);
+    }
     // 实际为422错误，但没有哈
     // {"errors":[{"path":["query","DSD"],"extensions":{"code":"undefinedField","typeName":"Query","fieldName":"DSD"},"locations":[{"line":11,"column":4}],"message":"Field 'DSD' doesn't exist on type 'Query'"}]}
-    // 这个错误貌似依然返回200？
-    if (json['errors'] != null ||
-        (resp.statusCode != 200 && json['message'] != null)) {
-      // 按理说应该状态码返回422，但没返回的原因是啥？？？？
-      throw GitHubGraphQLError(json); //懒得处理了，直接整个错误得了
+    // 按理说应该状态码返回422，但实际返回了200状态码，但没返回的原因是啥？？？？
+    if (json['errors'] != null) {
+      throw GitHubGraphQLError(json, statusCode: 422);
     }
     // 不为200的，直接返回状态码和状态码描述
     if (resp.statusCode != 200) {
-      throw GitHubGraphQLError(
-          {"code": resp.statusCode, "message": resp.reasonPhrase});
+      throw GitHubGraphQLError(resp.reasonPhrase ?? 'unknown Error',
+          statusCode: resp.statusCode);
     }
     // 写缓存数据
     if (cachedKey.isNotEmpty && cachedKey.length == 32) {

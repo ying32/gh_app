@@ -50,7 +50,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
   static const _apiURL = 'https://docs.github.com/zh/graphql';
 
   final _controller = TextEditingController();
-  String _bodyText = "";
+  String _resultText = "";
   bool _loading = false;
   final _treeNodes = <TreeViewItem>[];
 
@@ -68,7 +68,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
   void _doTest() {
     setState(() {
       _loading = true;
-      _bodyText = '';
+      _resultText = '';
       _treeNodes.clear();
     });
     if (_controller.text.isEmpty) {
@@ -83,16 +83,25 @@ class _GraphQLTestState extends State<GraphQLTest> {
       if (e is Map) {
         setState(() {
           _treeNodes.addAll(_buildTreeViewItems(e));
-          _bodyText = const JsonEncoder.withIndent('\t').convert(e);
+          _resultText = const JsonEncoder.withIndent('    ').convert(e);
         });
       } else {
         setState(() {
-          _bodyText = "${e.body}";
+          _resultText = "${e.body}";
         });
       }
     }).onError((e, s) {
       setState(() {
-        _bodyText = "$e";
+        if (e is GitHubGraphQLError) {
+          if (e.message is String) {
+            _resultText = "$e";
+          } else {
+            _resultText =
+                const JsonEncoder.withIndent('    ').convert(e.message);
+          }
+        } else {
+          _resultText = "$e";
+        }
       });
     }).whenComplete(() {
       setState(() {
@@ -149,7 +158,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
         style: context.isDark
             ? const PrismColdarkDarkStyle()
             : const PrismColdarkColdStyle());
-    final textSpans = prism.render(_bodyText, 'json');
+    final textSpans = prism.render(_resultText, 'json');
     return Row(
       children: [
         Expanded(
