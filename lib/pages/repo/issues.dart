@@ -65,7 +65,9 @@ class RepoIssuesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return WantKeepAlive(
       onInit: (context) {
-        APIWrap.instance.repoIssues(repo).then((data) {
+        APIWrap.instance.repoIssues(repo, onSecondUpdate: (value) {
+          context.read<RepoModel>().issues = value;
+        }).then((data) {
           context.read<RepoModel>().issues = data;
         });
       },

@@ -1152,7 +1152,7 @@ class QLQuery {
   final String body;
 
   /// [body]中使用的变量
-  final Map<String, String>? variables;
+  final Map<String, dynamic>? variables;
 
   /// 这个我也不知道干啥的（难道是有多个ql语句指定操作哪个的？？？，没研究过）
   final String? operationName;
@@ -1281,13 +1281,16 @@ class GitHubGraphQL {
   /// ```
   Future<T> query<S, T>(
     QLQuery query, {
-    void Function(http.Response response)? fail,
     Map<String, String>? headers,
     JSONConverter<T>? convert,
     bool? force,
+    ValueChanged<Map<String, dynamic>>? secondUpdateCallback,
   }) =>
       _request(query,
-          fail: fail, headers: headers, convert: convert, force: force);
+          headers: headers,
+          convert: convert,
+          force: force,
+          secondUpdateCallback: secondUpdateCallback);
 
   //  "Content-Type: application/json",
   //   "Accept: application/vnd.github.v4.idl"
@@ -1295,14 +1298,12 @@ class GitHubGraphQL {
   /// 修改操作
   Future<T> mutation<S, T>(
     QLQuery query, {
-    void Function(http.Response response)? fail,
     Map<String, String>? headers,
     Map<String, dynamic>? params,
     JSONConverter<T>? convert,
   }) async =>
       // 对于基变，不能缓存数据
-      _request(query,
-          fail: fail, headers: headers, convert: convert, force: true);
+      _request(query, headers: headers, convert: convert, force: true);
 
   /// 忽略path字段，强制为[endpoint]，本可不这样做的，但是他内部的[request]方法在判断[path]时
   /// 附加了一个”/“符号，造成服务端识为这是一个rest API。
@@ -1311,9 +1312,9 @@ class GitHubGraphQL {
   Future<T> _request<T>(
     QLQuery query, {
     Map<String, String>? headers,
-    void Function(http.Response response)? fail,
     JSONConverter<T>? convert,
     bool? force,
+    ValueChanged<Map<String, dynamic>>? secondUpdateCallback,
   }) async {
     final queryBody = query.jsonText;
 
@@ -1325,7 +1326,9 @@ class GitHubGraphQL {
     // 是否需要强制更新
     if (!(force ?? false)) {
       key = _cache.genKey("POST:$graphqlApiUrl:$queryBody");
-      // 已经缓存了，直接返回缓存
+      // 不管缓存过不过期都读取，后面再根据缓存是否过期去操作
+      //TODO: 这里暂时修改下逻辑吧，启动时不从文件缓存加载，必须要更新
+      //data = !_cache.isCached(key) ? null : await _cache.readCachedFile(key);
       data = await _cache.readCachedFile(key);
       // 是否需要更新缓存
       needUpdate = data == null; // 数据为null则没有本地缓存
@@ -1337,6 +1340,7 @@ class GitHubGraphQL {
         }
       }
     }
+
     // 是否需要更新
     if (needUpdate) {
       //print("需要更新");
@@ -1345,7 +1349,12 @@ class GitHubGraphQL {
             await _doRequest(cachedKey: key, body: queryBody, headers: headers);
       } else {
         //TODO: 这里还要弄下，完成后通知更新
-        _doRequest(cachedKey: key, body: queryBody, headers: headers);
+        _doRequest(cachedKey: key, body: queryBody, headers: headers)
+            .then((data) {
+          if (secondUpdateCallback != null && data['data'] != null) {
+            secondUpdateCallback.call(data['data']);
+          }
+        });
       }
     } else {
       //print("正在使用缓存");

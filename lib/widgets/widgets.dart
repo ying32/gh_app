@@ -420,10 +420,24 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
   final List<T> _list = [];
 
   @override
+  void didUpdateWidget(covariant ListViewRefresher<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initData != widget.initData) {
+      _resetData();
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
+    _resetData();
+  }
+
+  void _resetData() {
     _pageInfo = widget.initData.pageInfo;
+    _list.clear();
     _list.addAll(widget.initData.data);
+    _refreshController.resetNoData();
   }
 
   @override

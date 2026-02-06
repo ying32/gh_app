@@ -59,7 +59,9 @@ class RepoPullRequestPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return WantKeepAlive(
         onInit: (context) {
-          APIWrap.instance.repoPullRequests(repo).then((data) {
+          APIWrap.instance.repoPullRequests(repo, onSecondUpdate: (value) {
+            context.read<RepoModel>().pullRequests = value;
+          }).then((data) {
             context.read<RepoModel>().pullRequests = data;
           });
         },

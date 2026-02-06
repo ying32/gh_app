@@ -23,9 +23,10 @@ class ReposPage extends StatelessWidget {
       create: (_) => RepoListModel(owner: owner, isStarred: isStarred),
       child: WantKeepAlive(
           onInit: (context) {
-            APIWrap.instance
-                .userRepos(owner, isStarred: isStarred)
-                .then((data) {
+            APIWrap.instance.userRepos(owner, isStarred: isStarred,
+                onSecondUpdate: (value) {
+              context.read<RepoListModel>().repos = value;
+            }).then((data) {
               context.read<RepoListModel>().repos = data;
             });
           },

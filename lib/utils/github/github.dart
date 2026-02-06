@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/utils.dart';
@@ -124,25 +125,39 @@ class APIWrap {
 
   /// 获取仓库列表信息
   /// TODO: 这里还要传个东西，判断是否为组织的
-  Future<QLList<QLRepository>> userRepos(String owner,
-      {bool isStarred = false,
-      int? count,
-      String? nextCursor,
-      bool? force}) async {
+  Future<QLList<QLRepository>> userRepos(
+    String owner, {
+    bool isStarred = false,
+    int? count,
+    String? nextCursor,
+    bool? force,
+    ValueChanged<QLList<QLRepository>>? onSecondUpdate,
+  }) async {
     //print("===============================userRepos");
+
+    // 内部解析
+    QLList<QLRepository> parse(Map<String, dynamic>? json) {
+      if (json == null) return const QLList.empty();
+      return QLList.fromJson(
+          (json['viewer'] ?? json['user'] ?? json['organization'])?[
+              isStarred ? 'starredRepositories' : 'repositories'],
+          QLRepository.fromJson,
+          pageSize: count ?? defaultPageSize);
+    }
+
+    // 请求
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryRepos(
             owner: owner,
             isStarred: isStarred,
             count: count,
             nextCursor: nextCursor)),
-        force: force);
-    if (res == null) return const QLList.empty();
-    return QLList.fromJson(
-        (res['viewer'] ?? res['user'] ?? res['organization'])?[
-            isStarred ? 'starredRepositories' : 'repositories'],
-        QLRepository.fromJson,
-        pageSize: count ?? defaultPageSize);
+        force: force,
+        secondUpdateCallback: onSecondUpdate == null
+            ? null
+            : (json) => onSecondUpdate.call(parse(json)));
+
+    return parse(res);
   }
 
   /// 用户信息
@@ -159,14 +174,25 @@ class APIWrap {
     int? count,
     String? nextCursor,
     bool? force,
+    ValueChanged<QLList<QLRelease>>? onSecondUpdate,
   }) async {
+    // 解析
+    QLList<QLRelease> parse(Map<String, dynamic>? json) {
+      if (json == null) return const QLList.empty();
+      return QLList.fromJson(
+          json['repository']?['releases'], QLRelease.fromJson,
+          pageSize: count ?? defaultPageSize);
+    }
+
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryRepoReleases(repo.owner!.login, repo.name,
             count: count, nextCursor: nextCursor)),
-        force: force);
-    if (res == null) return const QLList.empty();
-    return QLList.fromJson(res['repository']?['releases'], QLRelease.fromJson,
-        pageSize: count ?? defaultPageSize);
+        force: force,
+        secondUpdateCallback: onSecondUpdate == null
+            ? null
+            : (json) => onSecondUpdate.call(parse(json)));
+
+    return parse(res);
   }
 
   /// 指定release的Assets文件列表
@@ -176,31 +202,45 @@ class APIWrap {
     int? count,
     String? nextCursor,
     bool? force,
+    ValueChanged<QLList<QLReleaseAsset>>? onSecondUpdate,
   }) async {
+    QLList<QLReleaseAsset> parse(Map<String, dynamic>? json) {
+      if (json == null) return const QLList.empty();
+      final obj = json['repository']?['release']?['releaseAssets'];
+      if (obj == null) return const QLList.empty();
+      return QLList.fromJson(obj, QLReleaseAsset.fromJson,
+          pageSize: count ?? defaultPageSize);
+    }
+
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryRepoReleaseAssets(repo.owner!.login, repo.name,
             tagName: release.tagName, count: count, nextCursor: nextCursor)),
-        force: force);
-    if (res == null) return const QLList.empty();
-    final obj = res['repository']?['release']?['releaseAssets'];
-    if (obj == null) return const QLList.empty();
-    return QLList.fromJson(obj, QLReleaseAsset.fromJson,
-        pageSize: count ?? defaultPageSize);
+        force: force,
+        secondUpdateCallback: onSecondUpdate == null
+            ? null
+            : (json) => onSecondUpdate.call(parse(json)));
+
+    return parse(res);
   }
 
-  /// 搜索
+  /// 搜索，不使用缓存功能
   Future<QLList<QLRepository>> searchRepo(
     String query, {
     int? count,
     String? nextCursor,
-    bool? force,
   }) async {
+    QLList<QLRepository> parse(Map<String, dynamic>? json) {
+      if (json == null) return const QLList.empty();
+      return QLList.fromJson(json['search'], QLRepository.fromJson,
+          totalCountAlias: 'repositoryCount',
+          pageSize: count ?? defaultPageSize);
+    }
+
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.search(query, count: count, nextCursor: nextCursor)),
-        force: force);
-    if (res == null) return const QLList.empty();
-    return QLList.fromJson(res['search'], QLRepository.fromJson,
-        totalCountAlias: 'repositoryCount', pageSize: count ?? defaultPageSize);
+        force: true);
+
+    return parse(res);
   }
 
   /// 分支列表
@@ -223,24 +263,48 @@ class APIWrap {
   }
 
   /// 目录内容缓存
-  Future<QLObject?> repoContents(QLRepository repo, String path,
-      {String? ref, bool? force}) async {
+  Future<QLObject?> repoContents(
+    QLRepository repo,
+    String path, {
+    String? ref,
+    bool? force,
+    ValueChanged<QLObject?>? onSecondUpdate,
+  }) async {
+    QLObject? parse(Map<String, dynamic>? json) {
+      if (json == null) return null;
+      final object = json['repository']?['object'];
+      if (object == null) return null;
+      return QLObject.fromJson(object);
+    }
+
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryObject(repo.owner!.login, repo.name,
             path: path, ref: ref)),
-        force: force);
-    if (res == null) return null;
-    final object = res['repository']?['object'];
-    if (object == null) return null;
-    return QLObject.fromJson(object);
+        force: force,
+        secondUpdateCallback: onSecondUpdate == null
+            ? null
+            : (json) => onSecondUpdate.call(parse(json)));
+
+    return parse(res);
   }
 
   /// README文件内容
-  Future<String> repoReadMe(QLRepository repo, String filename,
-      {String? ref, bool? force}) async {
-    final res = await repoContents(repo, filename, ref: ref, force: force);
-    if (res == null || res.blob == null || res.blob!.isBinary) return '';
-    return res.blob?.text ?? '';
+  Future<String> repoReadMe(
+    QLRepository repo,
+    String filename, {
+    String? ref,
+    bool? force,
+    ValueChanged<String>? onSecondUpdate,
+  }) async {
+    String parse(QLObject? res) {
+      if (res == null || res.blob == null || res.blob!.isBinary) return '';
+      return res.blob?.text ?? '';
+    }
+
+    final res = await repoContents(repo, filename,
+        ref: ref, force: force, onSecondUpdate: (object) => parse(object));
+
+    return parse(res);
   }
 
   Future<QLList<QLUser>> _userFollower({
@@ -258,8 +322,9 @@ class APIWrap {
             nextCursor: nextCursor)),
         force: force);
     if (res == null) return const QLList.empty();
-    final input =
-        (res['viewer'] ?? res['user'] ?? res['organization'])?['followers'];
+    final input = (res['viewer'] ??
+        res['user'] ??
+        res['organization'])?[isFollowers ? 'followers' : 'following'];
     if (input == null) return const QLList.empty();
     return QLList.fromJson(input, QLUser.fromJson,
         pageSize: count ?? defaultPageSize);
@@ -287,7 +352,17 @@ class APIWrap {
     String? nextCursor,
     required JSONConverter<T> convert,
     bool? force,
+    ValueChanged<QLList<T>>? onSecondUpdate,
   }) async {
+    // 内部解析
+    QLList<T> parse(Map<String, dynamic>? json) {
+      if (json == null) return const QLList.empty();
+      final input = json['repository']?[isIssues ? 'issues' : 'pullRequests'];
+      if (input == null) return const QLList.empty();
+      return QLList<T>.fromJson(input, convert,
+          pageSize: count ?? defaultPageSize);
+    }
+
     //open, closed, all
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryRepoIssuesOrPullRequests(
@@ -300,18 +375,23 @@ class APIWrap {
             isIssues: isIssues,
             count: count,
             nextCursor: nextCursor)),
-        force: force);
+        force: force,
+        secondUpdateCallback: onSecondUpdate == null
+            ? null
+            : (json) => onSecondUpdate.call(parse(json)));
 
-    if (res == null) return const QLList.empty();
-    final input = res['repository']?[isIssues ? 'issues' : 'pullRequests'];
-    if (input == null) return const QLList.empty();
-    return QLList<T>.fromJson(input, convert,
-        pageSize: count ?? defaultPageSize);
+    return parse(res);
   }
 
   /// 仓库issues
-  Future<QLList<QLIssue>> repoIssues(QLRepository repo,
-          {bool isOpen = true, int? count, String? nextCursor, bool? force}) =>
+  Future<QLList<QLIssue>> repoIssues(
+    QLRepository repo, {
+    bool isOpen = true,
+    int? count,
+    String? nextCursor,
+    bool? force,
+    ValueChanged<QLList<QLIssue>>? onSecondUpdate,
+  }) =>
       _repoIssuesOrPullRequests(repo,
           isOpen: isOpen,
           isIssues: true,
@@ -319,15 +399,19 @@ class APIWrap {
           count: count,
           nextCursor: nextCursor,
           convert: QLIssue.fromJson,
-          force: force);
+          force: force,
+          onSecondUpdate: onSecondUpdate);
 
   /// 仓库pullRequests
-  Future<QLList<QLPullRequest>> repoPullRequests(QLRepository repo,
-          {bool isOpen = true,
-          bool isMerged = false,
-          int? count,
-          String? nextCursor,
-          bool? force}) =>
+  Future<QLList<QLPullRequest>> repoPullRequests(
+    QLRepository repo, {
+    bool isOpen = true,
+    bool isMerged = false,
+    int? count,
+    String? nextCursor,
+    bool? force,
+    ValueChanged<QLList<QLPullRequest>>? onSecondUpdate,
+  }) =>
       _repoIssuesOrPullRequests(repo,
           isOpen: isOpen,
           isIssues: false,
@@ -335,34 +419,49 @@ class APIWrap {
           count: count,
           nextCursor: nextCursor,
           convert: QLPullRequest.fromJson,
-          force: force);
+          force: force,
+          onSecondUpdate: onSecondUpdate);
 
   /// 查询issue或者pull的评论
-  Future<QLList<QLComment>> repoIssueOrPullRequestComments<T>(QLRepository repo,
-      {required int number,
-      bool isIssues = true,
-      int? count,
-      String? nextCursor,
-      bool? force}) async {
+  Future<QLList<QLComment>> repoIssueOrPullRequestComments<T>(
+    QLRepository repo, {
+    required int number,
+    bool isIssues = true,
+    int? count,
+    String? nextCursor,
+    bool? force,
+    ValueChanged<QLList<QLComment>>? onSecondUpdate,
+  }) async {
+    QLList<QLComment> parse(Map<String, dynamic>? json) {
+      if (json == null) return const QLList.empty();
+      final input =
+          json['repository']?[isIssues ? 'issue' : 'pullRequest']?['comments'];
+      if (input == null) return const QLList.empty();
+      return QLList.fromJson(input, QLComment.fromJson,
+          pageSize: count ?? defaultPageSize);
+    }
+
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryIssueComments(
             repo.owner!.login, repo.name, number,
             count: count, nextCursor: nextCursor, isIssues: isIssues)),
-        force: force);
-    if (res == null) return const QLList.empty();
-    final input =
-        res['repository']?[isIssues ? 'issue' : 'pullRequest']?['comments'];
-    if (input == null) return const QLList.empty();
-    return QLList.fromJson(input, QLComment.fromJson,
-        pageSize: count ?? defaultPageSize);
+        force: force,
+        secondUpdateCallback: onSecondUpdate == null
+            ? null
+            : (json) => onSecondUpdate.call(parse(json)));
+
+    return parse(res);
   }
 
   /// 查询指定issue或者pull Request
-  Future<T?> _repoIssueOrPullRequest<T>(QLRepository repo,
-      {required int number,
-      bool isIssues = true,
-      required JSONConverter<T> convert,
-      bool? force}) async {
+  Future<T?> _repoIssueOrPullRequest<T>(
+    QLRepository repo, {
+    required int number,
+    bool isIssues = true,
+    required JSONConverter<T> convert,
+    bool? force,
+    // ValueChanged<QLList<QLComment>>? onSecondUpdate,
+  }) async {
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryIssueOrPullRequest(
             repo.owner!.login, repo.name, number,
