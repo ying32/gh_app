@@ -9,6 +9,7 @@ class DefaultIcons {
   static const pullRequest = Remix.git_pull_request_line;
   static const repository = Remix.git_repository_line;
   static const star = Remix.star_line;
+  static const starFill = Remix.star_fill;
   static const search = Remix.search_line;
   static const settings = Remix.settings_line;
   static const tags = Remix.price_tag_3_line;
@@ -23,6 +24,7 @@ class DefaultIcons {
   static const branch = Remix.git_branch_line;
   static const check = Remix.check_line;
   static const watch = Remix.eye_line;
+  static const watchFill = Remix.eye_fill;
   static const fork = Remix.git_fork_line;
   static const comment = Remix.chat_2_line;
   static const links = Remix.links_line;
@@ -69,68 +71,100 @@ class DefaultIcon extends StatelessWidget {
 
   const DefaultIcon.github({super.key, this.size, this.color})
       : icon = DefaultIcons.github;
+
   const DefaultIcon.home({super.key, this.size, this.color})
       : icon = DefaultIcons.home;
+
   const DefaultIcon.issues({super.key, this.size, this.color})
       : icon = DefaultIcons.issues;
+
   const DefaultIcon.pullRequest({super.key, this.size, this.color})
       : icon = DefaultIcons.pullRequest;
+
   const DefaultIcon.repository({super.key, this.size, this.color})
       : icon = DefaultIcons.repository;
+
   const DefaultIcon.star({super.key, this.size, this.color})
       : icon = DefaultIcons.star;
+
   const DefaultIcon.search({super.key, this.size, this.color})
       : icon = DefaultIcons.search;
+
   const DefaultIcon.settings({super.key, this.size, this.color})
       : icon = DefaultIcons.settings;
+
   const DefaultIcon.tag({super.key, this.size, this.color})
       : icon = DefaultIcons.tags;
+
   const DefaultIcon.releases({super.key, this.size, this.color})
       : icon = DefaultIcons.releases;
+
   const DefaultIcon.commit({super.key, this.size, this.color})
       : icon = DefaultIcons.commit;
+
   const DefaultIcon.verifiedBadge({super.key, this.size, this.color})
       : icon = DefaultIcons.verifiedBadge;
+
   const DefaultIcon.code({super.key, this.size, this.color})
       : icon = DefaultIcons.code;
+
   const DefaultIcon.action({super.key, this.size, this.color})
       : icon = DefaultIcons.action;
+
   const DefaultIcon.wiki({super.key, this.size, this.color})
       : icon = DefaultIcons.wiki;
+
   const DefaultIcon.repositoryPrivate({super.key, this.size, this.color})
       : icon = DefaultIcons.repositoryPrivate;
+
   const DefaultIcon.user({super.key, this.size, this.color})
       : icon = DefaultIcons.user;
+
   const DefaultIcon.branch({super.key, this.size, this.color})
       : icon = DefaultIcons.branch;
+
   const DefaultIcon.check({super.key, this.size, this.color})
       : icon = DefaultIcons.check;
+
   const DefaultIcon.watch({super.key, this.size, this.color})
       : icon = DefaultIcons.watch;
+
   const DefaultIcon.fork({super.key, this.size, this.color})
       : icon = DefaultIcons.fork;
+
   const DefaultIcon.comment({super.key, this.size, this.color})
       : icon = DefaultIcons.comment;
+
   const DefaultIcon.links({super.key, this.size, this.color})
       : icon = DefaultIcons.links;
+
   const DefaultIcon.readme({super.key, this.size, this.color})
       : icon = DefaultIcons.readme;
+
   const DefaultIcon.license({super.key, this.size, this.color})
       : icon = DefaultIcons.license;
+
   const DefaultIcon.folder({super.key, this.size, this.color})
       : icon = DefaultIcons.folder;
+
   const DefaultIcon.drive({super.key, this.size, this.color})
       : icon = DefaultIcons.drive;
+
   const DefaultIcon.group({super.key, this.size, this.color})
       : icon = DefaultIcons.group;
+
   const DefaultIcon.organization({super.key, this.size, this.color})
       : icon = DefaultIcons.organization;
+
   const DefaultIcon.twitter({super.key, this.size, this.color})
       : icon = DefaultIcons.twitter;
+
   const DefaultIcon.location({super.key, this.size, this.color})
       : icon = DefaultIcons.location;
+
   const DefaultIcon.mail({super.key, this.size, this.color})
       : icon = DefaultIcons.mail;
+
   const DefaultIcon.linkSource({super.key, this.size, this.color})
       : icon = DefaultIcons.linkSource;
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as mat;
+import 'package:gh_app/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
 import 'http_cache.dart';
@@ -54,11 +55,17 @@ class QLList<T> {
 
   /// 内部数据
   List<T> get data => _data;
+
   T operator [](index) => _data[index];
+
   operator []=(index, T value) => data[index] = value;
+
   bool get isEmpty => _data.isEmpty;
+
   bool get isNotEmpty => _data.isNotEmpty;
+
   int get length => _data.length;
+
   //void clear() => _data.clear();
 
   QLList.fromJson(
@@ -280,11 +287,11 @@ class QLRelease {
         publishedAt = _parseDateTime(input['updatedAt']),
         createdAt = _parseDateTime(input['createdAt']),
         assetsCount = input['releaseAssets']?['totalCount'] ?? 0;
-  // assets = input['releaseAssets']?['nodes'] == null
-  //     ? null
-  //     : List.from(input['releaseAssets']?['nodes'])
-  //         .map((e) => QLReleaseAsset.fromJson(e))
-  //         .toList();
+// assets = input['releaseAssets']?['nodes'] == null
+//     ? null
+//     : List.from(input['releaseAssets']?['nodes'])
+//         .map((e) => QLReleaseAsset.fromJson(e))
+//         .toList();
 }
 
 /// 分支
@@ -305,6 +312,37 @@ class QLRef {
   QLRef.fromJson(Map<String, dynamic> json)
       : name = json['name'] ?? 'HEAD',
         prefix = json['prefix'] ?? 'refs/heads/';
+}
+
+/// https://docs.github.com/zh/graphql/reference/enums#repositorypermission
+///// ignore: constant_identifier_names
+enum QLRepositoryPermission {
+  /// Can read, clone, and push to this repository. Can also manage issues, pull requests, and repository settings, including adding collaborators.
+  admin,
+
+  /// Can read, clone, and push to this repository. They can also manage issues, pull requests, and some repository settings.
+  maintain,
+
+  /// Can read and clone this repository. Can also open and comment on issues and pull requests.
+  read,
+
+  /// Can read and clone this repository. Can also manage issues and pull requests.
+  triage,
+
+  /// Can read, clone, and push to this repository. Can also manage issues and pull requests.
+  write,
+}
+
+/// https://docs.github.com/zh/graphql/reference/enums#subscriptionstate
+enum QLSubscriptionState {
+  /// The User is never notified.
+  ignored,
+
+  /// The User is notified of all conversations.
+  subscribed,
+
+  /// The User is only notified when participating or @mentioned.
+  unsubscribed,
 }
 
 /// 仓库信息
@@ -347,6 +385,8 @@ class QLRepository {
     this.isMirror = false,
     this.viewerCanSubscribe = false,
     this.viewerHasStarred = false,
+    this.permission,
+    this.viewerSubscription,
     this.releasesCount = 0,
     this.latestRelease,
     this.refsCount = 0,
@@ -462,6 +502,12 @@ class QLRepository {
   /// 当前用户能点赞，应该要登录吧
   final bool viewerHasStarred;
 
+  /// 当前查看者权限
+  final QLRepositoryPermission? permission;
+
+  /// 当前查看者定阅状态
+  final QLSubscriptionState? viewerSubscription;
+
   /// Release总数量
   final int releasesCount;
 
@@ -476,6 +522,10 @@ class QLRepository {
 
   /// 仓库全名：${owner.login}/$name
   String get fullName => "${owner?.login}/$name";
+
+  /// 当前查看用户是否已订阅，也就是watch
+  bool get viewerHasSubscribed =>
+      viewerSubscription == QLSubscriptionState.subscribed;
 
   factory QLRepository.fromJson(Map<String, dynamic> input) {
     input = input['repository'] ?? input;
@@ -505,6 +555,18 @@ class QLRepository {
       isTemplate: input['isTemplate'] ?? false,
       viewerCanSubscribe: input['viewerCanSubscribe'] ?? false,
       viewerHasStarred: input['viewerHasStarred'] ?? false,
+      permission: input['viewerPermission'] == null
+          ? null
+          : enumFromStringValue(
+              QLRepositoryPermission.values,
+              (input['viewerPermission'] as String).toLowerCase(),
+              QLRepositoryPermission.read),
+      viewerSubscription: input['viewerSubscription'] == null
+          ? null
+          : enumFromStringValue(
+              QLSubscriptionState.values,
+              (input['viewerSubscription'] as String).toLowerCase(),
+              QLSubscriptionState.ignored),
       openPullRequestsCount: input['pullRequests']?['totalCount'] ?? 0,
       watchersCount: input['watchers']?['totalCount'] ?? 0,
       mirrorUrl: input['mirrorUrl'] ?? '',
@@ -576,6 +638,7 @@ class QLOrganization extends QLUserBase {
 /// https://docs.github.com/zh/graphql/reference/objects#userstatus
 class QLUserStatus {
   const QLUserStatus({this.emoji = '', this.emojiHTML = '', this.message = ''});
+
   final String emoji;
   final String emojiHTML;
   final String message;
@@ -681,6 +744,7 @@ class QLLabel {
     this.description = '',
     this.isDefault = false,
   });
+
   final String name;
   final String color;
   final String description;
@@ -772,6 +836,7 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
 
   /// 是否已锁定
   final bool locked;
+
   // final milestone;
   /// 状态 取值 `OPEN` 和 `CLOSED`，如果QLPullRequest时可多取值`MERGED`
   final String? state;
@@ -826,6 +891,7 @@ class QLIssueType {
   final QLIssueTypeColor color;
   final String description;
   final bool isEnabled;
+
   //isPrivate is deprecated.
   // final bool isPrivate;
   final String name;
@@ -1184,6 +1250,7 @@ typedef JSONConverter<T> = T Function(Map<String, dynamic>);
 
 class GitHubGraphQLError {
   const GitHubGraphQLError(this.error);
+
   final Map<String, dynamic> error;
 
   @override
@@ -1206,7 +1273,9 @@ class GitHubRateLimit {
   static const _ratelimitRemainingHeader = 'x-ratelimit-remaining';
 
   int? get rateLimitLimit => _rateLimitLimit;
+
   int? get rateLimitRemaining => _rateLimitRemaining;
+
   DateTime? get rateLimitReset => _rateLimitReset == null
       ? null
       : DateTime.fromMillisecondsSinceEpoch(_rateLimitReset! * 1000,
@@ -1243,12 +1312,16 @@ enum AuthType {
 /// 认证方式
 class Authorization {
   const Authorization({required this.type, this.token});
+
   final AuthType type;
   final String? token;
+
   const Authorization.anonymous()
       : type = AuthType.anonymous,
         token = null;
+
   const Authorization.withOAuth2Token(this.token) : type = AuthType.oauth2;
+
   const Authorization.withBearerToken(this.token) : type = AuthType.accessToken;
 }
 

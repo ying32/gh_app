@@ -31,16 +31,29 @@ class RepoReleases extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           // Text('${}'),
-          IconText(
-            icon: DefaultIcons.releases,
-            iconColor: Colors.green,
-            text: Text(
-              lastRelease.name,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            trailing: TagLabel.other(
-              "Latest",
-              color: Colors.green,
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () {
+                // 这里先不管哈
+                ReleasesPage.createNewTab(context, repo);
+              },
+              child: IconText(
+                icon: DefaultIcons.releases,
+                iconColor: Colors.green,
+                expanded: true,
+                text: Text(
+                  lastRelease.name,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      overflow: TextOverflow.ellipsis),
+                ),
+                trailing: TagLabel.other(
+                  "Latest",
+                  color: Colors.green,
+                ),
+              ),
             ),
           ),
           Padding(

@@ -79,7 +79,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
           context: context, severity: InfoBarSeverity.error);
       return;
     }
-    gitHubAPI.query(QLQuery(_controller.text)).then((e) {
+    gitHubAPI.query(QLQuery(_controller.text), force: true).then((e) {
       if (e is Map) {
         setState(() {
           _treeNodes.addAll(_buildTreeViewItems(e));
@@ -261,8 +261,8 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             text: const Text('仓库分支信息(refs, tags)'),
                             onPressed: () {
                               // 他这分支n多，方便测试哈
-                              _controller
-                                      .text = //https://github.com/zed-industries/zed
+                              _controller.text =
+                                  //https://github.com/zed-industries/zed
                                   QLQueries.queryRepoRefs(
                                       'zed-industries', 'zed');
                             }),

@@ -12,12 +12,15 @@ class RepoModel extends ChangeNotifier {
 
   ///===========================当前仓库信息=============================
   QLRepository _repo;
+
   QLRepository get repo => _repo;
+
   set repo(QLRepository value) {
     if (value != _repo) {
       _repo = value;
       notifyListeners();
       updateFileObject();
+      _ref = _repo.defaultBranchRef.name;
     }
   }
 
@@ -25,7 +28,9 @@ class RepoModel extends ChangeNotifier {
 
   ///===========================分支=============================
   String? _ref;
+
   String? get ref => _ref;
+
   set ref(String? value) {
     if (_ref == value) return;
     _ref = value;
@@ -35,7 +40,9 @@ class RepoModel extends ChangeNotifier {
 
   /// 分支列表
   QLList<QLRef> _refs = const QLList.empty();
+
   QLList<QLRef> get refs => _refs;
+
   set refs(QLList<QLRef> value) {
     if (value == _refs) return;
     _refs = value;
@@ -45,7 +52,9 @@ class RepoModel extends ChangeNotifier {
   ///===========================仓库文件路径=============================
   /// 当前仓库信息
   String _path = '';
+
   String get path => _path;
+
   set path(String value) {
     if (value != _path) {
       _path = value;
@@ -127,7 +136,9 @@ class RepoModel extends ChangeNotifier {
 
   /// readme
   String _readmeContent = '';
+
   String get readmeContent => _readmeContent;
+
   set readmeContent(String value) {
     if (_readmeContent == value) return;
     _readmeContent = value;
@@ -142,7 +153,9 @@ class RepoModel extends ChangeNotifier {
 
   ///========================object=================================
   QLObject? _object;
+
   QLObject? get object => _object;
+
   set object(QLObject? value) {
     if (_object == value) return;
     _object = value;
@@ -151,7 +164,9 @@ class RepoModel extends ChangeNotifier {
 
   /// issues
   QLList<QLIssue>? _issues;
+
   QLList<QLIssue>? get issues => _issues;
+
   set issues(QLList<QLIssue>? value) {
     if (_issues == value) return;
     _issues = value;
@@ -160,7 +175,9 @@ class RepoModel extends ChangeNotifier {
 
   /// pullRequests
   QLList<QLPullRequest>? _pullRequests;
+
   QLList<QLPullRequest>? get pullRequests => _pullRequests;
+
   set pullRequests(QLList<QLPullRequest>? value) {
     if (_pullRequests == value) return;
     _pullRequests = value;
@@ -169,7 +186,9 @@ class RepoModel extends ChangeNotifier {
 
   /// releases
   QLList<QLRelease>? _releases;
+
   QLList<QLRelease>? get releases => _releases;
+
   set releases(QLList<QLRelease>? value) {
     if (_releases == value) return;
     _releases = value;
@@ -194,7 +213,9 @@ class RepoListModel extends ChangeNotifier {
   final String owner;
   final bool isStarred;
   QLList<QLRepository>? _repos;
+
   QLList<QLRepository>? get repos => _repos;
+
   set repos(QLList<QLRepository>? value) {
     if (_repos == value) return;
     _repos = value;

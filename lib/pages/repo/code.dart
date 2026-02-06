@@ -50,17 +50,25 @@ class _TopBar1 extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Button(
-            onPressed: _onWatch,
+            onPressed: repo.viewerCanSubscribe ? _onWatch : null,
             child: IconText(
-              icon: DefaultIcons.watch,
-              text: Text('${repo.watchersCount.toKiloString()} 关注'),
+              icon: repo.viewerHasSubscribed
+                  ? DefaultIcons.watchFill
+                  : DefaultIcons.watch,
+              iconColor: repo.viewerHasSubscribed ? Colors.green : null,
+              text: Text(
+                  '${repo.watchersCount.toKiloString()} ${repo.viewerHasSubscribed ? '取消' : ''}关注'),
             ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Button(
-            onPressed: repo.forkingAllowed == true ? _onFork : null,
+            // 这样对么？感觉不太对的啊
+            onPressed: repo.forkingAllowed == true &&
+                    repo.permission != QLRepositoryPermission.admin
+                ? _onFork
+                : null,
             child: IconText(
               icon: DefaultIcons.fork,
               text: Text('${repo.forksCount.toKiloString()} 分叉'),
@@ -72,8 +80,12 @@ class _TopBar1 extends StatelessWidget {
           child: Button(
             onPressed: _onStar,
             child: IconText(
-              icon: DefaultIcons.star,
-              text: Text('${repo.stargazersCount.toKiloString()} 点赞'),
+              icon: repo.viewerHasStarred
+                  ? DefaultIcons.starFill
+                  : DefaultIcons.star,
+              iconColor: repo.viewerHasStarred ? Colors.yellow : null,
+              text: Text(
+                  '${repo.stargazersCount.toKiloString()} ${repo.viewerHasStarred ? '取消' : ''}点赞'),
             ),
           ),
         ),

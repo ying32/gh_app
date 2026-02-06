@@ -73,6 +73,9 @@ class _AssetsPanelState extends State<_AssetsPanel> {
   /// 简单的替换url
   String _replaceURL(String url) {
     var newUrl = AppConfig.instance.releaseFileAssetsMirrorUrl;
+    if (newUrl.isEmpty) {
+      return url;
+    }
     if (!newUrl.endsWith("/")) {
       newUrl = "$newUrl/";
     }
@@ -150,6 +153,7 @@ class _RepoReleaseItem extends StatelessWidget {
                 ? IconText(
                     iconSize: 18,
                     icon: icon,
+                    expanded: true,
                     text: Text(text ?? '', overflow: TextOverflow.ellipsis),
                     trailing: trailing)
                 : Text(text ?? '', overflow: TextOverflow.ellipsis)

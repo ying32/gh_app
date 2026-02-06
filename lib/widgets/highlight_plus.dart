@@ -9,14 +9,14 @@ import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:path/path.dart' as path_lib;
 
 class HighlightViewPlus extends StatefulWidget {
-  const HighlightViewPlus(
+  HighlightViewPlus(
     String input, {
     super.key,
     required this.fileName,
     this.language,
     this.byteSize = 0,
     int tabSize = 8, // TODO: https://github.com/flutter/flutter/issues/50087
-  }) : source = input; //input.replaceAll('\t', ' ' * tabSize);
+  }) : source = input.replaceAll('\t', ' ' * tabSize);
 
   final String source;
   final String fileName;
@@ -141,6 +141,7 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
 
   List<TextSpan> _spans = [];
   String _lang = '';
+
   void _buildSpan() async {
     _lang = _getLang;
     if (_lang.isEmpty) return;

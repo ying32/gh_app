@@ -267,6 +267,8 @@ class QLQueries {
       pushedAt
       viewerCanSubscribe 
       viewerHasStarred 
+      viewerPermission
+      viewerSubscription
       mirrorUrl
       languages(first: 10) {
         nodes {

@@ -1,11 +1,17 @@
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/pages/issue_details.dart';
+import 'package:gh_app/pages/pull_request_details.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
+import 'default_icons.dart';
 import 'markdown_plus.dart';
 
 /// issues的标签
@@ -124,6 +130,7 @@ class IssueCommentItem extends StatelessWidget {
   }
 }
 
+/// issues的评论显示
 class IssuesCommentsView extends StatelessWidget {
   const IssuesCommentsView(
     this.data, {
@@ -154,8 +161,9 @@ class IssuesCommentsView extends StatelessWidget {
   }
 }
 
-class IssueType extends StatelessWidget {
-  const IssueType(this.issueType, {super.key, this.fontSize});
+/// issue类型标签，这个只取了默认的，他貌似还有个list类型的
+class IssueTypeLabel extends StatelessWidget {
+  const IssueTypeLabel(this.issueType, {super.key, this.fontSize});
 
   final QLIssueType issueType;
   final double? fontSize;
@@ -172,5 +180,67 @@ class IssueType extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ));
+  }
+}
+
+/// issue和pull request列表的显示项目
+class IssueOrPullRequestListItem extends StatelessWidget {
+  const IssueOrPullRequestListItem(this.item, {super.key});
+
+  final QLIssueOrPullRequest item;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: item is QLIssue
+          ? DefaultIcon.issues(color: item.isOpen ? Colors.green : Colors.red)
+          : DefaultIcon.pullRequest(
+              color: item.isOpen ? Colors.green : Colors.red),
+      title: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5.0),
+        child: Wrap(
+          runSpacing: 6.0,
+          children: [
+            Text(item.title,
+                style: const TextStyle(fontWeight: FontWeight.bold)),
+            if (item.labels.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: IssueLabels(labels: item.labels),
+              ),
+          ],
+        ),
+      ),
+      subtitle: Row(
+        children: [
+          if (item is QLIssue && (item as QLIssue).issueType != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5),
+              child: IssueTypeLabel((item as QLIssue).issueType!),
+            ),
+          Text('#${item.number}'),
+          Text(' $dotChar ${item.author?.login ?? ''}'),
+          Text(' $dotChar 打开于 ${item.createdAt?.toLabel ?? ''}')
+        ],
+      ),
+      trailing: item.commentsCount == 0
+          ? null
+          : SizedBox(
+              width: 60,
+              child: IconText(
+                icon: DefaultIcons.comment,
+                text: Text('${item.commentsCount}'),
+              ),
+            ),
+      onPressed: () {
+        if (item is QLIssue) {
+          IssueDetailsPage.createNewTab(
+              context, context.read<RepoModel>().repo, item as QLIssue);
+        } else if (item is QLPullRequest) {
+          PullRequestDetails.createNewTab(
+              context, context.read<RepoModel>().repo, item as QLPullRequest);
+        }
+      },
+    );
   }
 }

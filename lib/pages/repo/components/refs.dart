@@ -92,8 +92,10 @@ class _RepoBranches extends StatelessWidget {
           icon: DefaultIcons.branch,
           text: Selector<RepoModel, String?>(
               selector: (_, model) => model.ref,
-              builder: (_, selectedBranch, __) =>
-                  Text(selectedBranch ?? repo.defaultBranchRef.name)),
+              builder: (_, ref, __) {
+                //print("ref=$ref, default=${repo.defaultBranchRef.name}");
+                return Text(ref ?? repo.defaultBranchRef.name);
+              }),
         ),
       ),
     );

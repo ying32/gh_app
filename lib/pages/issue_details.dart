@@ -82,7 +82,7 @@ class IssueDetailsPage extends StatelessWidget {
                     if (issue.issueType != null)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: IssueType(issue.issueType!, fontSize: 14),
+                        child: IssueTypeLabel(issue.issueType!, fontSize: 14),
                       ),
                     //TODO: 这里还差一个合并的标签
                     const Spacer(),
@@ -143,7 +143,7 @@ class IssueDetailsPage extends StatelessWidget {
                         const SizedBox(height: 10),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 5),
-                          child: IssueType(issue.issueType!),
+                          child: IssueTypeLabel(issue.issueType!),
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.0),
