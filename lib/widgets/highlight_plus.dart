@@ -130,6 +130,15 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
     });
   }
 
+  @override
+  void didUpdateWidget(covariant HighlightViewPlus oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    //TODO: dark模式没弄
+    if (oldWidget.source != widget.source) {
+      _buildSpan();
+    }
+  }
+
   List<TextSpan> _spans = [];
   String _lang = '';
   void _buildSpan() async {

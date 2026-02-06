@@ -39,6 +39,14 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
   }
 
   @override
+  void didUpdateWidget(covariant MarkdownBlockPlus oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.body != widget.body) {
+      _convertMarkdown();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_body.isEmpty) return const SizedBox.shrink();
     return SelectionArea(
