@@ -99,13 +99,13 @@ class APIWrap {
 
   /// 当前user信息
   Future<QLUser?> currentUser(
-      {bool force = true, ValueChanged<QLUser?>? onSecondUpdate}) async {
+      {bool? force, ValueChanged<QLUser?>? onSecondUpdate}) async {
     if (gitHubAPI.isAnonymous) {
       return null;
     }
     return gitHubAPI.query(QLQuery(QLQueries.queryUser()),
         convert: QLUser.fromJson,
-        force: true,
+        force: force,
         secondUpdateCallback: onSecondUpdate == null
             ? null
             : (json) => onSecondUpdate.call(QLUser.fromJson(json)));
@@ -226,7 +226,10 @@ class APIWrap {
     String query, {
     int? count,
     String? nextCursor,
+    bool? force,
+    ValueChanged<QLList<QLRepository>>? onSecondUpdate,
   }) async {
+    //
     QLList<QLRepository> parse(Map<String, dynamic>? json) {
       if (json == null) return const QLList.empty();
       return QLList.fromJson(json['search'], QLRepository.fromJson,
@@ -236,7 +239,10 @@ class APIWrap {
 
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.search(query, count: count, nextCursor: nextCursor)),
-        force: true);
+        force: force,
+        secondUpdateCallback: onSecondUpdate == null
+            ? null
+            : (json) => onSecondUpdate.call(parse(json)));
 
     return parse(res);
   }

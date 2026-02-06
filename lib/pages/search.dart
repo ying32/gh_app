@@ -35,7 +35,10 @@ class _SearchPageState extends State<SearchPage>
     setState(() {
       _searching = true;
     });
-    APIWrap.instance.searchRepo(text).then((data) {
+    APIWrap.instance.searchRepo(text, onSecondUpdate: (value) {
+      _repos = value;
+      _doUpdate();
+    }).then((data) {
       _repos = data;
     }).whenComplete(_doUpdate);
   }
