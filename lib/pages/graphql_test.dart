@@ -215,6 +215,13 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
+                            text: const Text('查询仓库所有者信息'),
+                            onPressed: () {
+                              _controller.text =
+                                  QLQueries.queryRepoOwner('zed-industries');
+                            }),
+                        const MenuFlyoutSeparator(),
+                        MenuFlyoutItem(
                             text: const Text('仓库信息'),
                             onPressed: () {
                               _controller.text =

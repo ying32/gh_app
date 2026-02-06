@@ -43,14 +43,15 @@ class QLQueries {
   static String queryUser([String name = '']) {
     return '''query {  ${name.isEmpty ? 'viewer' : 'user(login:"$name")'} {
     login
-    name
     avatarUrl
+    url
+    
+    name
     company
     bio
     email
     location
     twitterUsername
-    url
     isViewer 
     websiteUrl
     followers  {
@@ -60,6 +61,53 @@ class QLQueries {
       totalCount
     }
     status { emoji emojiHTML message }
+    pinnedItems(first: 6, types:REPOSITORY) {
+      nodes {
+        ... on Repository {
+          name
+          forkCount
+          stargazerCount
+          isPrivate
+          description
+          isInOrganization
+          owner {
+            login
+            avatarUrl
+          }
+          primaryLanguage {
+            color
+            name
+          }
+          defaultBranchRef {
+            name
+          }
+          isFork
+          parent {
+            #nameWithOwner 
+            name 
+            owner {
+              login
+              avatarUrl
+            }
+          }  
+        }
+      } 
+    }
+  }
+}''';
+  }
+
+  /// 查询一个组织信息
+  static String queryOrganization(String name) {
+    return '''query { organization(login:"$name") {
+    login
+    avatarUrl
+    url
+    
+    name
+    email
+    location
+    websiteUrl
     pinnedItems(first: 6, types:REPOSITORY) {
       nodes {
         ... on Repository {
@@ -131,52 +179,6 @@ class QLQueries {
 //     }
 //   }
 // }''';
-  }
-
-  /// 查询一个组织信息
-  static String queryOrganization(String name) {
-    return '''query { organization(login:"$name") {
-    login
-    name
-    avatarUrl
-    email
-    location
-    url
-    websiteUrl
-    pinnedItems(first: 6, types:REPOSITORY) {
-      nodes {
-        ... on Repository {
-          name
-          forkCount
-          stargazerCount
-          isPrivate
-          description
-          isInOrganization
-          owner {
-            login
-            avatarUrl
-          }
-          primaryLanguage {
-            color
-            name
-          }
-          defaultBranchRef {
-            name
-          }
-          isFork
-          parent {
-            #nameWithOwner 
-            name 
-            owner {
-              login
-              avatarUrl
-            }
-          }  
-        }
-      } 
-    }
-  }
-}''';
   }
 
   /// 查询一个仓库信息
@@ -823,6 +825,42 @@ class QLQueries {
                 title  body  
        }
      }
+}''';
+  }
+
+  /// 查询一个仓库的所有者信息
+  static String queryRepoOwner(String login) {
+    // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
+    return '''query { 
+  repositoryOwner(login:"$login") {
+    __typename  
+    login
+    url 
+    avatarUrl
+    ... on User {
+      name
+      company
+      bio
+      email
+      location
+      twitterUsername
+      isViewer 
+      websiteUrl
+      followers  {
+        totalCount
+      }
+      following {
+        totalCount
+      }
+      status { emoji emojiHTML message }
+    }
+    ... on Organization {
+      name
+      email
+      location
+      websiteUrl
+    }
+  }
 }''';
   }
 }
