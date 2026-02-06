@@ -278,8 +278,10 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
     windowManager.addListener(this);
     super.initState();
     // 获取当前user
-    APIWrap.instance.currentUser.then((e) {
-      context.read<CurrentUserModel>().user = e;
+    APIWrap.instance.currentUser(onSecondUpdate: (value) {
+      context.read<CurrentUserModel>().user = value;
+    }).then((data) {
+      context.read<CurrentUserModel>().user = data;
     }).onError((e, s) {
       if (e is GitHubGraphQLError && e.isBadCredentials) {
         context.read<CurrentUserModel>().clearLogin();

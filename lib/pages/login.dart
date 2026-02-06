@@ -52,11 +52,9 @@ class _LoginPageState extends State<LoginPage> {
           AppConfig.instance.auth = auth;
           createGithub(auth);
           try {
-            await APIWrap.instance.currentUser;
+            final user = await APIWrap.instance.currentUser(force: true);
             if (mounted) {
-              APIWrap.instance.currentUser.then((e) {
-                context.read<CurrentUserModel>().user = e;
-              });
+              context.read<CurrentUserModel>().user = user;
             }
             _showInfo('登录成功');
           } on GitHubGraphQLError catch (e) {

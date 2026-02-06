@@ -12,7 +12,7 @@ class HomePage extends StatelessWidget {
 
   void _onRefresh(BuildContext context, RefreshController controller) async {
     try {
-      final user = await APIWrap.instance.refreshCurrentUser();
+      final user = await APIWrap.instance.currentUser(force: true);
       if (user != null) {
         //ignore: use_build_context_synchronously
         context.read<CurrentUserModel>().user = user;
@@ -37,12 +37,11 @@ class HomePage extends StatelessWidget {
         // start: PageHeader.horizontalPadding(context),
         end: PageHeader.horizontalPadding(context),
       ),
-      // 这里要做登录/登出监视，先不管了
       child: Card(
         child: Selector<CurrentUserModel, QLUser?>(
             selector: (_, model) => model.user,
             builder: (_, user, __) => user == null
-                ? const Center(child: ProgressRing())
+                ? const LoadingRing()
                 : EasyListViewRefresher(
                     onRefresh: (controller) => _onRefresh(context, controller),
                     listview: ListView(

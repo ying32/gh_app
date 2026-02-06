@@ -95,22 +95,20 @@ class APIWrap {
   static APIWrap? _instance;
   static APIWrap get instance => _instance ??= APIWrap._();
 
-  QLUser? _currentUser;
-
   ///================================== GRAPHQL API ===============================
 
   /// 当前user信息
-  Future<QLUser?> get currentUser async =>
-      _currentUser ??= (gitHubAPI.isAnonymous
-          ? null
-          : await gitHubAPI.query(QLQuery(QLQueries.queryUser()),
-              convert: QLUser.fromJson, force: true));
-
-  Future<QLUser?> refreshCurrentUser({bool force = true}) async {
-    if (gitHubAPI.isAnonymous) return null;
-    _currentUser = await gitHubAPI.query(QLQuery(QLQueries.queryUser()),
-        convert: QLUser.fromJson, force: force);
-    return _currentUser;
+  Future<QLUser?> currentUser(
+      {bool force = true, ValueChanged<QLUser?>? onSecondUpdate}) async {
+    if (gitHubAPI.isAnonymous) {
+      return null;
+    }
+    return gitHubAPI.query(QLQuery(QLQueries.queryUser()),
+        convert: QLUser.fromJson,
+        force: true,
+        secondUpdateCallback: onSecondUpdate == null
+            ? null
+            : (json) => onSecondUpdate.call(QLUser.fromJson(json)));
   }
 
   /// 指定用户信息
