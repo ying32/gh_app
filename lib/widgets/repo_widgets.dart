@@ -129,7 +129,8 @@ class RepoListItem extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: SelectableText(
               repo.description,
-              style: TextStyle(color: context.textColor200),
+              style: TextStyle(
+                  color: context.textColor200, overflow: TextOverflow.ellipsis),
             ),
           ),
 
@@ -140,6 +141,7 @@ class RepoListItem extends StatelessWidget {
                 child: RepoTopics(repo.topics!)),
 
           //Text('${item.tagsUrl}'),
+          //const Spacer(),
 
           Row(
             children: [

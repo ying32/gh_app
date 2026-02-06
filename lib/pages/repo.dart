@@ -5,8 +5,8 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
-import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/releases.dart';
+import 'package:gh_app/pages/user_info.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/github/github.dart';
@@ -22,8 +22,6 @@ import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:path/path.dart' as p;
 import 'package:provider/provider.dart';
-
-import 'pull_request_details.dart';
 
 part 'repo/action.dart';
 part 'repo/code.dart';
@@ -172,13 +170,21 @@ class _InternalRepoPage extends StatelessWidget {
               repo.owner?.avatarUrl,
               imageSize: 45,
               onPressed: () {
-                // 随便整的
-                showImageDialog(context, repo.owner!.avatarUrl);
-                if (repo.isInOrganization) {
-                  //UserInfoPage.createNewTab(context, user)
-                } else {
-                  //UserInfoPage.createNewTab(context, user);
-                }
+                // showImageDialog(context, repo.owner!.avatarUrl);
+                // 随便整的，先简单整下
+                LoadingDialog.show(context);
+
+                final future = repo.isInOrganization
+                    ? APIWrap.instance.organizationInfo(repo.owner!.login)
+                    : APIWrap.instance.userInfo(repo.owner!.login);
+                future.then((user) {
+                  closeDialog(context); //???
+                  if (user == null) return;
+                  UserInfoPage.createNewTab(context, user);
+                }).onError((e, s) {
+                  closeDialog(context);
+                  // showInfoDialog('msg', context: context)
+                });
               },
             ),
             const SizedBox(width: 10),

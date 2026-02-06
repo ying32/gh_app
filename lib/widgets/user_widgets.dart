@@ -170,7 +170,7 @@ class UserInfoPanel extends StatelessWidget {
             children: [
               UserHeadImage(user!.avatarUrl, imageSize: 60),
               const SizedBox(width: 10.0),
-              SelectionArea(child: UserNameWidget(user)),
+              Expanded(child: SelectionArea(child: UserNameWidget(user))),
             ],
           ),
         ),
@@ -188,7 +188,7 @@ class UserInfoPanel extends StatelessWidget {
 
         UserLineInfo(
           icon: DefaultIcons.group,
-          value: Row(
+          value: Wrap(
             children: [
               HyperlinkButton(
                 onPressed: () {

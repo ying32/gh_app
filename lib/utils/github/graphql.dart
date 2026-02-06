@@ -604,34 +604,39 @@ class QLRepository {
 }
 
 /// 组织用户
-class QLOrganization extends QLUserBase {
-  const QLOrganization({
-    required super.login,
-  });
+///
+/// 不要那么多东西，所以合并到QLUser上面
+typedef QLOrganization = QLUser;
 
-  factory QLOrganization.fromJson(Map<String, dynamic> input) {
-    input = input['viewer'] ?? input['organization'] ?? input;
-    return QLOrganization(
-      login: input['login'] ?? '',
-      // name: input['name'] ?? '',
-      // avatarUrl: input['avatarUrl'] ?? '',
-      // company: input['company'] ?? '',
-      // bio: input['bio'] ?? '',
-      // email: input['email'] ?? '',
-      // location: input['location'] ?? '',
-      // twitterUsername: input['twitterUsername'] ?? '',
-      // url: input['url'] ?? '',
-      // websiteUrl: input['websiteUrl'] ?? '',
-      // followersCount: input['followers']?['totalCount'] ?? 0,
-      // followingCount: input['following']?['totalCount'] ?? 0,
-      // pinnedItems: input['pinnedItems']?['nodes'] != null
-      //     ? List.of(input['pinnedItems']?['nodes'])
-      //     .map((e) => QLRepository.fromJson(e))
-      //     .toList()
-      //     : null,
-    );
-  }
-}
+///
+// class QLOrganization extends QLUser {
+//   const QLOrganization({
+//     required super.login,
+//   });
+//
+//   factory QLOrganization.fromJson(Map<String, dynamic> input) {
+//     input = input['viewer'] ?? input['organization'] ?? input;
+//     return QLOrganization(
+//       login: input['login'] ?? '',
+//       // name: input['name'] ?? '',
+//       // avatarUrl: input['avatarUrl'] ?? '',
+//       // company: input['company'] ?? '',
+//       // bio: input['bio'] ?? '',
+//       // email: input['email'] ?? '',
+//       // location: input['location'] ?? '',
+//       // twitterUsername: input['twitterUsername'] ?? '',
+//       // url: input['url'] ?? '',
+//       // websiteUrl: input['websiteUrl'] ?? '',
+//       // followersCount: input['followers']?['totalCount'] ?? 0,
+//       // followingCount: input['following']?['totalCount'] ?? 0,
+//       // pinnedItems: input['pinnedItems']?['nodes'] != null
+//       //     ? List.of(input['pinnedItems']?['nodes'])
+//       //     .map((e) => QLRepository.fromJson(e))
+//       //     .toList()
+//       //     : null,
+//     );
+//   }
+// }
 
 /// 用户状态
 ///

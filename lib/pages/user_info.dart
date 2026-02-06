@@ -40,9 +40,13 @@ class UserInfoPage extends StatelessWidget {
                   ),
                 ),
                 Wrap(
+                  runSpacing: 10,
+                  spacing: 10,
                   children: user!.pinnedItems!
                       .map((e) => SizedBox(
-                          width: 300, child: RepoListItem(e, isPinStyle: true)))
+                          // height: 160,
+                          width: 300,
+                          child: RepoListItem(e, isPinStyle: true)))
                       .toList(),
                 ),
               ],
