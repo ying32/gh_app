@@ -154,12 +154,13 @@ class RepoListItem extends StatelessWidget {
                   child: Text(repo.primaryLanguage.name,
                       style: TextStyle(color: context.textColor200))),
               // 许可协议
-              if (!isPinStyle && repo.license.name.isNotEmpty) ...[
+              if (!isPinStyle &&
+                  (repo.licenseInfo?.name.isNotEmpty ?? false)) ...[
                 IconText(
                   icon: DefaultIcons.license,
                   padding: padding,
                   iconColor: context.textColor200,
-                  text: Text(repo.license.name,
+                  text: Text(repo.licenseInfo!.name,
                       style: TextStyle(color: context.textColor200)),
                 ),
               ],

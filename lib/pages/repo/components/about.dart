@@ -45,12 +45,12 @@ class RepoAbout extends StatelessWidget {
 
         const IconText(
             icon: DefaultIcons.readme, padding: padding, text: Text('Readme')),
-        if (repo.license.name.isNotEmpty)
+        if (repo.licenseInfo?.name.isNotEmpty ?? false)
           IconText(
               icon: DefaultIcons.license,
               padding: padding,
               text: Text(
-                repo.license.name,
+                repo.licenseInfo!.name,
                 overflow: TextOverflow.ellipsis,
               ),
               expanded: true),

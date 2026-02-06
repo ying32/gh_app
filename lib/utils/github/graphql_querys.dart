@@ -22,6 +22,11 @@ import 'package:gh_app/utils/consts.dart';
 ///       }
 ///     }
 ///```
+///
+/// "nameWithOwner": "ying32/govcl",
+///
+///
+///
 /// 分页 https://docs.github.com/zh/graphql/guides/using-pagination-in-the-graphql-api
 ///
 /// TODO: 正常来说时面的数据都要使用变量来传递，但是我懒得弄哈，以后再优化吧

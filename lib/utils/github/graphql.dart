@@ -14,6 +14,8 @@ import 'http_cache.dart';
 ///
 /// 从后往前选择
 /// last: 10, before: "$startCursor "
+///
+/// https://docs.github.com/zh/graphql/reference/objects#pageinfo
 class QLPageInfo {
   QLPageInfo({
     required this.startCursor,
@@ -88,6 +90,8 @@ class QLList<T> {
 }
 
 /// 仓库的主语言
+///
+/// https://docs.github.com/zh/graphql/reference/objects#language
 class QLLanguage {
   const QLLanguage({
     this.color = '',
@@ -105,71 +109,68 @@ class QLLanguage {
         name = input['name'] ?? '';
 }
 
-/// 用户信息基础类，包含用户和组织
-class QLUserBase {
-  const QLUserBase({
+/// 用户信息基础类，包含用户和组织等
+///
+/// https://docs.github.com/zh/graphql/reference/interfaces#actor
+class QLActor {
+  const QLActor({
     required this.login,
     this.avatarUrl = '',
+    this.url = '',
   });
 
-  /// 用户名
+  /// The username of the actor.
   final String login;
 
-  /// 头像
+  /// A URL pointing to the actor's public avatar.
   final String avatarUrl;
-}
-
-/// 仓库所有者
-class QLRepositoryOwner extends QLUserBase {
-  const QLRepositoryOwner({
-    required super.login,
-    super.avatarUrl,
-    this.url = '',
-  });
 
   /// 用户或者组织的html url
-  final String url;
-
-  QLRepositoryOwner.fromJson(Map<String, dynamic> input)
-      : url = input['url'] ?? '',
-        super(
-          login: input['login'] ?? '',
-          avatarUrl: input['avatarUrl'] ?? '',
-        );
-}
-
-class QLActor extends QLUserBase {
-  const QLActor({
-    required super.login,
-    super.avatarUrl,
-    this.url = '',
-  });
-
-  /// 用户或者组织的html url
+  /// 链接地址，比如 https://github.com/{user-name}
   final String url;
 
   QLActor.fromJson(Map<String, dynamic> input)
       : url = input['url'] ?? '',
-        super(
+        login = input['login'] ?? '',
+        avatarUrl = input['avatarUrl'] ?? '';
+}
+
+/// 仓库所有者
+///
+/// https://docs.github.com/zh/graphql/reference/interfaces#repositoryowner
+class QLRepositoryOwner extends QLActor {
+  const QLRepositoryOwner({
+    required super.login,
+    super.avatarUrl,
+    super.url,
+  });
+
+  QLRepositoryOwner.fromJson(Map<String, dynamic> input)
+      : super(
+          url: input['url'] ?? '',
           login: input['login'] ?? '',
           avatarUrl: input['avatarUrl'] ?? '',
         );
 }
 
 /// 许可协议
-class QLLicenseKind {
-  const QLLicenseKind({this.name = ''});
+///
+/// https://docs.github.com/zh/graphql/reference/objects#license
+class QLLicense {
+  const QLLicense({this.name = ''});
 
   /// 许可协议名
   final String name;
 
-  QLLicenseKind.fromJson(Map<String, dynamic> json) : name = json['name'] ?? '';
+  QLLicense.fromJson(Map<String, dynamic> json) : name = json['name'] ?? '';
 }
 
 DateTime? _parseDateTime(String? value) =>
     value == null ? null : DateTime.parse(value);
 
 /// Release文件
+///
+/// https://docs.github.com/zh/graphql/reference/objects#releaseasset
 class QLReleaseAsset {
   const QLReleaseAsset({
     this.name = '',
@@ -217,6 +218,8 @@ class QLReleaseAsset {
 }
 
 /// Release项目
+///
+/// https://docs.github.com/zh/graphql/reference/objects#release
 class QLRelease {
   const QLRelease({
     this.name = '',
@@ -297,6 +300,8 @@ class QLRelease {
 /// 分支
 ///
 /// TODO: 这默认是用啥呢main?或者master？这个HEAD应该能用吧？
+///
+/// https://docs.github.com/zh/graphql/reference/objects#ref
 class QLRef {
   const QLRef({
     this.name = 'HEAD',
@@ -346,6 +351,8 @@ enum QLSubscriptionState {
 }
 
 /// 仓库信息
+///
+/// https://docs.github.com/zh/graphql/reference/objects#repository
 class QLRepository {
   QLRepository({
     this.name = '',
@@ -360,7 +367,7 @@ class QLRepository {
     this.pushedAt,
     this.url = '',
     this.openIssuesCount = 0,
-    this.license = const QLLicenseKind(),
+    this.licenseInfo,
     this.topics,
     this.isDisabled = false,
     this.forkingAllowed = false,
@@ -430,7 +437,7 @@ class QLRepository {
   final int openIssuesCount;
 
   /// 仓库许可协议信息
-  final QLLicenseKind license;
+  final QLLicense? licenseInfo;
 
   /// 仓库标签列表，可被搜索的tag
   final List<String>? topics;
@@ -588,9 +595,9 @@ class QLRepository {
       owner: input['owner'] != null
           ? QLRepositoryOwner.fromJson(input['owner'])
           : null,
-      license: input['licenseInfo'] != null
-          ? QLLicenseKind.fromJson(input['licenseInfo'])
-          : const QLLicenseKind(),
+      licenseInfo: input['licenseInfo'] == null
+          ? null
+          : QLLicense.fromJson(input['licenseInfo']),
       topics: input['repositoryTopics']?['nodes'] == null
           ? null
           : List.of(input['repositoryTopics']?['nodes'])
@@ -606,6 +613,8 @@ class QLRepository {
 /// 组织用户
 ///
 /// 不要那么多东西，所以合并到QLUser上面
+///
+/// https://docs.github.com/zh/graphql/reference/objects#organization
 typedef QLOrganization = QLUser;
 
 ///
@@ -655,11 +664,13 @@ class QLUserStatus {
 }
 
 /// 个人用户
-class QLUser extends QLUserBase {
+///
+/// https://docs.github.com/zh/graphql/reference/objects#user
+class QLUser extends QLActor {
   const QLUser({
     required super.login,
     super.avatarUrl,
-    this.url = '',
+    super.url,
     this.isViewer = false,
     this.name = '',
     this.company = '',
@@ -673,9 +684,6 @@ class QLUser extends QLUserBase {
     this.twitterUsername = '',
     this.pinnedItems,
   });
-
-  /// 链接地址，比如 https://github.com/{user-name}
-  final String url;
 
   /// 是否登录的用户
   final bool isViewer;
@@ -742,6 +750,8 @@ class QLUser extends QLUserBase {
 }
 
 /// 标签
+///
+/// https://docs.github.com/zh/graphql/reference/objects#label
 class QLLabel {
   const QLLabel({
     this.name = '',
@@ -763,6 +773,12 @@ class QLLabel {
 }
 
 /// Issues pullRequest Comment 基类
+///
+/// https://docs.github.com/zh/graphql/reference/objects#pullrequest
+///
+/// https://docs.github.com/zh/graphql/reference/objects#issue
+///
+/// https://docs.github.com/zh/graphql/reference/interfaces#comment
 class QLIssueOrPullRequestOrCommentBase {
   const QLIssueOrPullRequestOrCommentBase({
     this.author,
@@ -803,6 +819,10 @@ class QLIssueOrPullRequestOrCommentBase {
 }
 
 /// Issues or PullRequest
+///
+/// https://docs.github.com/zh/graphql/reference/objects#pullrequest
+///
+/// https://docs.github.com/zh/graphql/reference/objects#issue
 class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
   const QLIssueOrPullRequest({
     super.author,
@@ -859,7 +879,9 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
   bool get isClosed => state == "CLOSED";
 }
 
-/// issues颜色
+/// issues颜色，实际是一个枚举值，这里使用类来包装
+///
+/// https://docs.github.com/zh/graphql/reference/enums#issuetypecolor
 class QLIssueTypeColor {
   const QLIssueTypeColor([this.colorText = '']);
 
@@ -881,7 +903,7 @@ class QLIssueTypeColor {
       qlIssueTypeColor[colorText] ?? const mat.Color(0x00000000);
 }
 
-/// Issues类型
+/// Issue类型
 ///
 /// https://docs.github.com/zh/graphql/reference/objects#issuetype
 class QLIssueType {
@@ -909,6 +931,8 @@ class QLIssueType {
 }
 
 /// issue
+///
+/// https://docs.github.com/zh/graphql/reference/objects#issue
 class QLIssue extends QLIssueOrPullRequest {
   const QLIssue({
     super.number,
@@ -967,6 +991,8 @@ class QLIssue extends QLIssueOrPullRequest {
 }
 
 /// pullRequest
+///
+/// https://docs.github.com/zh/graphql/reference/objects#pullrequest
 class QLPullRequest extends QLIssueOrPullRequest {
   const QLPullRequest({
     super.number,
@@ -1021,6 +1047,8 @@ class QLPullRequest extends QLIssueOrPullRequest {
 }
 
 /// 评论
+///
+/// https://docs.github.com/zh/graphql/reference/interfaces#comment
 class QLComment extends QLIssueOrPullRequestOrCommentBase {
   const QLComment({
     super.author,
@@ -1063,6 +1091,12 @@ class QLComment extends QLIssueOrPullRequestOrCommentBase {
           updatedAt: _parseDateTime(input['updatedAt']),
         );
 }
+
+///==========GitObject 的实现方式
+// Blob
+// Commit
+// Tag
+// Tree
 
 /// 内容树，包含目录和文件列表
 ///
@@ -1168,6 +1202,8 @@ class QLBlob {
 }
 
 /// 仓库目录或者文件
+///
+/// https://docs.github.com/zh/graphql/reference/interfaces#gitobject
 class QLObject {
   const QLObject({
     this.entries,
@@ -1205,8 +1241,46 @@ class QLObject {
         blob = QLBlob(byteSize: 1, isBinary: false, text: '$err', oid: '');
 }
 
+/// Represents an actor in a Git commit (ie. an author or committer).
 ///
-class QLTopic {}
+/// https://docs.github.com/zh/graphql/reference/objects#gitactor
+///
+class QLGitActor {
+  const QLGitActor({
+    required this.avatarUrl,
+    this.date,
+    this.email = '',
+    this.name = '',
+    this.user,
+  });
+
+  /// A URL pointing to the author's public avatar.
+  final String avatarUrl;
+
+  /// The timestamp of the Git action (authoring or committing).
+  ///
+  /// GitTimestamp
+  /// An ISO-8601 encoded date string. Unlike the DateTime type, GitTimestamp is not converted in UTC.
+  final DateTime? date;
+
+  /// The email in the Git commit.
+  final String email;
+
+  /// The name in the Git commit.
+  final String name;
+
+  /// The GitHub user corresponding to the email field. Null if no such user exists.
+  final QLUser? user;
+}
+
+/// https://docs.github.com/zh/graphql/reference/objects#topic
+class QLTopic {
+  const QLTopic({required this.name});
+  final String name;
+
+  // int stargazerCount
+  // bool viewerHasStarred
+}
 
 ///=============================================================================
 
