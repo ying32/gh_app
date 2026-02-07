@@ -207,11 +207,15 @@ class RepoModel extends ChangeNotifier {
 /// 仓库列表
 class RepoListModel extends ChangeNotifier {
   RepoListModel(
-      {this.isStarred = false, this.owner = '', QLList<QLRepository>? repos})
+      {this.isStarred = false,
+      this.owner = '',
+      this.isOrganization = false,
+      QLList<QLRepository>? repos})
       : _repos = repos;
 
   final String owner;
   final bool isStarred;
+  final bool isOrganization;
   QLList<QLRepository>? _repos;
 
   QLList<QLRepository>? get repos => _repos;

@@ -538,6 +538,10 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
                   }
                 }).onError((e, s) {
                   _refreshController.loadFailed();
+                  showInfoDialog('加载失败',
+                      error: "$e",
+                      context: context,
+                      severity: InfoBarSeverity.error);
                 });
               },
         controller: _refreshController,

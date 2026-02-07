@@ -3,7 +3,6 @@ import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
-import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -30,30 +29,7 @@ class UserInfoPage extends StatelessWidget {
         ),
         if (user?.pinnedItems.isNotEmpty ?? false)
           Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    '置顶的', //Pinned
-                    style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-                  ),
-                ),
-                Wrap(
-                  runSpacing: 10,
-                  spacing: 10,
-                  children: user!.pinnedItems
-                      .map((e) => SizedBox(
-                          // height: 160,
-                          width: 300,
-                          child: RepoListItem(e, isPinStyle: true)))
-                      .toList(),
-                ),
-              ],
-            ),
+            child: UserPinned(user!.pinnedItems),
           ),
       ],
     );

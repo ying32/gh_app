@@ -145,6 +145,7 @@ class APIWrap {
     int? count,
     String? nextCursor,
     bool? force,
+    bool isOrganization = false,
     ValueChanged<QLList<QLRepository>>? onSecondUpdate,
   }) async {
     //print("===============================userRepos");
@@ -165,7 +166,8 @@ class APIWrap {
             owner: owner,
             isStarred: isStarred,
             count: count,
-            nextCursor: nextCursor),
+            nextCursor: nextCursor,
+            isOrganization: isOrganization),
         force: force,
         secondUpdateCallback: onSecondUpdate == null
             ? null

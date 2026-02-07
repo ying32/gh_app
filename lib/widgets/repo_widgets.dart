@@ -59,13 +59,25 @@ class RepoListItem extends StatelessWidget {
     super.key,
     this.isPinStyle = false,
     this.showOpenIssues = true,
+    this.expanded = false,
   });
 
   final QLRepository repo;
   final bool isPinStyle;
   final bool showOpenIssues;
 
+  final bool expanded;
+
   String get _title => isPinStyle ? repo.name : repo.fullName;
+
+  Widget _buildDescription(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: SelectableText(
+          repo.description,
+          style: TextStyle(
+              color: context.textColor200, overflow: TextOverflow.ellipsis),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -75,21 +87,14 @@ class RepoListItem extends StatelessWidget {
       // child: DefaultTextStyle(
       //   style: TextStyle(color: appTheme.color.lightest),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: expanded
+            ? MainAxisSize.max
+            : MainAxisSize.min, // 这里不能设置为min，否则Expanded不能使用，但是
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              // Text("${item.owner?.login ?? ''}/${item.name}"),
-              // 仓库所有者和仓库名
-              // HyperlinkButton(
-              //   onPressed: () {
-              //     pushRoute(context, '/repo', extra: repo);
-              //   },
-              //   child: Text("${repo.owner?.login ?? ''}/${repo.name}"),
-              // ),
-
               if (isPinStyle)
                 const Padding(
                   padding: EdgeInsets.only(right: 8.0),
@@ -126,15 +131,10 @@ class RepoListItem extends StatelessWidget {
           // fork信息
           if (repo.isFork && repo.parent != null) RepoItemForkInfo(repo),
           // 描述
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: SelectableText(
-              repo.description,
-              style: TextStyle(
-                  color: context.textColor200, overflow: TextOverflow.ellipsis),
-            ),
-          ),
-
+          if (expanded)
+            Expanded(child: _buildDescription(context))
+          else
+            _buildDescription(context),
           if (!isPinStyle && (repo.repositoryTopics?.isNotEmpty ?? false))
             // tags
             Padding(

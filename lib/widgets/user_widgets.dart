@@ -1,9 +1,11 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/default_icons.dart';
+import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -101,32 +103,40 @@ class UserLineInfo extends StatelessWidget {
   final bool isEmail;
   final Color? textColor;
 
-  Widget _build(Widget child) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: isLink && value is String
-            ? LinkButton(
-                onPressed: () {
-                  launchUrl(Uri.parse(isEmail ? "mailto:$value" : value));
-                },
-                text: child,
-                padding: EdgeInsets.zero,
-              )
-            : child,
-      );
+  Widget _buildLinkIf(Widget child) => isLink && value is String
+      ? LinkButton(
+          onPressed: () {
+            launchUrl(Uri.parse(isEmail ? "mailto:$value" : value));
+          },
+          text: child,
+          padding: EdgeInsets.zero,
+        )
+      : child;
 
   @override
   Widget build(BuildContext context) {
     if (value == null || (value is String && (value as String).isEmpty)) {
       return const SizedBox.shrink();
     }
+
+    late Widget child;
     if (value is Widget) {
-      if (icon == null) return _build(value);
-      return _build(IconText(icon: icon!, text: value));
+      if (icon == null) {
+        child = _buildLinkIf(value);
+      } else {
+        child = IconText(icon: icon!, text: _buildLinkIf(value));
+      }
     } else {
-      Widget child = Text("$value", style: TextStyle(color: textColor));
-      if (icon == null) return child;
-      return _build(IconText(icon: icon!, text: child, iconColor: textColor));
+      Widget child2 = Text("$value", style: TextStyle(color: textColor));
+      if (icon == null) {
+        child = child2;
+      } else {
+        child = IconText(
+            icon: icon!, text: _buildLinkIf(child2), iconColor: textColor);
+      }
     }
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0), child: child);
   }
 }
 
@@ -221,28 +231,83 @@ class UserInfoPanel extends StatelessWidget {
             ),
           ),
 
+          // 公司
           UserLineInfo(
               icon: DefaultIcons.organization,
               value: _user.company,
               textColor: context.textColor200),
         ],
+        // twitter
         UserLineInfo(
             icon: DefaultIcons.twitter,
             value: user.twitterUsername,
             textColor: context.textColor200),
+        // 位置
         UserLineInfo(
             icon: DefaultIcons.location,
             value: user.location,
             textColor: context.textColor200),
+        // 邮箱
         UserLineInfo(
             icon: DefaultIcons.mail,
             value: user.email,
             isLink: true,
             isEmail: true),
+        // 个人主页
         UserLineInfo(
             icon: DefaultIcons.links, value: user.websiteUrl, isLink: true),
         //UserLineDiskUseInfo(value: user?.diskUsage),
         const SizedBox(height: 8.0),
+        const Divider(),
+        if (user.repositoryCount > 0)
+          UserLineInfo(
+              icon: DefaultIcons.repository,
+              value: LinkButton(
+                text: Text("仓库数：${user.repositoryCount}"),
+                onPressed: () {
+                  ReposPage.createNewTab(context, user);
+                },
+              )),
+      ],
+    );
+  }
+}
+
+/// 用户置顶的项目列表
+class UserPinned extends StatelessWidget {
+  const UserPinned(this.items, {super.key});
+
+  final QLList<QLRepository> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8.0),
+          child: Text(
+            '置顶的', //Pinned
+            style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+          ),
+        ),
+        Wrap(
+          runSpacing: 10,
+          spacing: 10,
+          children: items
+              .map((e) => ConstrainedBox(
+                    constraints:
+                        const BoxConstraints.tightFor(width: 350, height: 140),
+                    child: RepoListItem(
+                      e,
+                      isPinStyle: true,
+                      expanded: true,
+                    ),
+                  ))
+              .toList(),
+        ),
       ],
     );
   }

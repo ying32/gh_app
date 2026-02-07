@@ -484,35 +484,14 @@ $_userFieldsFragment
   /// [sortDirection] 排序，可取值`DESC`或`ASC`
   ///
   /// [sortField] 排序，可取值`CREATED_AT`、`NAME`、`PUSHED_AT`、`STARGAZERS`、`UPDATED_AT`
-  static QLQuery queryRepos(
-      {String owner = '',
-      int? count,
-      bool isStarred = false,
-      String? nextCursor}) {
-    return QLQuery('''
-query(\$login: String!, \$isViewer: Boolean!, \$isStarred: Boolean=false, \$first:Int!, \$after:String)  {
-
-  viewer @include(if: \$isViewer) {
-    ...RepoList
-  }
-  user(login: \$login) @skip(if: \$isViewer) {
-    ...RepoList
-  } 
-}
-
-fragment RepoFields on Repository {
- $_repoLiteFields2
-}
-# 是这样写么？？？
-fragment RepoList on User {
-  # RepositoryConnection
-  repositories(first:\$first, after:\$after, orderBy: {direction:DESC, field:STARGAZERS}) @skip(if: \$isStarred){
-    totalCount
-    $_pageInfo
-    nodes {
-      ...RepoFields
-    }
-  }
+  static QLQuery queryRepos({
+    String owner = '',
+    int? count,
+    bool isStarred = false,
+    String? nextCursor,
+    bool isOrganization = false,
+  }) {
+    const starReposField = '''
   # StarredRepositoryConnection
   starredRepositories(first:\$first, after:\$after, orderBy: {direction:DESC, field:STARRED_AT}) @include(if: \$isStarred) {
     totalCount
@@ -521,6 +500,37 @@ fragment RepoList on User {
       ...RepoFields
     }
   }
+''';
+
+    const viewerField = '''
+viewer @include(if: \$isViewer) {
+    ...RepoList
+  } 
+''';
+
+    return QLQuery('''
+query(\$login: String!, \$isViewer: Boolean!, \$isStarred: Boolean=false, \$first:Int!, \$after:String)  {
+
+  ${isOrganization ? '' : viewerField}
+  ${!isOrganization ? 'user' : 'organization'}(login: \$login) @skip(if: \$isViewer) {
+    ...RepoList
+  } 
+}
+
+fragment RepoFields on Repository {
+ $_repoLiteFields2
+}
+# 是这样写么？？？
+fragment RepoList on ${!isOrganization ? 'User' : 'Organization'} {
+  # RepositoryConnection
+  repositories(first:\$first, after:\$after, orderBy: {direction:DESC, field:STARGAZERS}) @skip(if: \$isStarred){
+    totalCount
+    $_pageInfo
+    nodes {
+      ...RepoFields
+    }
+  }
+${isOrganization ? '' : starReposField}  
 }    
     ''', variables: {
       "login": owner,

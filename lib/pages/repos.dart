@@ -1,7 +1,10 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/models/tabview_model.dart';
+import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
@@ -12,19 +15,23 @@ class ReposPage extends StatelessWidget {
     super.key,
     this.owner = '',
     this.isStarred = false,
+    this.isOrganization = false,
   });
 
   final String owner;
   final bool isStarred;
+  final bool isOrganization;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => RepoListModel(owner: owner, isStarred: isStarred),
+      create: (_) => RepoListModel(
+          owner: owner, isStarred: isStarred, isOrganization: isOrganization),
       child: WantKeepAlive(
           onInit: (context) {
-            APIWrap.instance.userRepos(owner, isStarred: isStarred,
-                onSecondUpdate: (value) {
+            APIWrap.instance.userRepos(owner,
+                isStarred: isStarred,
+                isOrganization: isOrganization, onSecondUpdate: (value) {
               context.read<RepoListModel>().repos = value;
             }).then((data) {
               context.read<RepoListModel>().repos = data;
@@ -32,6 +39,28 @@ class ReposPage extends StatelessWidget {
           },
           child: const _ReposPage()),
     );
+  }
+
+  /// 创建一个仓库列表页
+  static void createNewTab(
+      BuildContext context, QLUserOrOrganizationCommon user,
+      {bool isStarred = false}) {
+    final tabView = context.read<TabviewModel>();
+    final tabKey = ValueKey("${RouterTable.repos}/${user.login}");
+    final index = tabView.indexOf(tabKey);
+    if (index != -1) {
+      tabView.goToTab(index);
+      return;
+    }
+    context.read<TabviewModel>().addTab(
+          ReposPage(
+              owner: user.login,
+              isStarred: isStarred,
+              isOrganization: user.isOrganization),
+          key: tabKey,
+          title: "${user.name.isEmpty ? user.login : user.name} 的仓库",
+          icon: const DefaultIcon.repository(),
+        );
   }
 }
 
@@ -51,11 +80,15 @@ class _ReposPage extends StatelessWidget {
                 return const QLList.empty();
               }
               return APIWrap.instance.userRepos(model.owner,
-                  isStarred: model.isStarred, nextCursor: pageInfo.endCursor);
+                  isStarred: model.isStarred,
+                  nextCursor: pageInfo.endCursor,
+                  isOrganization: model.isOrganization);
             },
             onRefresh: () async {
               return APIWrap.instance.userRepos(model.owner,
-                  isStarred: model.isStarred, force: true);
+                  isStarred: model.isStarred,
+                  force: true,
+                  isOrganization: model.isOrganization);
             });
       },
     );
