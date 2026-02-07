@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
+import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
@@ -46,7 +47,10 @@ class ReposPage extends StatelessWidget {
       BuildContext context, QLUserOrOrganizationCommon user,
       {bool isStarred = false}) {
     final tabView = context.read<TabviewModel>();
-    final tabKey = ValueKey("${RouterTable.repos}/${user.login}");
+    // 不会有叫viewer的用户吧？
+    final isMy = context.read<CurrentUserModel>().user?.login == user.login;
+    final tabKey = ValueKey(
+        "${isStarred ? RouterTable.stars : RouterTable.repos}/${isMy ? 'viewer' : user.login}");
     final index = tabView.indexOf(tabKey);
     if (index != -1) {
       tabView.goToTab(index);
@@ -54,11 +58,13 @@ class ReposPage extends StatelessWidget {
     }
     context.read<TabviewModel>().addTab(
           ReposPage(
-              owner: user.login,
+              owner: isMy ? '' : user.login,
               isStarred: isStarred,
               isOrganization: user.isOrganization),
           key: tabKey,
-          title: "${user.name.isEmpty ? user.login : user.name} 的仓库",
+          title: isMy
+              ? '我的仓库'
+              : "${user.name.isEmpty ? user.login : user.name} 的仓库",
           icon: const DefaultIcon.repository(),
         );
   }

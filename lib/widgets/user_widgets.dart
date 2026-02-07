@@ -262,11 +262,17 @@ class UserInfoPanel extends StatelessWidget {
         if (user.repositoryCount > 0)
           UserLineInfo(
               icon: DefaultIcons.repository,
-              value: LinkButton(
-                text: Text("仓库数：${user.repositoryCount}"),
-                onPressed: () {
-                  ReposPage.createNewTab(context, user);
-                },
+              value: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text("仓库数："),
+                  HyperlinkButton(
+                    child: Text("( ${user.repositoryCount} )"),
+                    onPressed: () {
+                      ReposPage.createNewTab(context, user);
+                    },
+                  ),
+                ],
               )),
       ],
     );
@@ -299,7 +305,7 @@ class UserPinned extends StatelessWidget {
           children: items
               .map((e) => ConstrainedBox(
                     constraints:
-                        const BoxConstraints.tightFor(width: 350, height: 140),
+                        const BoxConstraints.tightFor(width: 400, height: 150),
                     child: RepoListItem(
                       e,
                       isPinStyle: true,

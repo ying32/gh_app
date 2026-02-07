@@ -32,7 +32,7 @@ class _NavItem {
     required this.body,
   });
 
-  ValueKey key;
+  ValueKey<String> key;
   String title;
   Widget icon;
   Widget body;
