@@ -73,6 +73,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
 
   final _controller = TextEditingController();
   final _argsController = TextEditingController();
+  final _opNamController = TextEditingController();
   String _resultText = "";
   bool _loading = false;
   final _treeNodes = <TreeViewItem>[];
@@ -84,6 +85,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
 
   @override
   void dispose() {
+    _opNamController.dispose();
     _argsController.dispose();
     _controller.dispose();
     super.dispose();
@@ -146,7 +148,9 @@ class _GraphQLTestState extends State<GraphQLTest> {
     }
 
     gitHubAPI
-        .query(QLQuery(_controller.text, variables: _parseParams()),
+        .query(
+            QLQuery(_controller.text,
+                variables: _parseParams(), operationName: _opName),
             force: true)
         .then((e) {
       if (e is Map) {
@@ -214,6 +218,12 @@ class _GraphQLTestState extends State<GraphQLTest> {
       res.add(item);
     }
     return res;
+  }
+
+  String? get _opName {
+    final text = _opNamController.text.trim();
+    if (text.isEmpty) return null;
+    return text;
   }
 
   @override
@@ -389,9 +399,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
                       width: 200,
                       child: Column(
                         children: [
-                          const Row(
-                            children: [Text('参数：')],
-                          ),
+                          const Row(children: [Text('参数：')]),
                           const SizedBox(height: 8),
                           Expanded(
                               child: TextBox(
@@ -402,6 +410,16 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             maxLines: null,
                             selectionHeightStyle: ui.BoxHeightStyle.max,
                           )),
+                          const SizedBox(height: 8),
+                          const Row(children: [Text('操作名：')]),
+                          const SizedBox(height: 8),
+                          TextBox(
+                            // placeholder: '',
+                            textAlignVertical: TextAlignVertical.top,
+                            controller: _opNamController,
+
+                            selectionHeightStyle: ui.BoxHeightStyle.max,
+                          )
                         ],
                       ),
                     ),
