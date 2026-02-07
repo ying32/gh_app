@@ -104,12 +104,14 @@ class _GraphQLTestState extends State<GraphQLTest> {
         result ??= {};
         dynamic value;
         // String类型
-        if (argValue.startsWith('"') && argValue.endsWith('"')) {
+        if (argValue == "null" || argValue.isEmpty) {
+          value = null;
+        } else if (argValue.startsWith('"') && argValue.endsWith('"')) {
           value = argValue.substring(1, argValue.length - 1);
-        } else if (int.tryParse(argValue) != null) {
-          value = int.parse(argValue);
         } else if (bool.tryParse(argValue) != null) {
           value = bool.parse(argValue);
+        } else if (int.tryParse(argValue) != null) {
+          value = int.parse(argValue);
         } else if (double.tryParse(argValue) != null) {
           value = double.parse(argValue);
         }
