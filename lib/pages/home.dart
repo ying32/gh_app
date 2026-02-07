@@ -18,6 +18,7 @@ class HomePage extends StatelessWidget {
         context.read<CurrentUserModel>().user = user;
       }
       controller.refreshCompleted();
+      controller.resetNoData();
     } on GitHubGraphQLError catch (e) {
       if (e.isBadCredentials) {
         //ignore: use_build_context_synchronously

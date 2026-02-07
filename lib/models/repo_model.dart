@@ -92,17 +92,17 @@ class RepoModel extends ChangeNotifier {
         }
       }
     }).onError((e, _) {
-      QLObject.error(e);
+      QLGitObject.error(e);
     });
   }
 
-  QLTree _matchReadMeFile(QLObject object, RegExp regex) {
-    return object.entries!.lastWhere(
+  QLTreeEntry _matchReadMeFile(QLGitObject object, RegExp regex) {
+    return object.tree!.entries.lastWhere(
         (e) => regex.firstMatch(e.name.replaceAll("_", "-")) != null,
-        orElse: () => const QLTree());
+        orElse: () => const QLTreeEntry());
   }
 
-  String _getReadMeFile(QLObject object) {
+  String _getReadMeFile(QLGitObject object) {
     if (object.isFile) return '';
     // 优先匹配本地化的
     // var tree = _matchReadMeFile(
@@ -152,11 +152,11 @@ class RepoModel extends ChangeNotifier {
   List<String> get segmentedPaths => _segmentedPaths;
 
   ///========================object=================================
-  QLObject? _object;
+  QLGitObject? _object;
 
-  QLObject? get object => _object;
+  QLGitObject? get object => _object;
 
-  set object(QLObject? value) {
+  set object(QLGitObject? value) {
     if (_object == value) return;
     _object = value;
     notifyListeners();

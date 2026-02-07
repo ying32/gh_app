@@ -90,9 +90,16 @@ class _RepoBranches extends StatelessWidget {
         height: 32,
         child: IconText(
           icon: DefaultIcons.branch,
+          // text: Text(context.select<RepoModel, String?>((RepoModel model) {
+          //       print("=========更新");
+          //       return model.ref;
+          //     }) ??
+          //     repo.defaultBranchRef.name),
+          // 实际测试使用Selector可以比context.select要少些刷新次数
           text: Selector<RepoModel, String?>(
               selector: (_, model) => model.ref,
               builder: (_, ref, __) {
+                //print("=========更新");
                 //print("ref=$ref, default=${repo.defaultBranchRef.name}");
                 return Text(ref ?? repo.defaultBranchRef.name);
               }),

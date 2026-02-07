@@ -267,22 +267,22 @@ class APIWrap {
   }
 
   /// 目录内容缓存
-  Future<QLObject?> repoContents(
+  Future<QLGitObject?> repoContents(
     QLRepository repo,
     String path, {
     String? ref,
     bool? force,
-    ValueChanged<QLObject?>? onSecondUpdate,
+    ValueChanged<QLGitObject?>? onSecondUpdate,
   }) async {
-    QLObject? parse(Map<String, dynamic>? json) {
+    QLGitObject? parse(Map<String, dynamic>? json) {
       if (json == null) return null;
       final object = json['repository']?['object'];
       if (object == null) return null;
-      return QLObject.fromJson(object);
+      return QLGitObject.fromJson(object);
     }
 
     final res = await gitHubAPI.query(
-        QLQuery(QLQueries.queryObject(repo.owner.login, repo.name,
+        QLQuery(QLQueries.queryGitObject(repo.owner.login, repo.name,
             path: path, ref: ref)),
         force: force,
         secondUpdateCallback: onSecondUpdate == null
@@ -300,7 +300,7 @@ class APIWrap {
     bool? force,
     ValueChanged<String>? onSecondUpdate,
   }) async {
-    String parse(QLObject? res) {
+    String parse(QLGitObject? res) {
       if (res == null || res.blob == null || res.blob!.isBinary) return '';
       return res.blob?.text ?? '';
     }

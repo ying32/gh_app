@@ -276,7 +276,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
                         MenuFlyoutItem(
                             text: const Text('仓库文件列表'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryObject(
+                              _controller.text = QLQueries.queryGitObject(
                                   'ying32', 'govcl',
                                   path: "", ref: "HEAD");
                             }),

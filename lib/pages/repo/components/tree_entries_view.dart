@@ -6,7 +6,7 @@ class RepoTreeEntriesView extends StatelessWidget {
     super.key,
   });
 
-  Widget _buildItem(BuildContext context, QLTree tree) {
+  Widget _buildItem(BuildContext context, QLTreeEntry tree) {
     return ListTile(
       leading: SizedBox(
         width: 24,
@@ -31,7 +31,7 @@ class RepoTreeEntriesView extends StatelessWidget {
   }
 
   // 构建目录，这个还可以再优化的，不使用Column，暂时先这样吧
-  Widget _buildTree(BuildContext context, List<QLTree> entries) => Card(
+  Widget _buildTree(BuildContext context, List<QLTreeEntry> entries) => Card(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -47,7 +47,7 @@ class RepoTreeEntriesView extends StatelessWidget {
       );
 
   Widget _buildContent(
-      BuildContext context, QLObject object, QLRepository repo) {
+      BuildContext context, QLGitObject object, QLRepository repo) {
     // 如果数据是文件，则显示内容
     if (object.isFile) {
       if (kDebugMode) {
@@ -69,11 +69,11 @@ class RepoTreeEntriesView extends StatelessWidget {
       return const Text('还没做内容的哈');
       //return RepoContentView(contents.file!);
     }
-    if (object.entries == null) {
+    if (object.tree?.entries == null) {
       return const SizedBox.shrink();
     }
     // 返回目录结构
-    return _buildTree(context, object.entries!);
+    return _buildTree(context, object.tree!.entries);
   }
 
   @override
@@ -84,7 +84,7 @@ class RepoTreeEntriesView extends StatelessWidget {
       mainAxisSize: MainAxisSize.max,
       children: [
         // 监视文件对象改变
-        Selector<RepoModel, QLObject?>(
+        Selector<RepoModel, QLGitObject?>(
             selector: (_, model) => model.object,
             builder: (_, object, __) {
               if (object == null) {

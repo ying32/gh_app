@@ -306,6 +306,7 @@ class QLRef {
   const QLRef({
     this.name = 'HEAD',
     this.prefix = 'refs/heads/',
+    this.target,
   });
 
   /// `String!` 分支或者tag名
@@ -314,9 +315,15 @@ class QLRef {
   /// `String!` The ref's prefix, such as refs/heads/ or refs/tags/.
   final String prefix;
 
+  /// `GitObject` The object the ref points to. Returns null when object does not exist.
+  final QLGitObject? target;
+
   QLRef.fromJson(Map<String, dynamic> json)
       : name = json['name'] ?? 'HEAD',
-        prefix = json['prefix'] ?? 'refs/heads/';
+        prefix = json['prefix'] ?? 'refs/heads/',
+        target = json['target'] == null
+            ? null
+            : QLGitObject.fromJson(json['target']);
 }
 
 /// https://docs.github.com/zh/graphql/reference/enums#repositorypermission
@@ -1119,6 +1126,9 @@ class QLComment extends QLIssueOrPullRequestOrCommentBase {
         );
 }
 
+/// 子模块
+///
+/// https://docs.github.com/zh/graphql/reference/objects#submodule
 class QLSubmodule {
   const QLSubmodule(
       {this.branch = '', this.gitUrl = '', this.name = '', this.path = ''});
@@ -1141,17 +1151,20 @@ class QLSubmodule {
         gitUrl = input['gitUrl'] ?? '';
 }
 
+/// 提交记录
+///
+/// https://docs.github.com/zh/graphql/reference/objects#commit
+
 ///==========GitObject 的实现方式
 // Blob
 // Commit
 // Tag
 // Tree
 
-/// 内容树，包含目录和文件列表
-///
-/// https://docs.github.com/zh/graphql/reference/objects#tree
-class QLTree {
-  const QLTree({
+/// 内容信息
+/// https://docs.github.com/zh/graphql/reference/objects#treeentry
+class QLTreeEntry {
+  const QLTreeEntry({
     //this.extension = '',
     //this.language = const QLLanguage(),
     this.isGenerated = false,
@@ -1211,7 +1224,7 @@ class QLTree {
   ///
   /// If the TreeEntry is for a directory occupied by a submodule project, this returns the corresponding submodule.
 
-  QLTree.fromJson(Map<String, dynamic> input)
+  QLTreeEntry.fromJson(Map<String, dynamic> input)
       : //extension = input['extension'] ?? '',
         //language = input['language'] == null
         //    ? const QLLanguage()
@@ -1225,6 +1238,23 @@ class QLTree {
         submodule = input['submodule'] == null
             ? null
             : QLSubmodule.fromJson(input['submodule']);
+}
+
+/// 内容树，包含目录和文件列表
+///
+/// https://docs.github.com/zh/graphql/reference/objects#tree
+class QLTree {
+  const QLTree({this.entries = const []});
+
+  /// `entries ([TreeEntry!])` 目录
+  final List<QLTreeEntry> entries;
+
+  QLTree.fromJson(Map<String, dynamic> input)
+      : entries = input['entries'] == null
+            ? const []
+            : List.from(input['entries'])
+                .map((e) => QLTreeEntry.fromJson(e))
+                .toList();
 }
 
 /// 文件数据
@@ -1265,14 +1295,18 @@ class QLBlob {
 /// 仓库目录或者文件
 ///
 /// https://docs.github.com/zh/graphql/reference/interfaces#gitobject
-class QLObject {
-  const QLObject({
-    this.entries,
+class QLGitObject {
+  const QLGitObject({
+    this.tree,
     this.blob,
+    this.typeName = '',
   }) : _hasEntries = false;
 
+  /// 类型名，对应字段 `__typename`
+  final String typeName;
+
   /// 目录
-  final List<QLTree>? entries;
+  final QLTree? tree;
 
   /// 文件内容
   final QLBlob? blob;
@@ -1286,18 +1320,21 @@ class QLObject {
   /// 是否为文件
   bool get isFile => !_hasEntries;
 
-  QLObject.fromJson(Map<String, dynamic> input)
+  // Tree
+
+  static bool _isType(Map<String, dynamic> json, String type) =>
+      json['__typename'] == type;
+
+  QLGitObject.fromJson(Map<String, dynamic> input)
       : _hasEntries = input['entries'] != null,
-        blob = input['entries'] != null ? null : QLBlob.fromJson(input),
-        entries = input['entries'] == null
-            ? null
-            : List.from(input['entries'])
-                .map((e) => QLTree.fromJson(e))
-                .toList();
+        typeName = input['__typename'] ?? '',
+        blob = !_isType(input, 'Blob') ? null : QLBlob.fromJson(input),
+        tree = !_isType(input, 'Tree') ? null : QLTree.fromJson(input);
 
   /// 返回一个错误
-  QLObject.error(Object? err)
-      : entries = null,
+  QLGitObject.error(Object? err)
+      : tree = null,
+        typeName = '',
         _hasEntries = false,
         blob = QLBlob(byteSize: 1, isBinary: false, text: '$err', oid: '');
 }
