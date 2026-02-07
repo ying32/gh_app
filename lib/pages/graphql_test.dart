@@ -39,6 +39,28 @@ class OpenGraphQLIconButton extends StatelessWidget {
   }
 }
 
+class _TreeVew extends StatelessWidget {
+  const _TreeVew(this.nodes);
+
+  final List<TreeViewItem> nodes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 6),
+      child: SizedBox(
+        width: 350,
+        height: double.infinity,
+        child: Card(
+            // TreeView是有bug么？，当items被清后他还显示也不更新了
+            child: nodes.isEmpty
+                ? const SizedBox.shrink()
+                : TreeView(items: nodes)),
+      ),
+    );
+  }
+}
+
 class GraphQLTest extends StatefulWidget {
   const GraphQLTest({super.key});
 
@@ -50,6 +72,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
   static const _apiURL = 'https://docs.github.com/zh/graphql';
 
   final _controller = TextEditingController();
+  final _argsController = TextEditingController();
   String _resultText = "";
   bool _loading = false;
   final _treeNodes = <TreeViewItem>[];
@@ -61,8 +84,37 @@ class _GraphQLTestState extends State<GraphQLTest> {
 
   @override
   void dispose() {
+    _argsController.dispose();
     _controller.dispose();
     super.dispose();
+  }
+
+  Map<String, dynamic>? _parseArgs() {
+    Map<String, dynamic>? result;
+    // 解析参数
+    for (final line in const LineSplitter().convert(_argsController.text)) {
+      if (line.isEmpty) continue;
+      final idx = line.indexOf("=");
+      if (idx == -1) continue;
+      final argName = line.substring(0, idx).trim();
+      final argValue = line.substring(idx + 1).trim();
+      if (argName.isNotEmpty && argValue.isNotEmpty) {
+        result ??= {};
+        dynamic value;
+        // String类型
+        if (argValue.startsWith('"') && argValue.endsWith('"')) {
+          value = argValue.substring(1, argValue.length - 1);
+        } else if (int.tryParse(argValue) != null) {
+          value = int.parse(argValue);
+        } else if (bool.tryParse(argValue) != null) {
+          value = bool.parse(argValue);
+        } else if (double.tryParse(argValue) != null) {
+          value = double.parse(argValue);
+        }
+        result[argName] = value;
+      }
+    }
+    return result;
   }
 
   void _doTest() {
@@ -79,7 +131,10 @@ class _GraphQLTestState extends State<GraphQLTest> {
           context: context, severity: InfoBarSeverity.error);
       return;
     }
-    gitHubAPI.query(QLQuery(_controller.text), force: true).then((e) {
+
+    gitHubAPI
+        .query(QLQuery(_controller.text, variables: _parseArgs()), force: true)
+        .then((e) {
       if (e is Map) {
         setState(() {
           _treeNodes.addAll(_buildTreeViewItems(e));
@@ -149,11 +204,8 @@ class _GraphQLTestState extends State<GraphQLTest> {
 
   @override
   Widget build(BuildContext context) {
-    const style = TextStyle(
-        // fontFamily: 'Courier New',
-        fontFamily: 'monospace',
-        fontSize: 16.0,
-        height: 1.5);
+    const style =
+        TextStyle(fontFamily: 'monospace', fontSize: 16.0, height: 1.5);
     final prism = Prism(
         style: context.isDark
             ? const PrismColdarkDarkStyle()
@@ -301,10 +353,39 @@ class _GraphQLTestState extends State<GraphQLTest> {
                 ),
               ),
               Expanded(
-                child: TextBox(
-                  controller: _controller,
-                  maxLines: null,
-                  selectionHeightStyle: ui.BoxHeightStyle.max,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextBox(
+                        placeholder: 'GraphQL查询语句',
+                        controller: _controller,
+                        maxLines: null,
+                        selectionHeightStyle: ui.BoxHeightStyle.max,
+                        textAlignVertical: TextAlignVertical.top,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    SizedBox(
+                      width: 200,
+                      child: Column(
+                        children: [
+                          const Row(
+                            children: [Text('参数：')],
+                          ),
+                          const SizedBox(height: 8),
+                          Expanded(
+                              child: TextBox(
+                            placeholder:
+                                '语法：\nname=value\n每一行一条\n\n例：\nstring="string"\nint=123\nbool=true\ndouble=1.23',
+                            textAlignVertical: TextAlignVertical.top,
+                            controller: _argsController,
+                            maxLines: null,
+                            selectionHeightStyle: ui.BoxHeightStyle.max,
+                          )),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Padding(
@@ -342,18 +423,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
             ],
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6),
-          child: SizedBox(
-            width: 350,
-            height: double.infinity,
-            child: Card(
-                // TreeView是有bug么？，当items被清后他还显示也不更新了
-                child: _treeNodes.isEmpty
-                    ? const SizedBox.shrink()
-                    : TreeView(items: _treeNodes)),
-          ),
-        ),
+        _TreeVew(_treeNodes),
       ],
     );
   }
