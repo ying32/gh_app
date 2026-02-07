@@ -221,6 +221,7 @@ class _InternalRepoPage extends StatelessWidget {
       onRefresh: (controller) {
         APIWrap.instance.userRepo(context.read<RepoModel>().repo).then((e) {
           context.read<RepoModel>().repo = e!;
+
           controller.refreshCompleted();
         }).onError((e, s) {
           controller.refreshFailed();

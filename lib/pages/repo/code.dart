@@ -148,12 +148,28 @@ class _CodePageRight extends StatelessWidget {
 class RepoCodePage extends StatelessWidget {
   const RepoCodePage({super.key});
 
+  Widget _buildLastCommit(BuildContext context) {
+    final repo = context.read<RepoModel>().repo;
+    print(
+        "===============repo.defaultBranchRef.target?=${repo.defaultBranchRef.target?.typeName} , ${repo.defaultBranchRef.target?.commit?.messageHeadline} ");
+    if (repo.defaultBranchRef.target?.commit?.history.isNotEmpty ?? false) {
+      return Card(
+          child: Text(repo.defaultBranchRef.target!.commit!.history.firstOrNull
+                  ?.messageHeadline ??
+              ''));
+    }
+    return const SizedBox.shrink();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         const Divider(size: 1),
         const _TopBar2(),
+        // 当前分支最后提交记录
+        // _buildLastCommit(context),
+        // 导航指示
         const Padding(
           padding: EdgeInsets.symmetric(vertical: 8.0),
           child: Card(child: RepoBreadcrumbBar()),

@@ -57,29 +57,42 @@ class QLList<T> {
 
   /// 内部数据
   List<T> get data => _data;
-
   T operator [](index) => _data[index];
-
   operator []=(index, T value) => data[index] = value;
-
   bool get isEmpty => _data.isEmpty;
-
   bool get isNotEmpty => _data.isNotEmpty;
-
   int get length => _data.length;
+  T get first => _data.first;
+  T? get firstOrNull => _data.firstOrNull;
+  T get last => _data.last;
+  T? get lastOrNull => _data.lastOrNull;
+  Iterable<E> map<E>(E Function(T e) toElement) => _data.map(toElement);
 
   //void clear() => _data.clear();
 
   QLList.fromJson(
       Map<String, dynamic> input, T Function(Map<String, dynamic>) convert,
-      {this.pageSize = 0, String? totalCountAlias})
+      {this.pageSize = 0, String? totalCountAlias, String? fieldName})
       : _data = input['nodes'] == null
             ? []
-            : List.from(input['nodes'] as List).map((e) => convert(e)).toList(),
+            : List.from(input['nodes'] as List)
+                .map((e) => convert(fieldName != null ? e[fieldName] : e))
+                .toList(),
         totalCount = input[totalCountAlias ?? 'totalCount'] ?? 0,
         pageInfo = input['pageInfo'] == null
             ? null
             : QLPageInfo.fromJson(input['pageInfo']);
+
+  /// 一个允许为null的类
+  static QLList<T>? maybeFromJson<T>(
+          Map<String, dynamic>? input, T Function(Map<String, dynamic>) convert,
+          {int pageSize = 0, String? totalCountAlias, String? fieldName}) =>
+      input == null
+          ? null
+          : QLList<T>.fromJson(input, convert,
+              pageSize: pageSize,
+              totalCountAlias: totalCountAlias,
+              fieldName: fieldName);
 
   /// 空数据
   const QLList.empty()
@@ -107,6 +120,9 @@ class QLLanguage {
   QLLanguage.fromJson(Map<String, dynamic> input)
       : color = input['color'] ?? '',
         name = input['name'] ?? '';
+
+  static QLLanguage? maybeFromJson(Map<String, dynamic>? input) =>
+      input == null ? null : QLLanguage.fromJson(input);
 }
 
 /// 用户信息基础类，包含用户和组织等
@@ -151,6 +167,11 @@ class QLRepositoryOwner extends QLActor {
           login: input['login'] ?? '',
           avatarUrl: input['avatarUrl'] ?? '',
         );
+
+  factory QLRepositoryOwner.fromJsonAndDefault(Map<String, dynamic>? input) =>
+      input == null
+          ? const QLRepositoryOwner(login: '')
+          : QLRepositoryOwner.fromJson(input);
 }
 
 /// 许可协议
@@ -163,10 +184,17 @@ class QLLicense {
   final String name;
 
   QLLicense.fromJson(Map<String, dynamic> json) : name = json['name'] ?? '';
+
+  static QLLicense? maybeFromJson(Map<String, dynamic>? json) =>
+      json == null ? null : QLLicense.fromJson(json);
 }
 
+/// 解析时间
 DateTime? _parseDateTime(String? value) =>
     value == null ? null : DateTime.parse(value);
+
+/// 解析 ['tags']?['totalCount'] 这类的，并返回
+int _getTotalCount(Map<String, dynamic>? json) => json?['totalCount'] ?? 0;
 
 /// Release文件
 ///
@@ -203,18 +231,14 @@ class QLReleaseAsset {
   /// `DateTime!` 更新时间
   final DateTime? updatedAt;
 
-  factory QLReleaseAsset.fromJson(Map<String, dynamic> input) {
-    input = input['nodes'] ?? input;
-    return QLReleaseAsset(
-      name: input['name'] ?? '',
-      contentType: input['contentType'] ?? '',
-      downloadCount: input['downloadCount'] ?? 0,
-      downloadUrl: input['downloadUrl'] ?? '',
-      size: input['size'] ?? 0,
-      createdAt: _parseDateTime(input['createdAt']),
-      updatedAt: _parseDateTime(input['updatedAt']),
-    );
-  }
+  QLReleaseAsset.fromJson(Map<String, dynamic> input)
+      : name = input['name'] ?? '',
+        contentType = input['contentType'] ?? '',
+        downloadCount = input['downloadCount'] ?? 0,
+        downloadUrl = input['downloadUrl'] ?? '',
+        size = input['size'] ?? 0,
+        createdAt = _parseDateTime(input['createdAt']),
+        updatedAt = _parseDateTime(input['updatedAt']);
 }
 
 /// Release项目
@@ -289,12 +313,15 @@ class QLRelease {
         abbreviatedOid = input['tagCommit']?['abbreviatedOid'] ?? '',
         publishedAt = _parseDateTime(input['updatedAt']),
         createdAt = _parseDateTime(input['createdAt']),
-        assetsCount = input['releaseAssets']?['totalCount'] ?? 0;
+        assetsCount = _getTotalCount(input['releaseAssets']);
 // assets = input['releaseAssets']?['nodes'] == null
 //     ? null
 //     : List.from(input['releaseAssets']?['nodes'])
 //         .map((e) => QLReleaseAsset.fromJson(e))
 //         .toList();
+
+  static QLRelease? maybeFromJson(Map<String, dynamic>? input) =>
+      input == null ? null : QLRelease.fromJson(input);
 }
 
 /// 分支
@@ -324,6 +351,9 @@ class QLRef {
         target = json['target'] == null
             ? null
             : QLGitObject.fromJson(json['target']);
+
+  static QLRef? maybeFromJson(Map<String, dynamic>? json) =>
+      json == null ? null : QLRef.fromJson(json);
 }
 
 /// https://docs.github.com/zh/graphql/reference/enums#repositorypermission
@@ -376,7 +406,7 @@ class QLRepository {
     this.url = '',
     this.openIssuesCount = 0,
     this.licenseInfo,
-    this.topics,
+    this.repositoryTopics,
     this.isDisabled = false,
     this.forkingAllowed = false,
     this.hasIssuesEnabled = false,
@@ -388,7 +418,7 @@ class QLRepository {
     this.mirrorUrl = '',
     this.defaultBranchRef = const QLRef(),
     this.watchersCount = 0,
-    this.primaryLanguage = const QLLanguage(),
+    this.primaryLanguage,
     this.isInOrganization = false,
     this.openPullRequestsCount = 0,
     this.archivedAt,
@@ -406,6 +436,7 @@ class QLRepository {
     this.latestRelease,
     this.refsCount = 0,
     this.tagsCount = 0,
+    this.languages,
   });
 
   /// `String!` 仓库名
@@ -452,7 +483,7 @@ class QLRepository {
   final QLLicense? licenseInfo;
 
   /// `RepositoryTopicConnection!` 仓库标签列表，可被搜索的tag  实际字段 `repositoryTopics`
-  final List<String>? topics;
+  final QLList<QLTopic>? repositoryTopics;
 
   /// `Boolean!` 是否被禁用
   final bool isDisabled;
@@ -488,7 +519,7 @@ class QLRepository {
   final int watchersCount;
 
   /// `Language` 仓库主要使用的编程语言
-  final QLLanguage primaryLanguage;
+  final QLLanguage? primaryLanguage;
 
   /// `Boolean!` 是否为一个组织的项目
   final bool isInOrganization;
@@ -541,6 +572,9 @@ class QLRepository {
   /// `RefConnection.Int!` tags总数
   final int tagsCount;
 
+  /// 语言列表
+  final QLList<QLLanguage>? languages;
+
   /// 仓库全名：${owner.login}/$name
   /// 其实也可以使用`nameWithOwner`来读取
   String get fullName => "${owner.login}/$name";
@@ -548,6 +582,9 @@ class QLRepository {
   /// 当前查看用户是否已订阅，也就是watch
   bool get viewerHasSubscribed =>
       viewerSubscription == QLSubscriptionState.subscribed;
+
+  static QLRepository? maybeFromJson(Map<String, dynamic>? input) =>
+      input == null ? null : QLRepository.fromJson(input);
 
   factory QLRepository.fromJson(Map<String, dynamic> input) {
     input = input['repository'] ?? input;
@@ -559,7 +596,7 @@ class QLRepository {
       description: input['description'] ?? '',
       isArchived: input['isArchived'] ?? false,
       url: input['url'] ?? '',
-      openIssuesCount: input['issues']?['totalCount'] ?? 0,
+      openIssuesCount: _getTotalCount(input['issues']),
       isInOrganization: input['isInOrganization'] ?? false,
       diskUsage: input['diskUsage'] ?? 0,
       forkingAllowed: input['forkingAllowed'] ?? false,
@@ -589,38 +626,27 @@ class QLRepository {
               QLSubscriptionState.values,
               (input['viewerSubscription'] as String).toLowerCase(),
               QLSubscriptionState.ignored),
-      openPullRequestsCount: input['pullRequests']?['totalCount'] ?? 0,
-      watchersCount: input['watchers']?['totalCount'] ?? 0,
+      openPullRequestsCount: _getTotalCount(input['pullRequests']),
+      watchersCount: _getTotalCount(input['watchers']),
       mirrorUrl: input['mirrorUrl'] ?? '',
       defaultBranchRef: input['defaultBranchRef'] == null
           ? const QLRef()
           : QLRef.fromJson(input['defaultBranchRef']),
-      releasesCount: input['releases']?['totalCount'] ?? 0,
-      refsCount: input['refs']?['totalCount'] ?? 0,
-      tagsCount: input['tags']?['totalCount'] ?? 0,
-      latestRelease: input['latestRelease'] == null
-          ? null
-          : QLRelease.fromJson(input['latestRelease']),
+      releasesCount: _getTotalCount(input['releases']),
+      refsCount: _getTotalCount(input['refs']),
+      tagsCount: _getTotalCount(input['tags']),
+      latestRelease: QLRelease.maybeFromJson(input['latestRelease']),
       updatedAt: _parseDateTime(input['updatedAt']),
       archivedAt: _parseDateTime(input['archivedAt']),
       pushedAt: _parseDateTime(input['pushedAt']),
-      primaryLanguage: input['primaryLanguage'] != null
-          ? QLLanguage.fromJson(input['primaryLanguage'])
-          : const QLLanguage(),
-      owner: input['owner'] != null
-          ? QLRepositoryOwner.fromJson(input['owner'])
-          : const QLRepositoryOwner(login: ''),
-      licenseInfo: input['licenseInfo'] == null
-          ? null
-          : QLLicense.fromJson(input['licenseInfo']),
-      topics: input['repositoryTopics']?['nodes'] == null
-          ? null
-          : List.of(input['repositoryTopics']?['nodes'])
-              .map((e) => "${e['topic']?['name'] ?? ''}")
-              .toList(),
-      parent: input['parent'] == null
-          ? null
-          : QLRepository.fromJson(input['parent']),
+      primaryLanguage: QLLanguage.maybeFromJson(input['primaryLanguage']),
+      owner: QLRepositoryOwner.fromJsonAndDefault(input['owner']),
+      licenseInfo: QLLicense.maybeFromJson(input['licenseInfo']),
+      repositoryTopics: QLList.maybeFromJson(
+          input['repositoryTopics'], QLTopic.fromJson,
+          fieldName: 'topic'),
+      parent: QLRepository.maybeFromJson(input['parent']),
+      languages: QLList.maybeFromJson(input['languages'], QLLanguage.fromJson),
     );
   }
 }
@@ -651,8 +677,8 @@ typedef QLOrganization = QLUser;
 //       // twitterUsername: input['twitterUsername'] ?? '',
 //       // url: input['url'] ?? '',
 //       // websiteUrl: input['websiteUrl'] ?? '',
-//       // followersCount: input['followers']?['totalCount'] ?? 0,
-//       // followingCount: input['following']?['totalCount'] ?? 0,
+//       // followersCount: _getTotalCount(input['followers']),
+//       // followingCount: _getTotalCount(input['following']),
 //       // pinnedItems: input['pinnedItems']?['nodes'] != null
 //       //     ? List.of(input['pinnedItems']?['nodes'])
 //       //     .map((e) => QLRepository.fromJson(e))
@@ -697,7 +723,7 @@ class QLUser extends QLActor {
     this.followersCount = 0,
     this.followingCount = 0,
     this.twitterUsername = '',
-    this.pinnedItems = const [],
+    this.pinnedItems = const QLList.empty(),
   });
 
   /// `Boolean!` 是否登录的用户
@@ -738,7 +764,7 @@ class QLUser extends QLActor {
   //userViewType (UserViewType!)
 
   /// `PinnableItemConnection!` 置顶项目
-  final List<QLRepository> pinnedItems;
+  final QLList<QLRepository> pinnedItems;
 
   factory QLUser.fromJson(Map<String, dynamic> input) {
     input = input['viewer'] ?? input['user'] ?? input['organization'] ?? input;
@@ -757,13 +783,11 @@ class QLUser extends QLActor {
       url: input['url'] ?? '',
       isViewer: input['isViewer'] ?? false,
       websiteUrl: input['websiteUrl'] ?? '',
-      followersCount: input['followers']?['totalCount'] ?? 0,
-      followingCount: input['following']?['totalCount'] ?? 0,
-      pinnedItems: input['pinnedItems']?['nodes'] != null
-          ? List.of(input['pinnedItems']?['nodes'])
-              .map((e) => QLRepository.fromJson(e))
-              .toList()
-          : const [],
+      followersCount: _getTotalCount(input['followers']),
+      followingCount: _getTotalCount(input['following']),
+      pinnedItems:
+          QLList.maybeFromJson(input['pinnedItems'], QLRepository.fromJson) ??
+              const QLList.empty(),
     );
   }
 }
@@ -1016,7 +1040,7 @@ class QLIssue extends QLIssueOrPullRequest {
                   .toList(),
           lastEditedAt: _parseDateTime(input['lastEditedAt']),
           locked: input['locked'] ?? false,
-          commentsCount: input['comments']?['totalCount'] ?? 0,
+          commentsCount: _getTotalCount(input['comments']),
           state: input['state'],
           updatedAt: _parseDateTime(input['updatedAt']),
           viewerCanClose: input['viewerCanClose'] ?? false,
@@ -1151,9 +1175,169 @@ class QLSubmodule {
         gitUrl = input['gitUrl'] ?? '';
 }
 
+// class QLCommitHistory {
+//   const QLCommitHistory();
+//
+//   QLCommitHistory.fromJson(Map<String, dynamic> input)
+//       : branch = input['branch'] ?? '',
+//         name = input['name'] ?? '',
+//         path = input['path'] ?? '',
+//         gitUrl = input['gitUrl'] ?? '';
+// }
+
 /// 提交记录
 ///
 /// https://docs.github.com/zh/graphql/reference/objects#commit
+class QLCommit {
+  const QLCommit({
+    this.oid = '',
+    this.abbreviatedOid = '',
+    this.additions = 0,
+    this.author,
+    this.authoredByCommitter = false,
+    this.authoredDate,
+    this.changedFiles = 0,
+    this.message = '',
+    this.history = const QLList.empty(),
+    this.messageHeadline = '',
+  });
+
+  /// `GitObjectID!`
+  final String oid;
+
+  /// `String!`
+  final String abbreviatedOid;
+
+  /// `Int!`
+  final int additions;
+
+  /// `GitActor`
+  final QLGitActor? author;
+
+  /// `Boolean!`
+  final bool authoredByCommitter;
+
+  /// `DateTime!`
+  final DateTime? authoredDate;
+
+  // authors (GitActorConnection!)
+// blame (Blame!)
+  /// changedFiles (Int!)
+  final int changedFiles;
+// changedFilesIfAvailable (Int)
+// comments (CommitCommentConnection!)
+// committedDate (DateTime!)
+// committer (GitActor)
+// deletions (Int!)
+// file (TreeEntry)
+  /// history (CommitHistoryConnection!)
+  final QLList<QLCommit> history;
+
+// id (ID!)
+//
+// The Node ID of the Commit object.
+//
+  /// message (String!)
+  final String message;
+//
+// The Git commit message.
+//
+// messageBody (String!)
+//
+// The Git commit message body.
+//
+// messageBodyHTML (HTML!)
+//
+// The commit message body rendered to HTML.
+//
+  /// messageHeadline (String!)
+  final String messageHeadline;
+//
+// The Git commit message headline.
+//
+// messageHeadlineHTML (HTML!)
+//
+// The commit message headline rendered to HTML.
+//
+// oid (GitObjectID!)
+//
+// The Git object ID.
+//
+// onBehalfOf (Organization)
+//
+// The organization this commit was made on behalf of.
+//
+// parents (CommitConnection!)
+//
+// The parents of a commit.
+// repository (Repository!)
+//
+// The Repository this commit belongs to.
+//
+// resourcePath (URI!)
+//
+// The HTTP path for this commit.
+//
+// signature (GitSignature)
+//
+// Commit signing information, if present.
+//
+// status (Status)
+//
+// Status information for this commit.
+//
+// statusCheckRollup (StatusCheckRollup)
+//
+// Check and Status rollup information for this commit.
+//
+// submodules (SubmoduleConnection!)
+//
+// Returns a list of all submodules in this repository as of this Commit parsed from the .gitmodules file.
+//tarballUrl (URI!)
+//
+// Returns a URL to download a tarball archive for a repository. Note: For private repositories, these links are temporary and expire after five minutes.
+//
+// tree (Tree!)
+//
+// Commit's root Tree.
+//
+// treeResourcePath (URI!)
+//
+// The HTTP path for the tree of this commit.
+//
+// treeUrl (URI!)
+//
+// The HTTP URL for the tree of this commit.
+//
+// url (URI!)
+//
+// The HTTP URL for this commit.
+//
+// viewerCanSubscribe (Boolean!)
+//
+// Check if the viewer is able to change their subscription status for the repository.
+//
+// viewerSubscription (SubscriptionState)
+//
+// Identifies if the viewer is watching, not watching, or ignoring the subscribable entity.
+//
+// zipballUrl (URI!)
+
+  QLCommit.fromJson(Map<String, dynamic> json)
+      : oid = json['oid'] ?? '',
+        abbreviatedOid = json['abbreviatedOid'] ?? '',
+        additions = json['additions'] ?? 0,
+        changedFiles = json['changedFiles'] ?? 0,
+        message = json['message'] ?? '',
+        messageHeadline = json['messageHeadline'] ?? '',
+        author =
+            json['author'] == null ? null : QLGitActor.fromJson(json['author']),
+        authoredByCommitter = json['authoredByCommitter'] ?? false,
+        authoredDate = _parseDateTime(json['authoredDate']),
+        history = json['history'] == null
+            ? const QLList.empty()
+            : QLList.fromJson(json['history'], QLCommit.fromJson);
+}
 
 ///==========GitObject 的实现方式
 // Blob
@@ -1299,8 +1483,9 @@ class QLGitObject {
   const QLGitObject({
     this.tree,
     this.blob,
+    this.commit,
     this.typeName = '',
-  }) : _hasEntries = false;
+  });
 
   /// 类型名，对应字段 `__typename`
   final String typeName;
@@ -1311,14 +1496,17 @@ class QLGitObject {
   /// 文件内容
   final QLBlob? blob;
 
-  /// 通过查询是否有`entries`节点来判断
-  final bool _hasEntries;
+  /// git提交记录
+  final QLCommit? commit;
 
   /// 是否为目录
-  bool get isDir => _hasEntries;
+  bool get isDir => typeName == 'Tree';
 
   /// 是否为文件
-  bool get isFile => !_hasEntries;
+  bool get isFile => typeName == 'Blob';
+
+  /// 是否为提交记录
+  bool get isCommit => typeName == 'Commit';
 
   // Tree
 
@@ -1326,16 +1514,16 @@ class QLGitObject {
       json['__typename'] == type;
 
   QLGitObject.fromJson(Map<String, dynamic> input)
-      : _hasEntries = input['entries'] != null,
-        typeName = input['__typename'] ?? '',
+      : typeName = input['__typename'] ?? '',
         blob = !_isType(input, 'Blob') ? null : QLBlob.fromJson(input),
-        tree = !_isType(input, 'Tree') ? null : QLTree.fromJson(input);
+        tree = !_isType(input, 'Tree') ? null : QLTree.fromJson(input),
+        commit = !_isType(input, 'Commit') ? null : QLCommit.fromJson(input);
 
   /// 返回一个错误
   QLGitObject.error(Object? err)
       : tree = null,
+        commit = null,
         typeName = '',
-        _hasEntries = false,
         blob = QLBlob(byteSize: 1, isBinary: false, text: '$err', oid: '');
 }
 
@@ -1352,23 +1540,30 @@ class QLGitActor {
     this.user,
   });
 
-  /// A URL pointing to the author's public avatar.
+  /// `URI!` A URL pointing to the author's public avatar.
   final String avatarUrl;
 
   /// The timestamp of the Git action (authoring or committing).
   ///
-  /// GitTimestamp
+  /// `GitTimestamp`
   /// An ISO-8601 encoded date string. Unlike the DateTime type, GitTimestamp is not converted in UTC.
   final DateTime? date;
 
-  /// The email in the Git commit.
+  /// `String` The email in the Git commit.
   final String email;
 
-  /// The name in the Git commit.
+  /// `String` The name in the Git commit.
   final String name;
 
-  /// The GitHub user corresponding to the email field. Null if no such user exists.
+  /// `User` The GitHub user corresponding to the email field. Null if no such user exists.
   final QLUser? user;
+
+  QLGitActor.fromJson(Map<String, dynamic> json)
+      : avatarUrl = json['avatarUrl'] ?? '',
+        date = _parseDateTime(json['date']),
+        email = json['email'] ?? '',
+        name = json['name'] ?? '',
+        user = json['user'] == null ? null : QLUser.fromJson(json['user']);
 }
 
 /// https://docs.github.com/zh/graphql/reference/objects#topic
@@ -1378,6 +1573,8 @@ class QLTopic {
 
   // int stargazerCount
   // bool viewerHasStarred
+
+  QLTopic.fromJson(Map<String, dynamic> json) : name = json['name'] ?? '';
 }
 
 ///=============================================================================

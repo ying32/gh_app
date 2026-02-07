@@ -288,7 +288,7 @@ class QLQueries {
         target {
           __typename
           ... on Commit {
-            history(first: 1){  edges { node { oid messageHeadline } } }
+            history(first: 1){  nodes {  oid messageHeadline  } }
           }
         }
       }

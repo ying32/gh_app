@@ -12,10 +12,11 @@ import 'package:url_launcher/url_launcher.dart';
 class RepoTopics extends StatelessWidget {
   const RepoTopics(this.topics, {super.key});
 
-  final List<String> topics;
+  final QLList<QLTopic> topics;
 
   @override
   Widget build(BuildContext context) {
+    if (topics.isEmpty) return const SizedBox.shrink();
     return Wrap(
         runSpacing: 3.0,
         spacing: 1.0,
@@ -23,7 +24,7 @@ class RepoTopics extends StatelessWidget {
             .map((e) => LinkButton(
                   padding: EdgeInsets.zero,
                   borderRadius: BorderRadius.circular(10),
-                  text: TagLabel.other(e, color: Colors.blue),
+                  text: TagLabel.other(e.name, color: Colors.blue),
                   onPressed: () {
                     launchUrl(Uri.parse('$githubTopicsUrl/$e'));
                   },
@@ -134,11 +135,11 @@ class RepoListItem extends StatelessWidget {
             ),
           ),
 
-          if (!isPinStyle && (repo.topics?.isNotEmpty ?? false))
+          if (!isPinStyle && (repo.repositoryTopics?.isNotEmpty ?? false))
             // tags
             Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: RepoTopics(repo.topics!)),
+                child: RepoTopics(repo.repositoryTopics!)),
 
           //Text('${item.tagsUrl}'),
           //const Spacer(),
@@ -146,13 +147,15 @@ class RepoListItem extends StatelessWidget {
           Row(
             children: [
               // 语言的一个圆，颜色还要待弄下哈
-              LangCircleDot(repo.primaryLanguage),
+              if (repo.primaryLanguage != null)
+                LangCircleDot(repo.primaryLanguage!),
 
               // 语言
-              Padding(
-                  padding: padding,
-                  child: Text(repo.primaryLanguage.name,
-                      style: TextStyle(color: context.textColor200))),
+              if (repo.primaryLanguage != null)
+                Padding(
+                    padding: padding,
+                    child: Text(repo.primaryLanguage!.name,
+                        style: TextStyle(color: context.textColor200))),
               // 许可协议
               if (!isPinStyle &&
                   (repo.licenseInfo?.name.isNotEmpty ?? false)) ...[
