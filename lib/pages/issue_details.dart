@@ -106,7 +106,7 @@ class IssueDetailsPage extends StatelessWidget {
                     children: [
                       IssueCommentItem(
                           item: issue,
-                          owner: repo.owner?.login,
+                          owner: repo.owner.login,
                           openAuthor: issue.author?.login,
                           isFirst: true),
                       IssuesCommentsView(issue, repo: repo),

@@ -180,11 +180,11 @@ class UserInfoPanel extends StatelessWidget {
                 icon: null, value: user!.bio, textColor: context.textColor200)),
         const SizedBox(height: 8),
         // 心情
-        if (user!.status.emojiHTML.isNotEmpty ||
-            user!.status.message.isNotEmpty)
+        if (user!.status != null && user!.status!.emojiHTML.isNotEmpty ||
+            user!.status!.message.isNotEmpty)
           SelectionArea(
               child: HtmlWidget(
-                  "${user!.status.emojiHTML}${user!.status.message}")),
+                  "${user!.status!.emojiHTML}${user!.status!.message}")),
 
         UserLineInfo(
           icon: DefaultIcons.group,

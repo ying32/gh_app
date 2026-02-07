@@ -167,7 +167,7 @@ class _InternalRepoPage extends StatelessWidget {
         child: Row(
           children: [
             UserHeadImage(
-              repo.owner?.avatarUrl,
+              repo.owner.avatarUrl,
               imageSize: 45,
               onPressed: () {
                 // showImageDialog(context, repo.owner!.avatarUrl);
@@ -175,8 +175,8 @@ class _InternalRepoPage extends StatelessWidget {
                 LoadingDialog.show(context);
 
                 final future = repo.isInOrganization
-                    ? APIWrap.instance.organizationInfo(repo.owner!.login)
-                    : APIWrap.instance.userInfo(repo.owner!.login);
+                    ? APIWrap.instance.organizationInfo(repo.owner.login)
+                    : APIWrap.instance.userInfo(repo.owner.login);
                 future.then((user) {
                   closeDialog(context); //???
                   if (user == null) return;

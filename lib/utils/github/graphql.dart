@@ -18,27 +18,27 @@ import 'http_cache.dart';
 /// https://docs.github.com/zh/graphql/reference/objects#pageinfo
 class QLPageInfo {
   QLPageInfo({
-    required this.startCursor,
-    required this.endCursor,
+    this.startCursor,
+    this.endCursor,
     required this.hasNextPage,
     required this.hasPreviousPage,
   });
 
-  /// 起始游标
-  final String startCursor;
+  /// `String` 起始游标
+  final String? startCursor;
 
-  /// 结束位置游标
-  final String endCursor;
+  /// `String` 结束位置游标
+  final String? endCursor;
 
-  /// 是否有下一页
+  /// `Boolean!` 是否有下一页
   final bool hasNextPage;
 
-  /// 是否有上一页
+  /// `Boolean!` 是否有上一页
   final bool hasPreviousPage;
 
   QLPageInfo.fromJson(Map<String, dynamic> input)
-      : startCursor = input['startCursor'] ?? '',
-        endCursor = input['endCursor'] ?? '',
+      : startCursor = input['startCursor'],
+        endCursor = input['endCursor'],
         hasNextPage = input['hasNextPage'] ?? false,
         hasPreviousPage = input['hasPreviousPage'] ?? false;
 }
@@ -98,10 +98,10 @@ class QLLanguage {
     this.name = '',
   });
 
-  /// 语言所使用的颜色
+  /// `String` 语言所使用的颜色
   final String color;
 
-  /// 语言名
+  /// `String!` 语言名
   final String name;
 
   QLLanguage.fromJson(Map<String, dynamic> input)
@@ -119,13 +119,13 @@ class QLActor {
     this.url = '',
   });
 
-  /// The username of the actor.
+  /// `String!` The username of the actor.
   final String login;
 
-  /// A URL pointing to the actor's public avatar.
+  /// `String!` A URL pointing to the actor's public avatar.
   final String avatarUrl;
 
-  /// 用户或者组织的html url
+  /// `URI!` 用户或者组织的html url
   /// 链接地址，比如 https://github.com/{user-name}
   final String url;
 
@@ -159,7 +159,7 @@ class QLRepositoryOwner extends QLActor {
 class QLLicense {
   const QLLicense({this.name = ''});
 
-  /// 许可协议名
+  /// `String!` 许可协议名
   final String name;
 
   QLLicense.fromJson(Map<String, dynamic> json) : name = json['name'] ?? '';
@@ -182,25 +182,25 @@ class QLReleaseAsset {
     this.updatedAt,
   });
 
-  /// 文件名
+  /// `String!` 文件名
   final String name;
 
-  /// 文件内容类型
+  /// `String!` 文件内容类型
   final String contentType;
 
-  /// 文件大小
+  /// `Int!` 文件大小
   final int size;
 
-  /// 下载次数
+  /// `Int!` 下载次数
   final int downloadCount;
 
-  /// HTTP的下载地址
+  /// `URI!` HTTP的下载地址
   final String downloadUrl;
 
-  /// 创建时间
+  /// `DateTime!` 创建时间
   final DateTime? createdAt;
 
-  /// 更新时间
+  /// `DateTime!` 更新时间
   final DateTime? updatedAt;
 
   factory QLReleaseAsset.fromJson(Map<String, dynamic> input) {
@@ -237,44 +237,44 @@ class QLRelease {
     this.publishedAt,
   });
 
-  /// Release名
+  /// `String` Release名
   final String name;
 
-  /// 发布者信息
+  /// `User` 发布者信息
   final QLUser? author;
 
-  /// 标记名
+  /// `String!` 标记名
   final String tagName;
 
-  /// HTTP的链接
+  /// `URI!` HTTP的链接
   final String url;
 
-  /// 是否为草稿，这个一般只有自己的而且登录了能看到吧
+  /// `Boolean!` 是否为草稿，这个一般只有自己的而且登录了能看到吧
   final bool isDraft;
 
-  /// 是否为预览版
+  /// `Boolean!` 是否为预览版
   final bool isPrerelease;
 
-  /// 是否为最后一次发布的版本
+  /// `Boolean!` 是否为最后一次发布的版本
   final bool isLatest;
 
-  /// 描述，一般为 Release Notes
+  /// `String` 描述，一般为 Release Notes
   final String description;
 
-  /// tagCommit.abbreviatedOid
+  /// `Commit.String!` tagCommit.abbreviatedOid
   /// 使用哪个commit为准发布的
   final String abbreviatedOid;
 
   /// 文件附件
   ///final List<QLReleaseAsset>? assets;
 
-  /// 附件总数，这里不再查询全部的了
+  /// `ReleaseAssetConnection!.Int!`附件总数，这里不再查询全部的了
   final int assetsCount;
 
-  /// 创建时间
+  /// `DateTime!` 创建时间
   final DateTime? createdAt;
 
-  /// 推送时间
+  /// `DateTime` 推送时间
   final DateTime? publishedAt;
 
   QLRelease.fromJson(Map<String, dynamic> input)
@@ -308,10 +308,10 @@ class QLRef {
     this.prefix = 'refs/heads/',
   });
 
-  /// 分支或者tag名
+  /// `String!` 分支或者tag名
   final String name;
 
-  /// The ref's prefix, such as refs/heads/ or refs/tags/.
+  /// `String!` The ref's prefix, such as refs/heads/ or refs/tags/.
   final String prefix;
 
   QLRef.fromJson(Map<String, dynamic> json)
@@ -356,7 +356,7 @@ enum QLSubscriptionState {
 class QLRepository {
   QLRepository({
     this.name = '',
-    this.owner,
+    this.owner = const QLRepositoryOwner(login: ''),
     this.parent,
     this.forksCount = 0,
     this.stargazersCount = 0,
@@ -365,6 +365,7 @@ class QLRepository {
     this.isArchived = false,
     this.updatedAt,
     this.pushedAt,
+    this.createdAt,
     this.url = '',
     this.openIssuesCount = 0,
     this.licenseInfo,
@@ -400,135 +401,142 @@ class QLRepository {
     this.tagsCount = 0,
   });
 
-  /// 仓库名
+  /// `String!` 仓库名
   final String name;
 
-  /// 仓库所有者
-  final QLRepositoryOwner? owner;
+  /// `RepositoryOwner!` 仓库所有者
+  final QLRepositoryOwner owner;
 
-  /// 父仓库，一般为fork来的
+  /// `Repository` 父仓库，一般为fork来的
   final QLRepository? parent;
 
-  /// 被fork的总数
+  /// `GistConnection!.Int!` 被fork的总数
   final int forksCount;
 
-  /// 被点赞的总数
+  /// `Int!` 被点赞的总数
   final int stargazersCount;
 
-  /// 是否为私有项目
+  /// `Boolean` 是否为私有项目
   final bool isPrivate;
 
-  /// 仓库描述
+  /// `String` 仓库描述
   final String description;
 
-  /// 是否已归档
+  /// `Boolean!` 是否已归档
   final bool isArchived;
 
-  /// 更新时间
+  /// `DateTime!` 更新时间
   final DateTime? updatedAt;
 
-  /// 最后推送时间
+  /// `DateTime!` 创建时间
+  /// TODO: 字段没在查询中，只是放在，以后再弄
+  final DateTime? createdAt;
+
+  /// `DateTime` 最后推送时间
   final DateTime? pushedAt;
 
-  /// 仓库HTTP链接
+  /// `URI!` 仓库HTTP链接
   final String url;
 
-  /// 仓库牌打开的issues总数
+  /// `IssueConnection!.Int!` 仓库牌打开的issues总数
   final int openIssuesCount;
 
-  /// 仓库许可协议信息
+  /// `License` 仓库许可协议信息
   final QLLicense? licenseInfo;
 
-  /// 仓库标签列表，可被搜索的tag
+  /// `RepositoryTopicConnection!` 仓库标签列表，可被搜索的tag  实际字段 `repositoryTopics`
   final List<String>? topics;
 
-  /// 是否被禁用
+  /// `Boolean!` 是否被禁用
   final bool isDisabled;
 
-  ///  是否允许被fork？？？
+  /// `Boolean!` 是否允许被fork？？？
   final bool forkingAllowed;
 
-  /// 是否启用了issues
+  /// `Boolean!` 是否启用了issues
   final bool hasIssuesEnabled;
 
-  /// 是否启用了Projects
+  /// `Boolean!` 是否启用了Projects
   final bool hasProjectsEnabled;
 
-  /// 是否启用了WIKI页
+  /// `Boolean!` 是否启用了WIKI页
   final bool hasWikiEnabled;
 
-  /// 自定义的一个主页
+  /// `URI` 自定义的一个主页
   final String homepageUrl;
 
-  /// 是否fork？这个值是自己当前？
+  /// `Boolean!` 是否fork？这个值是自己当前？
   final bool isFork;
 
-  /// 是否为一个模板
+  /// `Boolean!` 是否为一个模板
   final bool isTemplate;
 
-  /// 镜像地址
+  /// `URI` 镜像地址
   final String mirrorUrl;
 
-  /// 默认分支信息
+  /// `Ref` 默认分支信息
   final QLRef defaultBranchRef;
 
-  /// 仓库关注数
+  /// `UserConnection!.Int!` 仓库关注数
   final int watchersCount;
 
-  /// 仓库主要使用的编程语言
+  /// `Language` 仓库主要使用的编程语言
   final QLLanguage primaryLanguage;
 
-  /// 是否为一个组织的项目
+  /// `Boolean!` 是否为一个组织的项目
   final bool isInOrganization;
 
-  /// 当前处于打开状态的合并请求
+  /// `PullRequestConnection!.Int!` 当前处于打开状态的合并请求
   final int openPullRequestsCount;
 
-  /// 归档时间
+  /// `DateTime` 归档时间
   final DateTime? archivedAt;
 
-  /// 使用磁盘空间大小
+  /// `Int` 使用磁盘空间大小
   final int diskUsage;
 
-  /// 是否有赞助按钮？
+  /// `Boolean!` 是否有赞助按钮？
   final bool hasSponsorshipsEnabled;
+
+  /// `Boolean!`
   final bool isBlankIssuesEnabled;
 
-  /// 是否为空仓库
+  /// `Boolean!` 是否为空仓库
   final bool isEmpty;
 
-  /// 是否被锁定
+  /// `Boolean!` 是否被锁定
   final bool isLocked;
 
-  /// 是否为一个镜像
+  /// `Boolean!` 是否为一个镜像
   final bool isMirror;
 
-  /// 当前用户能定阅，应该要登录吧
+  /// `Boolean!` 当前用户能定阅，应该要登录吧
   final bool viewerCanSubscribe;
 
-  /// 当前用户能点赞，应该要登录吧
+  /// `Boolean!` 当前用户能点赞，应该要登录吧
   final bool viewerHasStarred;
 
-  /// 当前查看者权限
+  /// `RepositoryPermission` 当前查看者权限
   final QLRepositoryPermission? permission;
 
-  /// 当前查看者定阅状态
+  /// `SubscriptionState` 当前查看者定阅状态
   final QLSubscriptionState? viewerSubscription;
 
-  /// Release总数量
+  /// `ReleaseConnection!.Int!`Release总数量
   final int releasesCount;
 
-  /// 最后一次发布的信息
+  /// `Release` 最后一次发布的信息
   final QLRelease? latestRelease;
 
-  /// 分支总数
+  /// `RefConnection.Int!` 分支总数
   final int refsCount;
 
-  /// tags总数
+  /// `RefConnection.Int!` tags总数
   final int tagsCount;
 
   /// 仓库全名：${owner.login}/$name
-  String get fullName => "${owner?.login}/$name";
+  /// 其实也可以使用`nameWithOwner`来读取
+  String get fullName => "${owner.login}/$name";
 
   /// 当前查看用户是否已订阅，也就是watch
   bool get viewerHasSubscribed =>
@@ -594,7 +602,7 @@ class QLRepository {
           : const QLLanguage(),
       owner: input['owner'] != null
           ? QLRepositoryOwner.fromJson(input['owner'])
-          : null,
+          : const QLRepositoryOwner(login: ''),
       licenseInfo: input['licenseInfo'] == null
           ? null
           : QLLicense.fromJson(input['licenseInfo']),
@@ -678,48 +686,52 @@ class QLUser extends QLActor {
     this.location = '',
     this.email = '',
     this.bio = '',
-    this.status = const QLUserStatus(),
+    this.status,
     this.followersCount = 0,
     this.followingCount = 0,
     this.twitterUsername = '',
-    this.pinnedItems,
+    this.pinnedItems = const [],
   });
 
-  /// 是否登录的用户
+  /// `Boolean!` 是否登录的用户
   final bool isViewer;
 
-  /// 用户昵称
+  /// `String` 用户昵称
   final String name;
 
-  /// 公司信息
+  /// `String` 公司信息
   final String company;
 
-  /// 个人网站
+  /// `URI` 个人网站
   final String websiteUrl;
 
-  /// 位置
+  /// `String` 位置
   final String location;
 
-  /// 邮箱
+  /// `String!` 邮箱
   final String email;
 
-  /// 签名信息
+  /// `String` 签名信息
   final String bio;
 
-  /// 用户状态
-  final QLUserStatus status;
+  /// `UserStatus` 用户状态
+  final QLUserStatus? status;
 
-  /// 关注“我”的人
+  /// `FollowingConnection!.Int!` 关注“我”的人
   final int followersCount;
 
-  /// “我”关注的人
+  /// `FollowerConnection!.Int!` “我”关注的人
   final int followingCount;
 
-  /// twitter用户名，现在为x的用户名
+  /// `String` twitter用户名，现在为x的用户名
   final String twitterUsername;
 
-  /// 置顶项目
-  final List<QLRepository>? pinnedItems;
+  //createdAt (DateTime!)
+  //isFollowingViewer (Boolean!)
+  //userViewType (UserViewType!)
+
+  /// `PinnableItemConnection!` 置顶项目
+  final List<QLRepository> pinnedItems;
 
   factory QLUser.fromJson(Map<String, dynamic> input) {
     input = input['viewer'] ?? input['user'] ?? input['organization'] ?? input;
@@ -744,7 +756,7 @@ class QLUser extends QLActor {
           ? List.of(input['pinnedItems']?['nodes'])
               .map((e) => QLRepository.fromJson(e))
               .toList()
-          : null,
+          : const [],
     );
   }
 }
@@ -760,9 +772,16 @@ class QLLabel {
     this.isDefault = false,
   });
 
+  /// `String!`
   final String name;
+
+  /// `String!`
   final String color;
+
+  /// `String`
   final String description;
+
+  /// `Boolean!`
   final bool isDefault;
 
   QLLabel.fromJson(Map<String, dynamic> input)
@@ -791,21 +810,21 @@ class QLIssueOrPullRequestOrCommentBase {
     this.updatedAt,
   });
 
-  /// 创建的作者信息
+  /// `Actor` 创建的作者信息
   final QLActor? author;
 
-  /// 内容
+  /// `String!` 内容
   final String body;
 
   //final String? bodyHTML;
 
-  /// Returns whether or not a comment has been minimized.
+  /// `Boolean!` Returns whether or not a comment has been minimized.
   final bool isMinimized;
 
   //Returns why the comment was minimized. One of abuse, off-topic, outdated, resolved, duplicate and spam. Note that the case and formatting of these values differs from the inputs to the MinimizeComment mutation.
   //final String minimizedReason
 
-  /// 创建时间
+  /// `DateTime!` 创建时间
   final DateTime? createdAt;
 
   /// 编辑人的信息
@@ -814,7 +833,7 @@ class QLIssueOrPullRequestOrCommentBase {
   /// 最后一次编辑时间
   final DateTime? lastEditedAt;
 
-  /// 更新的时间
+  /// `DateTime!` 更新的时间
   final DateTime? updatedAt;
 }
 
@@ -839,32 +858,34 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
     this.labels = const [],
     this.commentsCount = 0,
     this.locked = false,
-    this.state,
+    this.state = 'OPEN',
     this.viewerCanClose = false,
     this.viewerCanReopen = true,
   });
 
-  /// issue或者pullRequest的编号
+  /// `Int!` issue或者pullRequest的编号
   final int number;
 
-  /// 标题
+  /// `String!` 标题
   final String title;
 
   /// 关闭时间
   final DateTime? closedAt;
 
-  /// 标签列表
+  /// `LabelConnection` 标签列表
   final List<QLLabel> labels;
 
-  /// 评论总数
+  // isAnswered (Boolean)
+
+  /// `IssueCommentConnection!.Int!` 评论总数
   final int commentsCount;
 
-  /// 是否已锁定
+  /// `Boolean!` 是否已锁定
   final bool locked;
 
   // final milestone;
-  /// 状态 取值 `OPEN` 和 `CLOSED`，如果QLPullRequest时可多取值`MERGED`
-  final String? state;
+  /// `IssueState!` or `PullRequestState!` 状态 取值 `OPEN` 和 `CLOSED`，如果QLPullRequest时可多取值`MERGED`
+  final String state;
 
   /// 当前用户是否能关闭
   final bool viewerCanClose;
@@ -914,13 +935,18 @@ class QLIssueType {
     this.name = '',
   });
 
-  /// https://docs.github.com/zh/graphql/reference/enums#issuetypecolor
+  /// `IssueTypeColor!` https://docs.github.com/zh/graphql/reference/enums#issuetypecolor
   final QLIssueTypeColor color;
+
+  /// `String`
   final String description;
+
+  /// `Boolean!`
   final bool isEnabled;
 
   //isPrivate is deprecated.
   // final bool isPrivate;
+  /// `String!`
   final String name;
 
   QLIssueType.fromJson(Map<String, dynamic> input)
@@ -955,6 +981,7 @@ class QLIssue extends QLIssueOrPullRequest {
     this.issueType,
   });
 
+  /// `IssueType
   final QLIssueType? issueType;
 
   QLIssue.fromJson(Map<String, dynamic> input)
@@ -1092,6 +1119,28 @@ class QLComment extends QLIssueOrPullRequestOrCommentBase {
         );
 }
 
+class QLSubmodule {
+  const QLSubmodule(
+      {this.branch = '', this.gitUrl = '', this.name = '', this.path = ''});
+
+  /// `String`
+  final String branch;
+
+  /// `URI!`
+  final String gitUrl;
+
+  /// `String!`
+  final String name;
+
+  /// `String!`
+  final String path;
+  QLSubmodule.fromJson(Map<String, dynamic> input)
+      : branch = input['branch'] ?? '',
+        name = input['name'] ?? '',
+        path = input['path'] ?? '',
+        gitUrl = input['gitUrl'] ?? '';
+}
+
 ///==========GitObject 的实现方式
 // Blob
 // Commit
@@ -1111,43 +1160,52 @@ class QLTree {
     this.path = '',
     this.size = 0,
     this.type = '',
+    this.submodule,
   });
 
-  /// 文件扩展名
+  /// `String` 文件扩展名
   //final String extension;
 
-  /// 本文件所用的编程语言
+  /// `Language` 本文件所用的编程语言
   //final QLLanguage language;
 
-  /// 是否已生成此树状条目
+  /// `Boolean!` 是否已生成此树状条目
   final bool isGenerated;
 
-  /// 文件行数
+  /// `Int` 文件行数
   //final int lineCount;
 
-  /// 文件名
+  /// `String!` 文件名
   final String name;
 
   /// Entry file name. (Base64-encoded).
   /// nameRaw
 
-  /// 文件路径
+  /// `String` 文件路径
   final String path;
 
   /// The full path of the file. (Base64-encoded).
   /// pathRaw
 
-  /// 文件size
+  /// `Int!` 文件size
   final int size;
 
-  /// 类型： `blob`=文件、`tree`=目录
+  /// `String!` 类型： `blob`=文件、`tree`=目录, `commit`=子模块
   final String type;
+
+  /// `Submodule`
+  final QLSubmodule? submodule;
+  //
+  // If the TreeEntry is for a directory occupied by a submodule project, this returns the corresponding submodule.
 
   /// 是否为文件
   bool get isFile => type == "blob";
 
   /// 是否为目录
   bool get isDir => type == "tree";
+
+  /// 是否为子模块
+  bool get isSubmodule => type == "commit";
 
   /// submodule (Submodule)
   ///
@@ -1163,7 +1221,10 @@ class QLTree {
         name = input['name'] ?? '',
         path = input['path'] ?? '',
         size = input['size'] ?? 0,
-        type = input['type'] ?? '';
+        type = input['type'] ?? '',
+        submodule = input['submodule'] == null
+            ? null
+            : QLSubmodule.fromJson(input['submodule']);
 }
 
 /// 文件数据
@@ -1178,19 +1239,19 @@ class QLBlob {
     this.text = '',
   });
 
-  /// Git 对象 ID
+  /// `GitObjectID!` Git 对象 ID
   final String oid;
 
-  /// Blob 对象的字节大小
+  /// `Int!` Blob 对象的字节大小
   final int byteSize;
 
-  /// 指示 Blob 是二进制数据还是文本数据。如果无法确定编码方式，则返回 null
+  /// `Boolean` 指示 Blob 是二进制数据还是文本数据。如果无法确定编码方式，则返回 null
   final bool isBinary;
 
-  /// 指示内容是否被截断
+  /// `Boolean!` 指示内容是否被截断
   final bool isTruncated;
 
-  /// 如果`binary=true`则为`null`，否则为一个UTF8文本数据
+  /// `String` 如果`binary=true`则为`null`，否则为一个UTF8文本数据
   final String? text;
 
   QLBlob.fromJson(Map<String, dynamic> input)

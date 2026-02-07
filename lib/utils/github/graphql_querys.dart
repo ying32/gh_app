@@ -658,6 +658,9 @@ class QLQueries {
               path 
               size 
               type 
+              submodule {
+                branch gitUrl name path 
+              }
            }
         }
        ... on Blob {
@@ -814,18 +817,35 @@ class QLQueries {
   /// 查询指定issue或者pullRequest
   static String queryIssueOrPullRequest(String owner, String name, int number,
       {bool isIssues = true}) {
-    // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
+    // 本想用  fragment 来利用字段，但怎么写都不成功
     return '''query { 
    repository(owner:"$owner", name:"$name") {
-       ${isIssues ? 'issue' : 'pullRequest'}(number: $number) {
-                number
-                author {
-                   login avatarUrl
-                }
-                title  body  
+       issueOrPullRequest  (number: $number) {
+              __typename
+               ... on Issue {
+                  number
+                  author {  login avatarUrl }
+                  title  body  
+               }
+              ... on PullRequest {
+                  number
+                  author {  login avatarUrl }
+                  title  body  
+              }
        }
      }
 }''';
+//     return '''query {
+//    repository(owner:"$owner", name:"$name") {
+//        ${isIssues ? 'issue' : 'pullRequest'}(number: $number) {
+//                 number
+//                 author {
+//                    login avatarUrl
+//                 }
+//                 title  body
+//        }
+//      }
+// }''';
   }
 
   /// 查询一个仓库的所有者信息

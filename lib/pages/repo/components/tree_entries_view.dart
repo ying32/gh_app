@@ -6,17 +6,26 @@ class RepoTreeEntriesView extends StatelessWidget {
     super.key,
   });
 
-  Widget _buildItem(BuildContext context, QLTree file) {
+  Widget _buildItem(BuildContext context, QLTree tree) {
     return ListTile(
       leading: SizedBox(
         width: 24,
-        child: file.isFile
-            ? FileIcon(file.name, size: 24)
-            : DefaultIcon.folder(color: Colors.blue.lighter),
+        child: tree.isFile
+            ? FileIcon(tree.name, size: 24)
+            : tree.isSubmodule
+                ? const DefaultIcon.submodule(color: Colors.grey)
+                : DefaultIcon.folder(color: Colors.blue.lighter),
       ),
-      title: Text(file.name),
+      title: Text(tree.name),
       onPressed: () {
-        context.read<RepoModel>().path = file.path;
+        if (tree.isSubmodule) {
+          showInfoDialog('当前为一个子模块，暂不能跳转',
+              context: context, severity: InfoBarSeverity.warning);
+          //TODO: 这里考虑下是不是跳到仓库去
+          //print('object=${file.submodule?.gitUrl}');
+          return;
+        }
+        context.read<RepoModel>().path = tree.path;
       },
     );
   }
@@ -27,7 +36,9 @@ class RepoTreeEntriesView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ...entries.where((e) => e.isDir).map((e) => _buildItem(context, e)),
+            ...entries
+                .where((e) => e.isDir || e.isSubmodule)
+                .map((e) => _buildItem(context, e)),
             ...entries
                 .where((e) => e.isFile)
                 .map((e) => _buildItem(context, e)),

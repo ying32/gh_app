@@ -152,7 +152,7 @@ class IssuesCommentsView extends StatelessWidget {
             children: snapshot.data
                 .map((e) => IssueCommentItem(
                       item: e,
-                      owner: repo.owner?.login,
+                      owner: repo.owner.login,
                       openAuthor: data.author?.login,
                     ))
                 .toList(),

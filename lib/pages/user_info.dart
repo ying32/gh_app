@@ -25,7 +25,7 @@ class UserInfoPage extends StatelessWidget {
             direction: Axis.vertical,
           ),
         ),
-        if (user?.pinnedItems?.isNotEmpty ?? false)
+        if (user?.pinnedItems.isNotEmpty ?? false)
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.max,
@@ -42,7 +42,7 @@ class UserInfoPage extends StatelessWidget {
                 Wrap(
                   runSpacing: 10,
                   spacing: 10,
-                  children: user!.pinnedItems!
+                  children: user!.pinnedItems
                       .map((e) => SizedBox(
                           // height: 160,
                           width: 300,

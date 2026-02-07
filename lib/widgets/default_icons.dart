@@ -31,6 +31,7 @@ class DefaultIcons {
   static const readme = Remix.book_open_line;
   static const license = Remix.scales_line;
   static const folder = Remix.folder_fill;
+  static const submodule = Remix.folder_transfer_fill;
   static const drive = Remix.drive_line;
   static const group = Remix.group_line;
   static const organization = Remix.organization_chart;
@@ -146,6 +147,9 @@ class DefaultIcon extends StatelessWidget {
 
   const DefaultIcon.folder({super.key, this.size, this.color})
       : icon = DefaultIcons.folder;
+
+  const DefaultIcon.submodule({super.key, this.size, this.color})
+      : icon = DefaultIcons.submodule;
 
   const DefaultIcon.drive({super.key, this.size, this.color})
       : icon = DefaultIcons.drive;

@@ -161,7 +161,7 @@ class APIWrap {
   /// 用户信息
   Future<QLRepository?> userRepo(QLRepository repo, {bool? force}) async {
     return gitHubAPI.query(
-        QLQuery(QLQueries.queryRepo(repo.owner!.login, repo.name)),
+        QLQuery(QLQueries.queryRepo(repo.owner.login, repo.name)),
         convert: QLRepository.fromJson,
         force: force);
   }
@@ -183,7 +183,7 @@ class APIWrap {
     }
 
     final res = await gitHubAPI.query(
-        QLQuery(QLQueries.queryRepoReleases(repo.owner!.login, repo.name,
+        QLQuery(QLQueries.queryRepoReleases(repo.owner.login, repo.name,
             count: count, nextCursor: nextCursor)),
         force: force,
         secondUpdateCallback: onSecondUpdate == null
@@ -211,7 +211,7 @@ class APIWrap {
     }
 
     final res = await gitHubAPI.query(
-        QLQuery(QLQueries.queryRepoReleaseAssets(repo.owner!.login, repo.name,
+        QLQuery(QLQueries.queryRepoReleaseAssets(repo.owner.login, repo.name,
             tagName: release.tagName, count: count, nextCursor: nextCursor)),
         force: force,
         secondUpdateCallback: onSecondUpdate == null
@@ -256,7 +256,7 @@ class APIWrap {
     bool? force,
   }) async {
     final res = await gitHubAPI.query(
-        QLQuery(QLQueries.queryRepoRefs(repo.owner!.login, repo.name,
+        QLQuery(QLQueries.queryRepoRefs(repo.owner.login, repo.name,
             count: count, nextCursor: nextCursor, refPrefix: refPrefix)),
         force: force);
     if (res == null) return const QLList.empty();
@@ -282,7 +282,7 @@ class APIWrap {
     }
 
     final res = await gitHubAPI.query(
-        QLQuery(QLQueries.queryObject(repo.owner!.login, repo.name,
+        QLQuery(QLQueries.queryObject(repo.owner.login, repo.name,
             path: path, ref: ref)),
         force: force,
         secondUpdateCallback: onSecondUpdate == null
@@ -369,16 +369,16 @@ class APIWrap {
 
     //open, closed, all
     final res = await gitHubAPI.query(
-        QLQuery(QLQueries.queryRepoIssuesOrPullRequests(
-            repo.owner!.login, repo.name,
-            states: isMerged
-                ? 'MERGED'
-                : isOpen
-                    ? 'OPEN'
-                    : 'CLOSED',
-            isIssues: isIssues,
-            count: count,
-            nextCursor: nextCursor)),
+        QLQuery(
+            QLQueries.queryRepoIssuesOrPullRequests(repo.owner.login, repo.name,
+                states: isMerged
+                    ? 'MERGED'
+                    : isOpen
+                        ? 'OPEN'
+                        : 'CLOSED',
+                isIssues: isIssues,
+                count: count,
+                nextCursor: nextCursor)),
         force: force,
         secondUpdateCallback: onSecondUpdate == null
             ? null
@@ -447,7 +447,7 @@ class APIWrap {
 
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryIssueComments(
-            repo.owner!.login, repo.name, number,
+            repo.owner.login, repo.name, number,
             count: count, nextCursor: nextCursor, isIssues: isIssues)),
         force: force,
         secondUpdateCallback: onSecondUpdate == null
@@ -468,11 +468,12 @@ class APIWrap {
   }) async {
     final res = await gitHubAPI.query(
         QLQuery(QLQueries.queryIssueOrPullRequest(
-            repo.owner!.login, repo.name, number,
+            repo.owner.login, repo.name, number,
             isIssues: isIssues)),
         force: force);
     if (res == null) return null;
-    final input = res['repository']?[isIssues ? 'issue' : 'pullRequest'];
+    final input = res['repository']?['issueOrPullRequest'] ??
+        res['repository']?[isIssues ? 'issue' : 'pullRequest'];
     if (input == null) return null;
     return convert(input);
   }

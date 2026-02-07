@@ -83,7 +83,7 @@ class PullRequestDetails extends StatelessWidget {
                   children: [
                     IssueCommentItem(
                         item: pull,
-                        owner: repo.owner?.login,
+                        owner: repo.owner.login,
                         openAuthor: pull.author?.login,
                         isFirst: true),
                     IssuesCommentsView(pull, repo: repo),
