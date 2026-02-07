@@ -28,6 +28,7 @@ part 'repo/code.dart';
 part 'repo/components/about.dart';
 part 'repo/components/breadcrumb_bar.dart';
 part 'repo/components/file_content_view.dart';
+part 'repo/components/languages.dart';
 part 'repo/components/readme.dart';
 part 'repo/components/refs.dart';
 part 'repo/components/releases.dart';

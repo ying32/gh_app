@@ -500,9 +500,12 @@ class APIWrap {
   dynamic tryParseGithubUrl(Uri? uri) {
     if (uri == null) return null;
     final segments = uri.pathSegments.where((e) => e.isNotEmpty).toList();
-    if (segments.length < 2) return null;
-    // 最少2个
+    if (segments.isEmpty) return null;
+    // 只有一个的时候，是组织或者用户名
+    // TODO: 先不弄了
     final login = segments[0].trim();
+    // 最少2个
+    if (segments.length < 2) return null;
     var repoName = segments[1].trim();
     if (repoName.endsWith(".git")) {
       repoName = repoName.substring(0, repoName.length - 4);

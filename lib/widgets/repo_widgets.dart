@@ -215,13 +215,14 @@ class RepoItemForkInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const style = TextStyle(fontSize: 12);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: Row(
         children: [
-          const Text('forked 自 '),
+          const Text('分叉自 ', style: style),
           LinkButton(
-              text: Text('${repo.parent?.fullName}'),
+              text: Text('${repo.parent?.fullName}', style: style),
               onPressed: () {
                 RepoPage.createNewTab(context, repo.parent!);
               })

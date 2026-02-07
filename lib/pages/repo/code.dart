@@ -139,6 +139,8 @@ class _CodePageRight extends StatelessWidget {
         SizedBox(width: double.infinity, child: Card(child: RepoAbout())),
         SizedBox(height: 2),
         SizedBox(width: double.infinity, child: RepoReleases()),
+        SizedBox(height: 2),
+        SizedBox(width: double.infinity, child: RepoLanguages()),
       ],
     );
   }
