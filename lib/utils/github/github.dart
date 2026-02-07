@@ -103,7 +103,7 @@ class APIWrap {
     if (gitHubAPI.isAnonymous) {
       return null;
     }
-    return gitHubAPI.query(QLQueries.queryUser(),
+    return gitHubAPI.query(QLQueries.queryViewer(),
         convert: QLUser.fromJson,
         force: force,
         secondUpdateCallback: onSecondUpdate == null
@@ -112,13 +112,30 @@ class APIWrap {
   }
 
   /// 指定用户信息
-  Future<QLUser?> userInfo(String name, {bool? force}) => gitHubAPI
-      .query(QLQueries.queryUser(name), convert: QLUser.fromJson, force: force);
-
+  // Future<QLUser?> userInfo(String name, {bool? force}) =>
+  //     gitHubAPI.query(QLQueries.queryRepoOwner(name),
+  //         convert: QLUser.fromJson, force: force);
+  //
+  // /// 指定组织信息
+  // Future<QLOrganization?> organizationInfo(String name, {bool? force}) =>
+  //     gitHubAPI.query(QLQueries.queryRepoOwner(name),
+  //         convert: QLOrganization.fromJson, force: force);
   /// 指定组织信息
-  Future<QLOrganization?> organizationInfo(String name, {bool? force}) =>
-      gitHubAPI.query(QLQueries.queryOrganization(name),
-          convert: QLOrganization.fromJson, force: force);
+  Future<QLUserOrOrganizationCommon?> ownerInfo(String login,
+      {bool? force}) async {
+    var res =
+        await gitHubAPI.query(QLQueries.queryRepoOwner(login), force: force);
+    if (res == null) return null;
+    res = res['repositoryOwner'];
+    if (res == null) return null;
+    final typeName = res['__typename'];
+    if (typeName == "User") {
+      return QLUser.fromJson(res);
+    } else if (typeName == 'Organization') {
+      return QLOrganization.fromJson(res);
+    }
+    return null;
+  }
 
   /// 获取仓库列表信息
   /// TODO: 这里还要传个东西，判断是否为组织的

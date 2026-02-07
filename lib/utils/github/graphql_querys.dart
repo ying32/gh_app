@@ -183,37 +183,56 @@ fragment organizationFields on Organization {
 } 
 ''';
 
+  /// 查询登录用户信息
+  ///
+  /// https://docs.github.com/zh/graphql/reference/objects#user
+  ///
+  /// [name] 如果为空则查询当前登录的User信息，需要header中加入认证的
+  static QLQuery queryViewer() {
+    return const QLQuery('''
+query {  
+  viewer {
+    __typename
+    ... on User {
+      ...userFields
+    }
+  }
+}
+$_userFieldsFragment
+''');
+  }
+
   /// 查询用户信息
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#user
   ///
   /// [name] 如果为空则查询当前登录的User信息，需要header中加入认证的
-  static QLQuery queryUser([String name = '']) {
-    return QLQuery('''
-query(\$login: String!, \$isViewer: Boolean!) {  
-  viewer @include(if: \$isViewer) {
-    __typename
-    ...userFields
-  }
-  user(login:\$login) @skip(if: \$isViewer) {
-    __typename
-    ...userFields
-  }
-}
-$_userFieldsFragment
-''', variables: {"login": name, "isViewer": name.isEmpty});
-  }
-
-  /// 查询一个组织信息
-  static QLQuery queryOrganization(String name) {
-    return QLQuery('''query(\$login: String!) { 
-  organization(login:\$login) {
-    ...organizationFields
-  }
-}
-$_organizationFieldsFragment
-''', variables: {"login": name});
-  }
+//   static QLQuery queryUser([String name = '']) {
+//     return QLQuery('''
+// query(\$login: String!, \$isViewer: Boolean!) {
+//   viewer @include(if: \$isViewer) {
+//     __typename
+//     ...userFields
+//   }
+//   user(login:\$login) @skip(if: \$isViewer) {
+//     __typename
+//     ...userFields
+//   }
+// }
+// $_userFieldsFragment
+// ''', variables: {"login": name, "isViewer": name.isEmpty});
+//   }
+//
+//   /// 查询一个组织信息
+//   static QLQuery queryOrganization(String name) {
+//     return QLQuery('''query(\$login: String!) {
+//   organization(login:\$login) {
+//     ...organizationFields
+//   }
+// }
+// $_organizationFieldsFragment
+// ''', variables: {"login": name});
+//   }
 
   /// 查询“我”关注的或者关注“我”的用户信息
   static QLQuery queryFollowerUsers(

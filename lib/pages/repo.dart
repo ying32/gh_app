@@ -175,10 +175,10 @@ class _InternalRepoPage extends StatelessWidget {
                 // 随便整的，先简单整下
                 LoadingDialog.show(context);
 
-                final future = repo.isInOrganization
-                    ? APIWrap.instance.organizationInfo(repo.owner.login)
-                    : APIWrap.instance.userInfo(repo.owner.login);
-                future.then((user) {
+                // final future = repo.isInOrganization
+                //     ? APIWrap.instance.organizationInfo(repo.owner.login)
+                //     : APIWrap.instance.userInfo(repo.owner.login);
+                APIWrap.instance.ownerInfo(repo.owner.login).then((user) {
                   closeDialog(context); //???
                   if (user == null) return;
                   UserInfoPage.createNewTab(context, user);

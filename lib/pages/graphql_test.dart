@@ -262,7 +262,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
                         MenuFlyoutItem(
                             text: const Text('当前用户信息'),
                             onPressed: () {
-                              final ql = QLQueries.queryUser();
+                              final ql = QLQueries.queryViewer();
                               _controller.text = ql.document;
                               _argsController.text = _decodeParams(ql);
                             }),
@@ -275,9 +275,9 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
-                            text: const Text('其他用户信息'),
+                            text: const Text('其他用户或者组织信息'),
                             onPressed: () {
-                              final ql = QLQueries.queryUser('ying32');
+                              final ql = QLQueries.queryRepoOwner('ying32');
                               _controller.text = ql.document;
                               _argsController.text = _decodeParams(ql);
                             }),
@@ -302,7 +302,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             text: const Text('查询组织信息'),
                             onPressed: () {
                               final ql =
-                                  QLQueries.queryOrganization('zed-industries');
+                                  QLQueries.queryRepoOwner('zed-industries');
                               _controller.text = ql.document;
                               _argsController.text = _decodeParams(ql);
                             }),
