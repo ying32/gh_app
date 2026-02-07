@@ -103,7 +103,7 @@ class APIWrap {
     if (gitHubAPI.isAnonymous) {
       return null;
     }
-    return gitHubAPI.query(QLQuery(QLQueries.queryUser()),
+    return gitHubAPI.query(QLQueries.queryUser(),
         convert: QLUser.fromJson,
         force: force,
         secondUpdateCallback: onSecondUpdate == null
@@ -112,9 +112,8 @@ class APIWrap {
   }
 
   /// 指定用户信息
-  Future<QLUser?> userInfo(String name, {bool? force}) =>
-      gitHubAPI.query(QLQuery(QLQueries.queryUser(name)),
-          convert: QLUser.fromJson, force: force);
+  Future<QLUser?> userInfo(String name, {bool? force}) => gitHubAPI
+      .query(QLQueries.queryUser(name), convert: QLUser.fromJson, force: force);
 
   /// 指定组织信息
   Future<QLOrganization?> organizationInfo(String name, {bool? force}) =>

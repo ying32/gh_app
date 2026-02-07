@@ -5,6 +5,7 @@ import 'package:flutter/material.dart' as mat;
 import 'package:gh_app/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
+import 'graphql_querys.dart';
 import 'http_cache.dart';
 
 /// 分页信息，按规则传递。比如：
@@ -651,43 +652,6 @@ class QLRepository {
   }
 }
 
-/// 组织用户
-///
-/// 不要那么多东西，所以合并到QLUser上面
-///
-/// https://docs.github.com/zh/graphql/reference/objects#organization
-typedef QLOrganization = QLUser;
-
-///
-// class QLOrganization extends QLUser {
-//   const QLOrganization({
-//     required super.login,
-//   });
-//
-//   factory QLOrganization.fromJson(Map<String, dynamic> input) {
-//     input = input['viewer'] ?? input['organization'] ?? input;
-//     return QLOrganization(
-//       login: input['login'] ?? '',
-//       // name: input['name'] ?? '',
-//       // avatarUrl: input['avatarUrl'] ?? '',
-//       // company: input['company'] ?? '',
-//       // bio: input['bio'] ?? '',
-//       // email: input['email'] ?? '',
-//       // location: input['location'] ?? '',
-//       // twitterUsername: input['twitterUsername'] ?? '',
-//       // url: input['url'] ?? '',
-//       // websiteUrl: input['websiteUrl'] ?? '',
-//       // followersCount: _getTotalCount(input['followers']),
-//       // followingCount: _getTotalCount(input['following']),
-//       // pinnedItems: input['pinnedItems']?['nodes'] != null
-//       //     ? List.of(input['pinnedItems']?['nodes'])
-//       //     .map((e) => QLRepository.fromJson(e))
-//       //     .toList()
-//       //     : null,
-//     );
-//   }
-// }
-
 /// 用户状态
 ///
 /// https://docs.github.com/zh/graphql/reference/objects#userstatus
@@ -704,45 +668,71 @@ class QLUserStatus {
         message = input['message'] ?? '';
 }
 
+/// 用户和组织公用的
+class QLUserOrOrganizationCommon extends QLActor {
+  const QLUserOrOrganizationCommon({
+    required super.login,
+    super.avatarUrl,
+    super.url,
+    this.createdAt,
+    this.name = '',
+    this.email = '',
+    this.location = '',
+    this.twitterUsername = '',
+    this.websiteUrl = '',
+    this.pinnedItems = const QLList.empty(),
+  });
+
+  /// createdAt (DateTime!)
+  final DateTime? createdAt;
+
+  /// `String` 用户昵称
+  final String name;
+
+  /// `String!` 邮箱
+  final String email;
+
+  /// `String` 位置
+  final String location;
+
+  /// `String` twitter用户名，现在为x的用户名
+  final String twitterUsername;
+
+  /// `URI` 个人网站
+  final String websiteUrl;
+
+  /// `PinnableItemConnection!` 置顶项目
+  final QLList<QLRepository> pinnedItems;
+}
+
 /// 个人用户
 ///
 /// https://docs.github.com/zh/graphql/reference/objects#user
-class QLUser extends QLActor {
+class QLUser extends QLUserOrOrganizationCommon {
   const QLUser({
     required super.login,
     super.avatarUrl,
     super.url,
+    super.createdAt,
+    super.name,
+    super.email,
+    super.location,
+    super.twitterUsername,
+    super.websiteUrl,
+    super.pinnedItems,
     this.isViewer = false,
-    this.name = '',
     this.company = '',
-    this.websiteUrl = '',
-    this.location = '',
-    this.email = '',
     this.bio = '',
     this.status,
     this.followersCount = 0,
     this.followingCount = 0,
-    this.twitterUsername = '',
-    this.pinnedItems = const QLList.empty(),
   });
 
   /// `Boolean!` 是否登录的用户
   final bool isViewer;
 
-  /// `String` 用户昵称
-  final String name;
-
   /// `String` 公司信息
   final String company;
-
-  /// `URI` 个人网站
-  final String websiteUrl;
-
-  /// `String` 位置
-  final String location;
-
-  /// `String!` 邮箱
-  final String email;
 
   /// `String` 签名信息
   final String bio;
@@ -756,15 +746,9 @@ class QLUser extends QLActor {
   /// `FollowerConnection!.Int!` “我”关注的人
   final int followingCount;
 
-  /// `String` twitter用户名，现在为x的用户名
-  final String twitterUsername;
-
   //createdAt (DateTime!)
   //isFollowingViewer (Boolean!)
   //userViewType (UserViewType!)
-
-  /// `PinnableItemConnection!` 置顶项目
-  final QLList<QLRepository> pinnedItems;
 
   factory QLUser.fromJson(Map<String, dynamic> input) {
     input = input['viewer'] ?? input['user'] ?? input['organization'] ?? input;
@@ -785,6 +769,53 @@ class QLUser extends QLActor {
       websiteUrl: input['websiteUrl'] ?? '',
       followersCount: _getTotalCount(input['followers']),
       followingCount: _getTotalCount(input['following']),
+      pinnedItems:
+          QLList.maybeFromJson(input['pinnedItems'], QLRepository.fromJson) ??
+              const QLList.empty(),
+    );
+  }
+}
+
+/// 组织用户
+///
+/// 不要那么多东西，所以合并到QLUser上面
+///
+/// https://docs.github.com/zh/graphql/reference/objects#organization
+///
+class QLOrganization extends QLUserOrOrganizationCommon {
+  const QLOrganization({
+    required super.login,
+    super.avatarUrl,
+    super.url,
+    super.createdAt,
+    super.name,
+    super.email,
+    super.location,
+    super.twitterUsername,
+    super.websiteUrl,
+    super.pinnedItems,
+    this.description = '',
+  });
+
+  /// description (String)
+  final String description;
+  // isVerified (Boolean!)
+  // organizationBillingEmail (String)
+  // teams (TeamConnection!)
+
+  factory QLOrganization.fromJson(Map<String, dynamic> input) {
+    input = input['viewer'] ?? input['organization'] ?? input;
+    return QLOrganization(
+      login: input['login'] ?? '',
+      avatarUrl: input['avatarUrl'] ?? '',
+      url: input['url'] ?? '',
+      name: input['name'] ?? '',
+      email: input['email'] ?? '',
+      location: input['location'] ?? '',
+      twitterUsername: input['twitterUsername'] ?? '',
+      websiteUrl: input['websiteUrl'] ?? '',
+      // followersCount: _getTotalCount(input['followers']),
+      // followingCount: _getTotalCount(input['following']),
       pinnedItems:
           QLList.maybeFromJson(input['pinnedItems'], QLRepository.fromJson) ??
               const QLList.empty(),
@@ -1575,39 +1606,6 @@ class QLTopic {
   // bool viewerHasStarred
 
   QLTopic.fromJson(Map<String, dynamic> json) : name = json['name'] ?? '';
-}
-
-///=============================================================================
-
-/// GraphQL查询
-class QLQuery {
-  const QLQuery(
-    this.body, {
-    this.variables,
-    this.operationName,
-    this.isQuery = true,
-  });
-
-  /// ql语句，不包含query{}或者mutation {}的主体
-  final String body;
-
-  /// [body]中使用的变量
-  final Map<String, dynamic>? variables;
-
-  /// 这个我也不知道干啥的（难道是有多个ql语句指定操作哪个的？？？，没研究过）
-  final String? operationName;
-  final bool isQuery;
-
-  /// 编码后的graphql
-  String get jsonText => jsonEncode(toJson());
-
-  Map<String, dynamic> toJson() => {
-        //TODO: mutation 是不是这样操作呢？还没测试过，到时候测试了再说吧
-        //"query": isQuery ? "query {\n $body \n}" : "mutation {\rn $body \n}",
-        "query": body,
-        if (variables != null) "variables": variables,
-        if (operationName != null) "operationName": operationName,
-      };
 }
 
 /// GraphQL查询

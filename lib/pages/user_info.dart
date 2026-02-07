@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 class UserInfoPage extends StatelessWidget {
   const UserInfoPage(this.user, {super.key});
 
-  final QLUser? user;
+  final QLUserOrOrganizationCommon? user;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,10 @@ class UserInfoPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SizedBox(width: 240, child: UserInfoPanel(user)),
+        SizedBox(
+            width: 240,
+            child:
+                user == null ? const SizedBox.shrink() : UserInfoPanel(user!)),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
           child: Divider(
@@ -56,7 +59,8 @@ class UserInfoPage extends StatelessWidget {
     );
   }
 
-  static void createNewTab(BuildContext context, QLUser user) {
+  static void createNewTab(
+      BuildContext context, QLUserOrOrganizationCommon user) {
     context.read<TabviewModel>().addTab(
           UserInfoPage(user),
           key: ValueKey("${RouterTable.user}/${user.login}"),

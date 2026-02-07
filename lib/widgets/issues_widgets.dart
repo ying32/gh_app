@@ -94,7 +94,7 @@ class IssueCommentItem extends StatelessWidget {
         Container(
           width: 70,
           padding: const EdgeInsets.symmetric(horizontal: 15),
-          child: UserHeadImage(item?.author?.avatarUrl, imageSize: 40),
+          child: UserHeadImage(item?.author, imageSize: 40),
         ),
         Expanded(
           child: _IssueLine(

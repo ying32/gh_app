@@ -81,7 +81,7 @@ class _UserHeadImageButton extends StatelessWidget {
           return const ApplicationIcon(size: 40);
         }
         return UserHeadImage(
-          user.avatarUrl,
+          user,
           imageSize: 40,
           tooltip: user.name.isEmpty ? user.login : user.name,
           onPressed: () {

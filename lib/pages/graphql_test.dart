@@ -89,7 +89,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
     super.dispose();
   }
 
-  Map<String, dynamic>? _parseArgs() {
+  Map<String, dynamic>? _parseParams() {
     Map<String, dynamic>? result;
     // 解析参数
     for (final line in const LineSplitter().convert(_argsController.text)) {
@@ -117,6 +117,19 @@ class _GraphQLTestState extends State<GraphQLTest> {
     return result;
   }
 
+  List<String> _decodeParams(QLQuery query) {
+    if (query.variables != null && query.variables!.isNotEmpty) {
+      return query.variables!.keys.map((key) {
+        final val = query.variables![key];
+        if (val is String) {
+          return '$key="$val"';
+        }
+        return '$key=$val';
+      }).toList();
+    }
+    return [];
+  }
+
   void _doTest() {
     setState(() {
       _loading = true;
@@ -133,7 +146,8 @@ class _GraphQLTestState extends State<GraphQLTest> {
     }
 
     gitHubAPI
-        .query(QLQuery(_controller.text, variables: _parseArgs()), force: true)
+        .query(QLQuery(_controller.text, variables: _parseParams()),
+            force: true)
         .then((e) {
       if (e is Map) {
         setState(() {
@@ -233,7 +247,10 @@ class _GraphQLTestState extends State<GraphQLTest> {
                         MenuFlyoutItem(
                             text: const Text('当前用户信息'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryUser();
+                              final ql = QLQueries.queryUser();
+                              _controller.text = ql.document;
+                              _argsController.text =
+                                  _decodeParams(ql).join("\n");
                             }),
                         MenuFlyoutItem(
                             text: const Text('当前用户仓库列表'),
@@ -244,7 +261,10 @@ class _GraphQLTestState extends State<GraphQLTest> {
                         MenuFlyoutItem(
                             text: const Text('其他用户信息'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryUser('ying32');
+                              final ql = QLQueries.queryUser('ying32');
+                              _controller.text = ql.document;
+                              _argsController.text =
+                                  _decodeParams(ql).join("\n");
                             }),
                         MenuFlyoutItem(
                             text: const Text('查询followers的用户'),

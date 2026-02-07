@@ -168,7 +168,7 @@ class _InternalRepoPage extends StatelessWidget {
         child: Row(
           children: [
             UserHeadImage(
-              repo.owner.avatarUrl,
+              repo.owner,
               imageSize: 45,
               onPressed: () {
                 // showImageDialog(context, repo.owner!.avatarUrl);

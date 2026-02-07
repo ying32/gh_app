@@ -1,4 +1,49 @@
+import 'dart:convert';
+
 import 'package:gh_app/utils/consts.dart';
+
+///=============================================================================
+
+/// GraphQL查询
+class QLQuery {
+  const QLQuery(
+    this.document, {
+    this.variables,
+    this.operationName,
+    this.isQuery = true,
+  });
+
+  /// ql语句（这东西貌似是称为document），不包含query{}或者mutation {}的主体
+  final String document;
+
+  /// 关于变量的定义
+  ///
+  /// ```
+  ///   # 以 $ 开头的
+  ///   #  $login: String  // 可为null的，但貌似需得有默认值？[variables]可不存在
+  ///   #  $login: String = "ying32" // 允许为null的，而且指定了默认值[variables]可不存在
+  ///   #  $login: String!  // 不允许为null，[variables]中必须要有
+  ///   query($)
+  /// ```
+  ///
+  /// [body]中使用的变量
+  final Map<String, dynamic>? variables;
+
+  /// 这个我也不知道干啥的（难道是有多个ql语句指定操作哪个的？？？，没研究过）
+  final String? operationName;
+  final bool isQuery;
+
+  /// 编码后的graphql
+  String get jsonText => jsonEncode(toJson());
+
+  Map<String, dynamic> toJson() => {
+        //TODO: mutation 是不是这样操作呢？还没测试过，到时候测试了再说吧
+        //"query": isQuery ? "query {\n $body \n}" : "mutation {\rn $body \n}",
+        "query": document,
+        if (variables != null) "variables": variables,
+        if (operationName != null) "operationName": operationName,
+      };
+}
 
 ///NOTE: 当如果列表类型有多种时，需要使用 `... on TYPE`来选择记录，否则不需要使用这个，当然使用了也没问题
 ///比如：
@@ -40,12 +85,20 @@ class QLQueries {
   /// https://docs.github.com/zh/graphql/reference/objects#user
   ///
   /// [name] 如果为空则查询当前登录的User信息，需要header中加入认证的
-  static String queryUser([String name = '']) {
-    return '''query {  ${name.isEmpty ? 'viewer' : 'user(login:"$name")'} {
+  static QLQuery queryUser([String name = '']) {
+    return QLQuery('''
+query(\$login: String!, \$isViewer: Boolean!) {  
+  viewer @include(if: \$isViewer) {
+    ...userFields
+  }
+  user(login:\$login) @skip(if: \$isViewer) {
+    ...userFields
+  }
+}
+fragment userFields on User {
     login
     avatarUrl
     url
-    
     name
     company
     bio
@@ -93,8 +146,8 @@ class QLQueries {
         }
       } 
     }
-  }
-}''';
+} 
+''', variables: {"login": name, "isViewer": name.isEmpty});
   }
 
   /// 查询一个组织信息
@@ -852,7 +905,6 @@ class QLQueries {
 
   /// 查询一个仓库的所有者信息
   static String queryRepoOwner(String login) {
-    // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
     return '''query { 
   repositoryOwner(login:"$login") {
     __typename  
