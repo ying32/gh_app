@@ -119,17 +119,20 @@ class _GraphQLTestState extends State<GraphQLTest> {
     return result;
   }
 
-  List<String> _decodeParams(QLQuery query) {
+  String _decodeParams(QLQuery query) {
     if (query.variables != null && query.variables!.isNotEmpty) {
-      return query.variables!.keys.map((key) {
+      final list = query.variables!.keys.map((key) {
         final val = query.variables![key];
         if (val is String) {
           return '$key="$val"';
         }
         return '$key=$val';
-      }).toList();
+      });
+      if (list.isNotEmpty) {
+        return list.join("\n");
+      }
     }
-    return [];
+    return '';
   }
 
   void _doTest() {
@@ -259,13 +262,14 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             onPressed: () {
                               final ql = QLQueries.queryUser();
                               _controller.text = ql.document;
-                              _argsController.text =
-                                  _decodeParams(ql).join("\n");
+                              _argsController.text = _decodeParams(ql);
                             }),
                         MenuFlyoutItem(
                             text: const Text('当前用户仓库列表'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryRepos();
+                              final ql = QLQueries.queryRepos();
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
@@ -273,109 +277,132 @@ class _GraphQLTestState extends State<GraphQLTest> {
                             onPressed: () {
                               final ql = QLQueries.queryUser('ying32');
                               _controller.text = ql.document;
-                              _argsController.text =
-                                  _decodeParams(ql).join("\n");
+                              _argsController.text = _decodeParams(ql);
                             }),
                         MenuFlyoutItem(
                             text: const Text('查询followers的用户'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryFollowerUsers(
+                              final ql = QLQueries.queryFollowerUsers(
                                   name: '', isFollowers: true);
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         MenuFlyoutItem(
                             text: const Text('查询following的用户'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryFollowerUsers(
+                              final ql = QLQueries.queryFollowerUsers(
                                   name: '', isFollowers: false);
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('查询组织信息'),
                             onPressed: () {
-                              _controller.text =
+                              final ql =
                                   QLQueries.queryOrganization('zed-industries');
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('查询仓库所有者信息'),
                             onPressed: () {
-                              _controller.text =
+                              final ql =
                                   QLQueries.queryRepoOwner('zed-industries');
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('仓库信息'),
                             onPressed: () {
-                              _controller.text =
-                                  QLQueries.queryRepo('ying32', 'govcl');
+                              final ql = QLQueries.queryRepo('ying32', 'govcl');
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('仓库Issues信息'),
                             onPressed: () {
-                              _controller.text =
+                              final ql =
                                   QLQueries.queryRepoIssuesOrPullRequests(
                                       'ying32', 'govcl');
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         MenuFlyoutItem(
                             text: const Text('仓库指定Issue信息'),
                             onPressed: () {
-                              _controller.text =
-                                  QLQueries.queryIssueOrPullRequest(
-                                      'ying32', 'govcl', 212);
+                              final ql = QLQueries.queryIssueOrPullRequest(
+                                  'ying32', 'govcl', 212);
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         MenuFlyoutItem(
                             text: const Text('仓库指定Issue评论'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryIssueComments(
+                              final ql = QLQueries.queryIssueComments(
                                   'ying32', 'govcl', 212);
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('仓库PullRequests信息'),
                             onPressed: () {
-                              _controller.text =
+                              final ql =
                                   QLQueries.queryRepoIssuesOrPullRequests(
                                       'ying32', 'govcl',
                                       isIssues: false);
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('仓库Releases'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryRepoReleases(
+                              final ql = QLQueries.queryRepoReleases(
                                   'ying32', 'govcl');
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         MenuFlyoutItem(
                             text: const Text('仓库Releases Assets'),
                             onPressed: () {
-                              _controller.text =
-                                  QLQueries.queryRepoReleaseAssets(
-                                      'ying32', 'govcl',
-                                      tagName: 'v2.2.3');
+                              final ql = QLQueries.queryRepoReleaseAssets(
+                                  'ying32', 'govcl',
+                                  tagName: 'v2.2.3');
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('仓库文件列表'),
                             onPressed: () {
-                              _controller.text = QLQueries.queryGitObject(
+                              final ql = QLQueries.queryGitObject(
                                   'ying32', 'govcl',
                                   path: "", ref: "HEAD");
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         MenuFlyoutItem(
                             text: const Text('仓库分支信息(refs, tags)'),
                             onPressed: () {
                               // 他这分支n多，方便测试哈
-                              _controller.text =
-                                  //https://github.com/zed-industries/zed
-                                  QLQueries.queryRepoRefs(
-                                      'zed-industries', 'zed');
+                              //https://github.com/zed-industries/zed
+                              final ql = QLQueries.queryRepoRefs(
+                                  'zed-industries', 'zed');
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('搜索仓库'),
                             onPressed: () {
-                              _controller.text = QLQueries.search('govcl');
+                              final ql = QLQueries.search('govcl');
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
                             }),
                       ],
                     )

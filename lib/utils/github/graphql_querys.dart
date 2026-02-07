@@ -80,6 +80,109 @@ class QLQueries {
   static String _getNextCursor(String? cursor) =>
       cursor != null && cursor.isNotEmpty ? ', after: "$cursor"' : '';
 
+  static const _repoLiteFields = '''
+          name
+          owner {
+            login
+            avatarUrl
+          }
+          description
+          primaryLanguage {
+            color
+            name
+          }
+          defaultBranchRef {
+            name
+          }     
+          updatedAt
+          url
+          forkCount
+          isInOrganization
+          stargazerCount
+          isArchived
+          isPrivate
+          pushedAt
+          isFork
+          parent {
+            #nameWithOwner 
+            name 
+            owner {
+              login
+              avatarUrl
+            }
+          }  ''';
+
+  static const _repoLiteFields2 = '''
+         $_repoLiteFields 
+          licenseInfo {
+             name 
+          }      
+          repositoryTopics(first: 20) {
+             totalCount
+             nodes {
+               topic {
+                 name
+               }
+             }
+          }
+''';
+
+  static const _pinnedItemsQuery = '''
+    pinnedItems(first: 6, types:REPOSITORY) {
+      nodes {
+        ... on Repository {
+           $_repoLiteFields
+        }
+      } 
+    }
+''';
+
+  /// 页面信息，也许会增加一个`totalCount`字段？？？
+  static const _pageInfo = '''
+      #totalCount
+      pageInfo { 
+        endCursor 
+        # startCursor 
+        hasNextPage 
+        #hasPreviousPage 
+     }''';
+
+  static const _userFieldsFragment = '''
+fragment userFields on User {
+  login
+  avatarUrl
+  url
+  name
+  company
+  bio
+  email
+  location
+  twitterUsername
+  isViewer 
+  websiteUrl
+  followers { totalCount }
+  following { totalCount }
+  repositories { totalCount }
+  status { emoji emojiHTML message }
+  $_pinnedItemsQuery
+} 
+''';
+
+  static const _organizationFieldsFragment = '''
+fragment organizationFields on Organization {
+  login
+  avatarUrl
+  url
+  name
+  email
+  location
+  twitterUsername
+  websiteUrl
+  repositories { totalCount }
+  $_pinnedItemsQuery
+} 
+''';
+
   /// 查询用户信息
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#user
@@ -89,139 +192,49 @@ class QLQueries {
     return QLQuery('''
 query(\$login: String!, \$isViewer: Boolean!) {  
   viewer @include(if: \$isViewer) {
+    __typename
     ...userFields
   }
   user(login:\$login) @skip(if: \$isViewer) {
+    __typename
     ...userFields
   }
 }
-fragment userFields on User {
-    login
-    avatarUrl
-    url
-    name
-    company
-    bio
-    email
-    location
-    twitterUsername
-    isViewer 
-    websiteUrl
-    followers  {
-      totalCount
-    }
-    following {
-      totalCount
-    }
-    repositories {
-        totalCount
-    }
-    status { emoji emojiHTML message }
-    pinnedItems(first: 6, types:REPOSITORY) {
-      nodes {
-        ... on Repository {
-          name
-          forkCount
-          stargazerCount
-          isPrivate
-          description
-          isInOrganization
-          owner {
-            login
-            avatarUrl
-          }
-          primaryLanguage {
-            color
-            name
-          }
-          defaultBranchRef {
-            name
-          }
-          isFork
-          parent {
-            #nameWithOwner 
-            name 
-            owner {
-              login
-              avatarUrl
-            }
-          }  
-        }
-      } 
-    }
-} 
+$_userFieldsFragment
 ''', variables: {"login": name, "isViewer": name.isEmpty});
   }
 
   /// 查询一个组织信息
-  static String queryOrganization(String name) {
-    return '''query { organization(login:"$name") {
-    login
-    avatarUrl
-    url
-    
-    name
-    email
-    location
-    websiteUrl
-    pinnedItems(first: 6, types:REPOSITORY) {
-      nodes {
-        ... on Repository {
-          name
-          forkCount
-          stargazerCount
-          isPrivate
-          description
-          isInOrganization
-          owner {
-            login
-            avatarUrl
-          }
-          primaryLanguage {
-            color
-            name
-          }
-          defaultBranchRef {
-            name
-          }
-          isFork
-          parent {
-            #nameWithOwner 
-            name 
-            owner {
-              login
-              avatarUrl
-            }
-          }  
-        }
-      } 
-    }
+  static QLQuery queryOrganization(String name) {
+    return QLQuery('''query(\$login: String!) { 
+  organization(login:\$login) {
+    ...organizationFields
   }
-}''';
+}
+$_organizationFieldsFragment
+''', variables: {"login": name});
   }
 
   /// 查询“我”关注的或者关注“我”的用户信息
-  static String queryFollowerUsers(
+  static QLQuery queryFollowerUsers(
       {String name = '',
       bool isFollowers = true,
       int? count,
       String? nextCursor}) {
-    return '''query {  
+    return QLQuery('''query(\$first:Int!, \$after:String) {  
     viewer {
-    ${isFollowers ? 'followers' : 'following'}(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}) {
-      totalCount
-      pageInfo {
-        endCursor
-        startCursor
-        hasNextPage
-        hasPreviousPage
-      }
+    ${isFollowers ? 'followers' : 'following'}(first: \$first, after:\$after) {
+      #totalCount
+      $_pageInfo
       nodes {
-         login name avatarUrl bio
+        login name avatarUrl bio
       }
     }
   }
-}''';
+}''', variables: {
+      "first": count ?? defaultPageSize,
+      "after": nextCursor,
+    });
 
 //     return '''query($isFollowers: Boolean = true) {  viewer {
 //     followers(first: 10) @include(if: $isFollowers) {
@@ -245,7 +258,7 @@ fragment userFields on User {
   /// [refs] 取值为 `refs/heads/` 或 `refs/tags/`
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#repository
-  static String queryRepo(String owner, String name) {
+  static QLQuery queryRepo(String owner, String name) {
     /// 默认分支的最后一个提交，方法一
     ///      defaultBranchRef {
     ///         name
@@ -271,6 +284,17 @@ fragment userFields on User {
     ///      }
     ///
     /// 使用条件方式
+    ///
+    ///       defaultBranchRef {
+    ///         name
+    ///         target {
+    ///           __typename
+    ///           ... on Commit {
+    ///             history(first: 1){  nodes {  oid messageHeadline  } }
+    ///           }
+    ///         }
+    ///       }
+    ///
     /// query($incTarget: Boolean = false) {
     ///   repository(owner: "ying32", name: "govcl") {
     ///       defaultBranchRef {
@@ -284,114 +308,70 @@ fragment userFields on User {
     ///   }
     /// }
 
-    return '''query { repository(owner:"$owner", name:"$name") {
-      name
-      owner {
-        login
-        avatarUrl
-      }
-      #nameWithOwner 
-      description
-      primaryLanguage {
-        color
-        name
-      }
-      parent {
-        #nameWithOwner 
-        name 
-        owner {
-          login
-          avatarUrl
-        }
-      }
-      archivedAt
-      updatedAt
-      url
-      diskUsage
-      forkCount
-      forkingAllowed
-      stargazerCount
-      hasIssuesEnabled
-      hasProjectsEnabled
-      hasSponsorshipsEnabled
-      hasWikiEnabled
-      homepageUrl
-      isArchived
-      isBlankIssuesEnabled
-      isDisabled
-      isEmpty
-      isFork
-      isInOrganization
-      isLocked
-      isMirror
-      isPrivate
-      isTemplate
-      isSecurityPolicyEnabled
-      pushedAt
-      viewerCanSubscribe 
-      viewerHasStarred 
-      viewerPermission
-      viewerSubscription
-      mirrorUrl
-      languages(first: 10) {
-        nodes {
-          color
-          name
-        }
-      }
-      defaultBranchRef {
-        name
-        target {
-          __typename
-          ... on Commit {
-            history(first: 1){  nodes {  oid messageHeadline  } }
+    return QLQuery('''query(\$owner:String!,\$name:String!) { 
+    repository(owner:\$owner, name:\$name) {
+          $_repoLiteFields2
+          archivedAt
+          diskUsage
+          forkingAllowed
+          hasIssuesEnabled
+          hasProjectsEnabled
+          hasSponsorshipsEnabled
+          hasWikiEnabled
+          homepageUrl
+          isBlankIssuesEnabled
+          isDisabled
+          isEmpty
+          isLocked
+          isMirror
+          isTemplate
+          isSecurityPolicyEnabled
+          viewerCanSubscribe
+          viewerHasStarred
+          viewerPermission
+          viewerSubscription
+          mirrorUrl
+          languages(first: 10) {
+            nodes {
+              color
+              name
+            }
           }
-        }
-      }
-      issues(states:OPEN) {
-        totalCount
-      }
-      pullRequests(states:OPEN) {
-        totalCount
-      }
-      watchers {
-        totalCount
-      }
-      licenseInfo {
-         name 
-      }
-      latestRelease {
-        author {
-           login
-           name
-        }
-        name 
-        tagName 
-        updatedAt 
-        url 
-        createdAt
-        isDraft
-        isLatest
-        isPrerelease
-      }
-      refs(refPrefix: "refs/heads/") {
-        totalCount  
-      }
-      tags: refs(refPrefix: "refs/tags/") {
-        totalCount  
-      }
-      releases {
-        totalCount 
-      }
-      repositoryTopics(first: 20) {
-         nodes {
-           topic {
-             name
-           }
-         }
-      }
+          issues(states:OPEN) {
+            totalCount
+          }
+          pullRequests(states:OPEN) {
+            totalCount
+          }
+          watchers {
+            totalCount
+          }
+          latestRelease {
+            author {
+               login
+               name
+            }
+            name
+            tagName
+            updatedAt
+            url
+            createdAt
+            isDraft
+            isLatest
+            isPrerelease
+          }
+          refs(refPrefix: "refs/heads/") {
+            totalCount
+          }
+          tags: refs(refPrefix: "refs/tags/") {
+            totalCount
+          }
+          releases {
+            totalCount
+          }
     }
-}''';
+   
+}''', variables: {"owner": owner, "name": name});
   }
 
   /// 查询一个仓库信息的releases
@@ -404,18 +384,14 @@ fragment userFields on User {
   /// https://docs.github.com/zh/graphql/reference/objects#release
   ///
   /// `CREATED_AT`和`NAME`
-  static String queryRepoReleases(String owner, String name,
+  static QLQuery queryRepoReleases(String owner, String name,
       {int? count, String? nextCursor}) {
     // 应该要按更新时间排，但是没有相应的值可选
-    return '''query { repository(owner:"$owner", name:"$name") {
-      releases(first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, orderBy: {direction: DESC, field: CREATED_AT}) {
-        totalCount 
-        pageInfo {
-          endCursor
-          startCursor
-          hasNextPage
-          hasPreviousPage
-        }
+    return QLQuery('''query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String) { 
+    repository(owner:\$owner, name:\$name) {
+      releases(first:\$first, after: \$after, orderBy: {direction: DESC, field: CREATED_AT}) {
+        #totalCount 
+        $_pageInfo
         nodes {
           author { 
             login 
@@ -440,26 +416,26 @@ fragment userFields on User {
         }
       }
     }
-}''';
+}''', variables: {
+      "owner": owner,
+      "name": name,
+      "first": count ?? defaultPageSize,
+      "after": nextCursor
+    });
   }
 
   /// 查询仓库指定Release的Assets
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#repository
-  static String queryRepoReleaseAssets(String owner, String name,
+  static QLQuery queryRepoReleaseAssets(String owner, String name,
       {required String tagName, int? count, String? nextCursor}) {
     // 应该要按更新时间排，但是没有相应的值可选
-    return '''query {
-    repository(owner:"$owner", name:"$name") {
-      release(tagName:"$tagName") {
-        releaseAssets(first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}) {   
+    return QLQuery('''query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String, \$tagName:String!) {
+    repository(owner:\$owner, name:\$name) {
+      release(tagName:\$tagName) {
+        releaseAssets(first:\$first, after: \$after) {   
           totalCount 
-          pageInfo {
-            endCursor
-            startCursor
-            hasNextPage
-            hasPreviousPage
-          }
+          $_pageInfo
           nodes {
             contentType
             createdAt
@@ -472,7 +448,13 @@ fragment userFields on User {
         }
       }
     }
-}''';
+}''', variables: {
+      "owner": owner,
+      "name": name,
+      "first": count ?? defaultPageSize,
+      "after": nextCursor,
+      "tagName": tagName,
+    });
   }
 
   /// 查询User的仓库列表，只列出少量信息，具体到时候使用[queryRepo]来查询详细信息
@@ -483,80 +465,74 @@ fragment userFields on User {
   /// [sortDirection] 排序，可取值`DESC`或`ASC`
   ///
   /// [sortField] 排序，可取值`CREATED_AT`、`NAME`、`PUSHED_AT`、`STARGAZERS`、`UPDATED_AT`
-  static String queryRepos(
+  static QLQuery queryRepos(
       {String owner = '',
       int? count,
-      String sortDirection = "DESC",
-      String sortField = "CREATED_AT",
       bool isStarred = false,
       String? nextCursor}) {
-    // 贡献过的仓库 topRepositories
-    if (isStarred) {
-      // 只有这一个参数
-      sortField = 'STARRED_AT';
-    }
-    // 我的仓库按星数量排序
-    if (owner.isEmpty && !isStarred) {
-      sortField = 'STARGAZERS';
-    }
+    return QLQuery('''
+query(\$login: String!, \$isViewer: Boolean!, \$isStarred: Boolean=false, \$first:Int!, \$after:String)  {
 
-    // 只查询user的仓库信息
-    return '''query {  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {
-    ${isStarred ? 'starredRepositories' : 'repositories'}(first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, orderBy: {direction: $sortDirection, field: $sortField}) {
-      totalCount
-      pageInfo {
-        endCursor
-        startCursor
-        hasNextPage
-        hasPreviousPage
-      }
-      nodes {
-          name
-          owner {
-            login
-            avatarUrl
-          }
-          description
-          primaryLanguage {
-            color
-            name
-          }
-          defaultBranchRef {
-            name
-          } 
-          updatedAt
-          url
-          forkCount
-          isInOrganization
-          stargazerCount
-          isArchived
-          isPrivate
-          pushedAt
-          licenseInfo {
-             name 
-          }
-          isFork
-          parent {
-            #nameWithOwner 
-            name 
-            owner {
-              login
-              avatarUrl
-            }
-          }
-          repositoryTopics(first: 20) {
-             totalCount
-             nodes {
-               topic {
-                 name
-               }
-             }
-          }
-          ${isStarred ? '' : 'issues(states: OPEN) { totalCount }'}
-        }
-      } 
+  viewer @include(if: \$isViewer) {
+    ...RepoList
   }
-}''';
+  user(login: \$login) @skip(if: \$isViewer) {
+    ...RepoList
+  } 
+}
+
+fragment RepoFields on Repository {
+ $_repoLiteFields2
+}
+# 是这样写么？？？
+fragment RepoList on User {
+  # RepositoryConnection
+  repositories(first:\$first, after:\$after, orderBy: {direction:DESC, field:STARGAZERS}) @skip(if: \$isStarred){
+    totalCount
+    $_pageInfo
+    nodes {
+      ...RepoFields
+    }
+  }
+  # StarredRepositoryConnection
+  starredRepositories(first:\$first, after:\$after, orderBy: {direction:DESC, field:STARRED_AT}) @include(if: \$isStarred) {
+    totalCount
+    $_pageInfo
+    nodes {
+      ...RepoFields
+    }
+  }
+}    
+    ''', variables: {
+      "login": owner,
+      "isViewer": owner.isEmpty,
+      "isStarred": isStarred,
+      "first": count ?? defaultPageSize,
+      "after": nextCursor,
+    });
+
+    // 贡献过的仓库 topRepositories
+//     if (isStarred) {
+//       // 只有这一个参数
+//       sortField = 'STARRED_AT';
+//     }
+//     // 我的仓库按星数量排序
+//     if (owner.isEmpty && !isStarred) {
+//       sortField = 'STARGAZERS';
+//     }
+//
+//     // 只查询user的仓库信息
+//     return '''query {  ${owner.isEmpty ? 'viewer' : 'user(login: "$owner")'} {
+//     ${isStarred ? 'starredRepositories' : 'repositories'}(first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, orderBy: {direction: $sortDirection, field: $sortField}) {
+//       totalCount
+//       $_pageInfo
+//       nodes {
+//           $_repoLiteFields2
+//           ${isStarred ? '' : 'issues(states: OPEN) { totalCount }'}
+//         }
+//       }
+//   }
+// }''';
   }
 
   /// 查询仓库issues或者pullRequests
@@ -574,7 +550,7 @@ fragment userFields on User {
   /// [sortDirection] 排序，可取值`DESC`或`ASC`
   ///
   /// [sortField] 排序，可取值`CREATED_AT`、`UPDATED_AT`，如果是[isIssues=true]或者多取值`COMMENTS`
-  static String queryRepoIssuesOrPullRequests(
+  static QLQuery queryRepoIssuesOrPullRequests(
     String owner,
     String name, {
     int? count,
@@ -601,48 +577,50 @@ fragment userFields on User {
     //                   description
     //                 }
     //                 closed
-    return '''query { repository(owner:"$owner", name:"$name") {
-          ${isIssues ? 'issues' : 'pullRequests'}(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
-             totalCount
-             pageInfo {
-              endCursor
-              startCursor
-              hasNextPage
-              hasPreviousPage
-             }
+    return QLQuery('''
+query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String) { 
+  repository(owner:\$owner, name:\$name) {
+    ${isIssues ? 'issues' : 'pullRequests'}(first: \$first, after:\$after, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
+       totalCount
+       $_pageInfo
+       nodes {
+          number 
+          author {
+             login avatarUrl
+          }
+          title 
+          body
+          #bodyHTML
+          comments { totalCount }
+          closedAt
+          createdAt
+          editor {
+            login avatarUrl
+          }
+          ${isIssues ? 'issueType { color description isEnabled name  }' : ''}
+          labels(first: 20, orderBy: { direction:ASC, field: NAME }) {
              nodes {
-                number 
-                author {
-                   login avatarUrl
-                }
-                title 
-                body
-                #bodyHTML
-                comments { totalCount }
-                closedAt
-                createdAt
-                editor {
-                  login avatarUrl
-                }
-                ${isIssues ? 'issueType { color description isEnabled name  }' : ''}
-                labels(first: 20, orderBy: { direction:ASC, field: NAME }) {
-                   nodes {
-                     name 
-                     color 
-                     description 
-                     isDefault 
-                   }
-                }
-                lastEditedAt 
-                locked 
-                state 
-                updatedAt 
-                viewerCanClose 
-                viewerCanReopen 
+               name 
+               color 
+               description 
+               isDefault 
              }
           }
-    }      
-}''';
+          lastEditedAt 
+          locked 
+          state 
+          updatedAt 
+          viewerCanClose 
+          viewerCanReopen 
+       }
+    }
+  }      
+}''', variables: {
+      "owner": owner,
+      "name": name,
+      "first": count ?? defaultPageSize,
+      "after": nextCursor,
+    });
   }
 
   /// 查询文件
@@ -687,7 +665,7 @@ fragment userFields on User {
   /// https://docs.github.com/zh/graphql/reference/objects#tree
   ///
   /// https://docs.github.com/zh/graphql/reference/objects#treeentry
-  static String queryGitObject(String owner, String name,
+  static QLQuery queryGitObject(String owner, String name,
       {String path = "", String? ref}) {
     // 不能获得二进制文件，可以使用REST API来获取，headers中添加 "Accept": "application/vnd.github.v3.raw"
     // 核心 REST 接口：GET /repos/{owner}/{repo}/contents/{path}（推荐）
@@ -705,9 +683,10 @@ fragment userFields on User {
     //   lineCount
     // }
 
-    return '''query {
-  repository(owner: "$owner", name: "$name") {
-    object(expression: "${ref == null || ref.isEmpty ? 'HEAD' : ref}:$path") {
+    return QLQuery('''
+query(\$owner:String!, \$name:String!, \$expression:String!) {
+  repository(owner: \$owner, name: \$name) {
+    object(expression: \$expression) {
         __typename
         ... on Tree {
            entries { 
@@ -730,7 +709,11 @@ fragment userFields on User {
         }
     }
   }    
-}''';
+}''', variables: {
+      "owner": owner,
+      "name": name,
+      "expression": "${ref == null || ref.isEmpty ? 'HEAD' : ref}:$path"
+    });
   }
 
   /// 搜索
@@ -753,7 +736,7 @@ fragment userFields on User {
   /// [type] 要搜索的类型 https://docs.github.com/zh/graphql/reference/enums#searchtype
   ///
   ///  `DISCUSSION`、`ISSUE` `ISSUE_ADVANCED` `REPOSITORY` `USER`
-  static String search(String query,
+  static QLQuery search(String query,
       {int? count, String type = 'REPOSITORY', String? nextCursor}) {
     /// ... on Discussion { }
     /// ... on Issue { }
@@ -771,49 +754,38 @@ fragment userFields on User {
     /// repositoryCount
     /// userCount
     /// wikiCount
-    return '''query {
-  search(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, query: "$query", type: $type) {
-    pageInfo {
-      endCursor
-      startCursor
-      hasNextPage
-      hasPreviousPage
-    }
+    ///
+
+    return QLQuery('''
+query(\$first:Int!, \$after:String, \$query:String!, \$type:SearchType=REPOSITORY) {
+  search(first: \$first, after:\$after, query: \$query, type: \$type) {
     repositoryCount
+    $_pageInfo
     nodes {
        ... on Repository {
-            name
-            forkCount
-            stargazerCount
-            isPrivate
-            description
-            isInOrganization
-            url
-            owner {
-              login
-              avatarUrl
-            }
-            primaryLanguage {
-              color
-              name
-            }
-            defaultBranchRef {
-              name
-            }
-            pushedAt
-            isFork
-            parent {
-              #nameWithOwner 
-              name 
-              owner {
-                login
-                avatarUrl
-              }
-            }
+             $_repoLiteFields2
           }
         }
       }
-}''';
+}
+    ''', variables: {
+      "first": count ?? defaultPageSize,
+      "after": nextCursor,
+      "query": query,
+      "type": type
+    });
+
+//     return '''query {
+//   search(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, query: "$query", type: $type) {
+//     repositoryCount
+//     $_pageInfo
+//     nodes {
+//        ... on Repository {
+//              $_repoLiteFields2
+//           }
+//         }
+//       }
+// }''';
   }
 
   /// 查询仓库指定Release的Assets
@@ -821,36 +793,51 @@ fragment userFields on User {
   /// https://docs.github.com/zh/graphql/reference/objects#repository
   ///
   /// [refPrefix] 可取值： `refs/heads/`, `refs/tags/`
-  static String queryRepoRefs(String owner, String name,
+  static QLQuery queryRepoRefs(String owner, String name,
       {int? count, String refPrefix = 'refs/heads/', String? nextCursor}) {
-    // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
-    return '''query {
-    repository(owner:"$owner", name:"$name") {
-       refs(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, refPrefix: "$refPrefix", orderBy: {direction : DESC, field: TAG_COMMIT_DATE}) {
+    return QLQuery('''
+query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String, \$refPrefix:String!) {
+    repository(owner:\$owner, name:\$name) {
+       refs(first:\$first, after:\$after, refPrefix:\$refPrefix, orderBy: {direction: DESC, field: TAG_COMMIT_DATE}) {
           totalCount 
-          pageInfo {
-            endCursor
-            startCursor
-            hasNextPage
-            hasPreviousPage
-          }
-          nodes  { name prefix }
+          $_pageInfo
+          nodes { name prefix }
        }
     }
-}''';
+}
+''', variables: {
+      "owner": owner,
+      "name": name,
+      "first": count ?? defaultPageSize,
+      "after": nextCursor,
+      "refPrefix": refPrefix,
+    });
+
+//     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
+//     return '''query {
+//     repository(owner:"$owner", name:"$name") {
+//        refs(first: ${count ?? defaultPageSize}${_getNextCursor(nextCursor)}, refPrefix: "$refPrefix", orderBy: {direction : DESC, field: TAG_COMMIT_DATE}) {
+//           totalCount
+//           $_pageInfo
+//           nodes  { name prefix }
+//        }
+//     }
+// }''';
   }
 
   /// 提交的评论
   /// // , orderBy : {direction : DESC, field: UPDATED_AT}
   /// // https://docs.github.com/zh/graphql/reference/objects#issue
-  static String queryIssueComments(String owner, String name, int number,
+  static QLQuery queryIssueComments(String owner, String name, int number,
       {int? count, bool isIssues = true, String? nextCursor}) {
     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
-    return '''query { 
-   repository(owner:"$owner", name:"$name") {
-       ${isIssues ? 'issue' : 'pullRequest'}(number: $number) {
-          comments  (first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}) {
+
+    return QLQuery('''query(\$owner:String!, \$name:String!, \$number:Int!, \$first:Int!, \$after:String) { 
+   repository(owner:\$owner, name:\$name) {
+       ${isIssues ? 'issue' : 'pullRequest'}(number: \$number) {
+          comments  (first:\$first, after:\$after) {
                totalCount
+               $_pageInfo
                nodes {
                   author { login avatarUrl }
                   body
@@ -869,30 +856,87 @@ fragment userFields on User {
           }   
        }
      }
-}''';
+}''', variables: {
+      "owner": owner,
+      "name": name,
+      "number": number,
+      "first": count ?? defaultPageSize,
+      "after": nextCursor,
+    });
+
+//     return '''query {
+//    repository(owner:"$owner", name:"$name") {
+//        ${isIssues ? 'issue' : 'pullRequest'}(number: $number) {
+//           comments  (first:${count ?? defaultPageSize}${_getNextCursor(nextCursor)}) {
+//                totalCount
+//                $_pageInfo
+//                nodes {
+//                   author { login avatarUrl }
+//                   body
+//                   #bodyHTML
+//                   createdAt
+//                   editor { login avatarUrl  }
+//                   lastEditedAt
+//                   publishedAt
+//                   updatedAt
+//                   isMinimized
+//                   url
+//                   viewerCanDelete
+//                   viewerCanUpdate
+//                   viewerDidAuthor
+//                 }
+//           }
+//        }
+//      }
+// }''';
   }
 
   /// 查询指定issue或者pullRequest
-  static String queryIssueOrPullRequest(String owner, String name, int number,
-      {bool isIssues = true}) {
+  static QLQuery queryIssueOrPullRequest(
+      String owner, String name, int number) {
     // 本想用  fragment 来利用字段，但怎么写都不成功
-    return '''query { 
-   repository(owner:"$owner", name:"$name") {
-       issueOrPullRequest  (number: $number) {
+
+    return QLQuery('''
+query(\$owner:String!, \$name:String!, \$number:Int!) { 
+   repository(owner:\$owner, name:\$name) {
+       issueOrPullRequest(number: \$number) {
               __typename
                ... on Issue {
                   number
-                  author {  login avatarUrl }
+                  author { login avatarUrl }
                   title  body  
                }
               ... on PullRequest {
                   number
-                  author {  login avatarUrl }
+                  author { login avatarUrl }
                   title  body  
               }
        }
      }
-}''';
+}    
+''', variables: {
+      "owner": owner,
+      "name": name,
+      "number": number,
+    });
+
+//     return '''query {
+//    repository(owner:"$owner", name:"$name") {
+//        issueOrPullRequest  (number: $number) {
+//               __typename
+//                ... on Issue {
+//                   number
+//                   author { login avatarUrl }
+//                   title  body
+//                }
+//               ... on PullRequest {
+//                   number
+//                   author { login avatarUrl }
+//                   title  body
+//               }
+//        }
+//      }
+// }''';
 //     return '''query {
 //    repository(owner:"$owner", name:"$name") {
 //        ${isIssues ? 'issue' : 'pullRequest'}(number: $number) {
@@ -906,42 +950,28 @@ fragment userFields on User {
 // }''';
   }
 
-  /// 查询一个仓库的所有者信息
-  static String queryRepoOwner(String login) {
-    return '''query { 
-  repositoryOwner(login:"$login") {
+  /// 查询一个仓库的所有者信息，通过这个接口可以查询一个login的信息
+  static QLQuery queryRepoOwner(String login) {
+    return QLQuery('''
+query(\$login:String!) { 
+  repositoryOwner(login:\$login) {
     __typename  
-    login
-    url 
-    avatarUrl
+    #login
+    #url 
+    #avatarUrl
     ... on User {
-      name
-      company
-      bio
-      email
-      location
-      twitterUsername
-      isViewer 
-      websiteUrl
-      followers  {
-        totalCount
-      }
-      following {
-        totalCount
-      }
-      repositories {
-        totalCount
-      }
-      status { emoji emojiHTML message }
+      ...userFields
     }
     ... on Organization {
-      name
-      email
-      location
-      websiteUrl
+      ...organizationFields
     }
   }
-}''';
+}
+$_userFieldsFragment
+$_organizationFieldsFragment
+''', variables: {
+      "login": login,
+    });
   }
 }
 
@@ -990,18 +1020,4 @@ fragment userFields on User {
 //           }
 //        }
 //    }
-// }
-
-/// https://docs.github.com/zh/graphql/reference/objects#topic
-// topics
-//query {
-//
-//     topic(name: "govcl") {
-//        __typename
-//       name
-//       repositories(first: 10) {
-//           totalCount
-//           nodes {  name }
-//        }
-//     }
 // }
