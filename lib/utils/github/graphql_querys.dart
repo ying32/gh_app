@@ -113,6 +113,9 @@ fragment userFields on User {
     following {
       totalCount
     }
+    repositories {
+        totalCount
+    }
     status { emoji emojiHTML message }
     pinnedItems(first: 6, types:REPOSITORY) {
       nodes {
@@ -924,6 +927,9 @@ fragment userFields on User {
         totalCount
       }
       following {
+        totalCount
+      }
+      repositories {
         totalCount
       }
       status { emoji emojiHTML message }

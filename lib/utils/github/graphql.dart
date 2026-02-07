@@ -681,6 +681,8 @@ class QLUserOrOrganizationCommon extends QLActor {
     this.twitterUsername = '',
     this.websiteUrl = '',
     this.pinnedItems = const QLList.empty(),
+    required this.isOrganization,
+    this.repositoryCount = 0,
   });
 
   /// createdAt (DateTime!)
@@ -703,6 +705,13 @@ class QLUserOrOrganizationCommon extends QLActor {
 
   /// `PinnableItemConnection!` 置顶项目
   final QLList<QLRepository> pinnedItems;
+
+  /// 这个字段是用于公用时判断的
+  final bool isOrganization;
+
+  /// 仓库总数，
+  /// repositories (RepositoryConnection!)  A list of repositories that the user owns.
+  final int repositoryCount;
 }
 
 /// 个人用户
@@ -720,6 +729,8 @@ class QLUser extends QLUserOrOrganizationCommon {
     super.twitterUsername,
     super.websiteUrl,
     super.pinnedItems,
+    super.isOrganization = false,
+    super.repositoryCount,
     this.isViewer = false,
     this.company = '',
     this.bio = '',
@@ -753,6 +764,7 @@ class QLUser extends QLUserOrOrganizationCommon {
   factory QLUser.fromJson(Map<String, dynamic> input) {
     input = input['viewer'] ?? input['user'] ?? input['organization'] ?? input;
     return QLUser(
+      isOrganization: false,
       login: input['login'] ?? '',
       name: input['name'] ?? '',
       avatarUrl: input['avatarUrl'] ?? '',
@@ -769,6 +781,7 @@ class QLUser extends QLUserOrOrganizationCommon {
       websiteUrl: input['websiteUrl'] ?? '',
       followersCount: _getTotalCount(input['followers']),
       followingCount: _getTotalCount(input['following']),
+      repositoryCount: _getTotalCount(input['repositories']),
       pinnedItems:
           QLList.maybeFromJson(input['pinnedItems'], QLRepository.fromJson) ??
               const QLList.empty(),
@@ -794,6 +807,8 @@ class QLOrganization extends QLUserOrOrganizationCommon {
     super.twitterUsername,
     super.websiteUrl,
     super.pinnedItems,
+    super.isOrganization = true,
+    super.repositoryCount,
     this.description = '',
   });
 
@@ -802,10 +817,36 @@ class QLOrganization extends QLUserOrOrganizationCommon {
   // isVerified (Boolean!)
   // organizationBillingEmail (String)
   // teams (TeamConnection!)
+  //viewerCanCreateRepositories (Boolean!)
+  //
+  // Viewer can create repositories on this organization.
+  //
+  // viewerCanCreateTeams (Boolean!)
+  //
+  // Viewer can create teams on this organization.
+  //
+  // viewerCanSponsor (Boolean!)
+  //
+  // Whether or not the viewer is able to sponsor this user/organization.
+  //
+  // viewerIsAMember (Boolean!)
+  //
+  // Viewer is an active member of this organization.
+  //
+  // viewerIsFollowing (Boolean!)
+  //
+  // Whether or not this Organization is followed by the viewer.
+  //
+  // viewerIsSponsoring (Boolean!)
+  //
+  // True if the viewer is sponsoring this user/organization.
+  //
+  // webCommitSignoffRequired (Boolean!)
 
   factory QLOrganization.fromJson(Map<String, dynamic> input) {
     input = input['viewer'] ?? input['organization'] ?? input;
     return QLOrganization(
+      isOrganization: true,
       login: input['login'] ?? '',
       avatarUrl: input['avatarUrl'] ?? '',
       url: input['url'] ?? '',
@@ -816,6 +857,7 @@ class QLOrganization extends QLUserOrOrganizationCommon {
       websiteUrl: input['websiteUrl'] ?? '',
       // followersCount: _getTotalCount(input['followers']),
       // followingCount: _getTotalCount(input['following']),
+      repositoryCount: _getTotalCount(input['repositories']),
       pinnedItems:
           QLList.maybeFromJson(input['pinnedItems'], QLRepository.fromJson) ??
               const QLList.empty(),
