@@ -189,6 +189,7 @@ fragment organizationFields on Organization {
   ///
   /// [name] 如果为空则查询当前登录的User信息，需要header中加入认证的
   static QLQuery queryViewer() {
+    //TODO: 这里还缺个组织用户的
     return const QLQuery('''
 query {  
   viewer {
@@ -240,9 +241,10 @@ $_userFieldsFragment
       bool isFollowers = true,
       int? count,
       String? nextCursor}) {
+    final func = isFollowers ? 'followers' : 'following';
     return QLQuery('''query(\$first:Int!, \$after:String) {  
     viewer {
-    ${isFollowers ? 'followers' : 'following'}(first: \$first, after:\$after) {
+    $func(first: \$first, after:\$after) {
       #totalCount
       $_pageInfo
       nodes {
@@ -491,51 +493,49 @@ $_userFieldsFragment
     String? nextCursor,
     bool isOrganization = false,
   }) {
-    const starReposField = '''
-  # StarredRepositoryConnection
-  starredRepositories(first:\$first, after:\$after, orderBy: {direction:DESC, field:STARRED_AT}) @include(if: \$isStarred) {
-    totalCount
-    $_pageInfo
-    nodes {
-      ...RepoFields
-    }
-  }
-''';
+    final userFunc = owner.isEmpty
+        ? 'viewer'
+        : (isOrganization
+            ? 'organization(login: "$owner")'
+            : 'user(login: "$owner")');
+    final func = isStarred ? 'starredRepositories' : 'repositories';
+    final sortField = isStarred ? 'STARRED_AT' : 'STARGAZERS';
+    //final fragmentType = isOrganization ? 'Organization' : 'User';
 
-    const viewerField = '''
-viewer @include(if: \$isViewer) {
-    ...RepoList
-  } 
-''';
+//     const starReposField = '''
+//   # StarredRepositoryConnection
+//   starredRepositories(first:\$first, after:\$after, orderBy: {direction:DESC, field:STARRED_AT}) @include(if: \$isStarred) {
+//     totalCount
+//     $_pageInfo
+//     nodes {
+//       ...RepoFields
+//     }
+//   }
+// ''';
+//
+//     const viewerField = '''
+// viewer @include(if: \$isViewer) {
+//     ...RepoList
+//   }
+// ''';
 
     return QLQuery('''
-query(\$login: String!, \$isViewer: Boolean!, \$isStarred: Boolean=false, \$first:Int!, \$after:String)  {
-
-  ${isOrganization ? '' : viewerField}
-  ${!isOrganization ? 'user' : 'organization'}(login: \$login) @skip(if: \$isViewer) {
-    ...RepoList
-  } 
+query(\$first:Int!, \$after:String)  {
+  $userFunc {
+    $func(first:\$first, after:\$after, orderBy: {direction:DESC, field:$sortField})  {
+      totalCount
+      $_pageInfo
+      nodes {
+        ...RepoFields
+      }
+    }
+  }
 }
 
 fragment RepoFields on Repository {
  $_repoLiteFields2
-}
-# 是这样写么？？？
-fragment RepoList on ${!isOrganization ? 'User' : 'Organization'} {
-  # RepositoryConnection
-  repositories(first:\$first, after:\$after, orderBy: {direction:DESC, field:STARGAZERS}) @skip(if: \$isStarred){
-    totalCount
-    $_pageInfo
-    nodes {
-      ...RepoFields
-    }
-  }
-${isOrganization ? '' : starReposField}  
-}    
-    ''', variables: {
-      "login": owner,
-      "isViewer": owner.isEmpty,
-      "isStarred": isStarred,
+}  
+''', variables: {
       "first": count ?? defaultPageSize,
       "after": nextCursor,
     });
@@ -606,10 +606,15 @@ ${isOrganization ? '' : starReposField}
     //                   description
     //                 }
     //                 closed
+
+    final func = isIssues ? 'issues' : 'pullRequests';
+    final issueTypeField =
+        isIssues ? 'issueType { color description isEnabled name  }' : '';
+
     return QLQuery('''
 query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String) { 
   repository(owner:\$owner, name:\$name) {
-    ${isIssues ? 'issues' : 'pullRequests'}(first: \$first, after:\$after, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
+    $func(first: \$first, after:\$after, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
        totalCount
        $_pageInfo
        nodes {
@@ -626,7 +631,7 @@ query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String) {
           editor {
             login avatarUrl
           }
-          ${isIssues ? 'issueType { color description isEnabled name  }' : ''}
+          $issueTypeField
           labels(first: 20, orderBy: { direction:ASC, field: NAME }) {
              nodes {
                name 
@@ -861,9 +866,10 @@ query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String, \$refPrefix
       {int? count, bool isIssues = true, String? nextCursor}) {
     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
 
+    final func = isIssues ? 'issue' : 'pullRequest';
     return QLQuery('''query(\$owner:String!, \$name:String!, \$number:Int!, \$first:Int!, \$after:String) { 
    repository(owner:\$owner, name:\$name) {
-       ${isIssues ? 'issue' : 'pullRequest'}(number: \$number) {
+       $func(number: \$number) {
           comments  (first:\$first, after:\$after) {
                totalCount
                $_pageInfo
