@@ -352,7 +352,7 @@ $_userFieldsFragment
           viewerPermission
           viewerSubscription
           mirrorUrl
-          languages(first: 10) {
+          languages(first: 40) {
             nodes {
               color
               name
