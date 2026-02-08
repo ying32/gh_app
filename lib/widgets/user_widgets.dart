@@ -1,5 +1,4 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
@@ -7,6 +6,7 @@ import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/repo_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
+import 'package:markdown/markdown.dart' as mk;
 import 'package:url_launcher/url_launcher.dart';
 
 /// 用户头像
@@ -186,18 +186,27 @@ class UserInfoPanel extends StatelessWidget {
         ),
         if (user is QLUser) ...[
           // 签名信息
-          SelectionArea(
-              child: UserLineInfo(
-                  icon: null,
-                  value: _user.bio,
-                  textColor: context.textColor200)),
+          SelectableText(_user.bio,
+              style: TextStyle(color: context.textColor200)),
+          // SelectionArea(
+          //     child: UserLineInfo(
+          //         icon: null,
+          //         value: _user.bio,
+          //         textColor: context.textColor200)),
           const SizedBox(height: 8),
           // 心情
-          if (_user.status != null && _user.status!.emojiHTML.isNotEmpty ||
-              _user.status!.message.isNotEmpty)
-            SelectionArea(
-                child: HtmlWidget(
-                    "${_user.status!.emojiHTML}${_user.status!.message}")),
+          if (_user.status != null &&
+              (_user.status!.emojiHTML.isNotEmpty ||
+                  _user.status!.message.isNotEmpty))
+            SelectableText.rich(
+                TextSpan(text: mk.emojis[_user.status!.emoji] ?? '', children: [
+                  const TextSpan(text: ' '),
+                  TextSpan(text: _user.status!.message),
+                ]),
+                style: TextStyle(color: context.textColor200)),
+          // SelectionArea(
+          //     child: HtmlWidget(
+          //         "${_user.status!.emojiHTML}${_user.status!.message}")),
 
           UserLineInfo(
             icon: DefaultIcons.group,
@@ -216,17 +225,6 @@ class UserInfoPanel extends StatelessWidget {
                   },
                   child: Text("${_user.followingCount ?? 0}个关注"),
                 ),
-                // 这里要用RichText来弄
-                // m.TextButton.icon(
-                //     label: Text(
-                //         "${_currentUser?.followersCount ?? 0}个关注者· "),
-                //     icon: const Icon(DefaultIcons.group, size: 16),
-                //     onPressed: () {}),
-                // m.TextButton.icon(
-                //     label: Text(
-                //         "${_currentUser?.followingCount ?? 0}个关注· "),
-                //     icon: const Icon(DefaultIcons.group, size: 16),
-                //     onPressed: () {}),
               ],
             ),
           ),
@@ -265,7 +263,7 @@ class UserInfoPanel extends StatelessWidget {
               value: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text("仓库数："),
+                  Text("仓库数：", style: TextStyle(color: context.textColor200)),
                   HyperlinkButton(
                     child: Text("( ${user.repositoryCount} )"),
                     onPressed: () {

@@ -146,6 +146,27 @@ class _CodePageRight extends StatelessWidget {
   }
 }
 
+class _MouseNavigation extends StatelessWidget {
+  const _MouseNavigation({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+        onPointerDown: (event) {
+          //print("event.buttons=${event.buttons}");
+          switch (event.buttons) {
+            case 0x8: // 后退键(扩展键1)
+              context.read<RepoModel>().pathMouseBack();
+            case 0x10: // 前进键(扩展键2)
+              context.read<RepoModel>().pathMouseForward();
+          }
+        },
+        child: child);
+  }
+}
+
 /// 代码页面
 class RepoCodePage extends StatelessWidget {
   const RepoCodePage({super.key});
@@ -165,36 +186,38 @@ class RepoCodePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Divider(size: 1),
-        const _TopBar2(),
-        // 当前分支最后提交记录
-        // _buildLastCommit(context),
-        // 导航指示
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Card(child: RepoBreadcrumbBar()),
-        ),
-        Expanded(
-          //TODO: 待优化
-          child: ListView(
-            children: const [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 内容树
-                  Expanded(child: RepoTreeEntriesView()),
-                  SizedBox(width: 10.0),
-
-                  // 右边
-                  SizedBox(width: 300, child: _CodePageRight())
-                ],
-              ),
-            ],
+    return _MouseNavigation(
+      child: Column(
+        children: [
+          const Divider(size: 1),
+          const _TopBar2(),
+          // 当前分支最后提交记录
+          // _buildLastCommit(context),
+          // 导航指示
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Card(child: RepoBreadcrumbBar()),
           ),
-        ),
-      ],
+          Expanded(
+            //TODO: 待优化
+            child: ListView(
+              children: const [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 内容树
+                    Expanded(child: RepoTreeEntriesView()),
+                    SizedBox(width: 10.0),
+
+                    // 右边
+                    SizedBox(width: 300, child: _CodePageRight())
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

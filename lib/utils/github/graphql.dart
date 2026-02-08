@@ -665,7 +665,7 @@ class QLUserStatus {
   final String message;
 
   QLUserStatus.fromJson(Map<String, dynamic> input)
-      : emoji = input['emoji'] ?? '',
+      : emoji = input['emoji']?.replaceAll(":", "") ?? '',
         emojiHTML = input['emojiHTML'] ?? '',
         message = input['message'] ?? '';
 }

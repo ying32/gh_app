@@ -58,6 +58,7 @@ class RepoModel extends ChangeNotifier {
   set path(String value) {
     if (value != _path) {
       _path = value;
+      _lastMouseNavPath = '';
       // 改变路径，此时也需要置空对象
 
       //_segmentedPaths.clear();
@@ -71,6 +72,25 @@ class RepoModel extends ChangeNotifier {
       notifyListeners();
       updateFileObject();
     }
+  }
+
+  String _lastMouseNavPath = '';
+
+  void pathMouseBack() {
+    if (_path.isNotEmpty) {
+      final idx = _path.lastIndexOf("/");
+      if (idx == -1) {
+        _lastMouseNavPath = path;
+        path = '';
+        return;
+      }
+      _lastMouseNavPath = path;
+      path = path.substring(0, idx);
+    }
+  }
+
+  void pathMouseForward() {
+    if (_lastMouseNavPath.isEmpty) return;
   }
 
   /// 更新内容对象

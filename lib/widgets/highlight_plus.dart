@@ -150,10 +150,12 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
         style: context.isDark
             ? const PrismColdarkDarkStyle()
             : const PrismColdarkColdStyle());
-    _spans = prism.render(widget.source, _lang);
-    if (_spans.isNotEmpty && mounted) {
-      setState(() {});
-    }
+    try {
+      _spans = prism.render(widget.source, _lang);
+      if (_spans.isNotEmpty && mounted) {
+        setState(() {});
+      }
+    } catch (e) {}
   }
 
   Widget _defaultSelectableText() {
