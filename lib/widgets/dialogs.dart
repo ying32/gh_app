@@ -80,6 +80,10 @@ bool goToRepoPageByUri(
     APIWrap.instance.repoIssue(res.repo, number: res.issue.number).then((e) {
       onSuccess(res.copyWith(issue: e));
     }).onError((e, s) {
+      if (kDebugMode) {
+        print("$e");
+        print("$s");
+      }
       onFailed?.call(e);
     }).whenComplete(() {
       if (useLoading) {

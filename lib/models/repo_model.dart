@@ -39,7 +39,7 @@ class RepoModel extends ChangeNotifier {
   }
 
   /// 分支列表
-  QLList<QLRef> _refs = const QLList.empty();
+  QLList<QLRef> _refs = const QLList();
 
   QLList<QLRef> get refs => _refs;
 

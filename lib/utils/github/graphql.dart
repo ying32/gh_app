@@ -96,11 +96,11 @@ class QLList<T> {
               fieldName: fieldName);
 
   /// 空数据
-  const QLList.empty()
-      : _data = const [],
-        totalCount = 0,
-        pageSize = 0,
-        pageInfo = null;
+  // const QLList.empty()
+  //     : _data = const [],
+  //       totalCount = 0,
+  //       pageSize = 0,
+  //       pageInfo = null;
 }
 
 /// 仓库的主语言
@@ -150,6 +150,9 @@ class QLActor {
       : url = input['url'] ?? '',
         login = input['login'] ?? '',
         avatarUrl = input['avatarUrl'] ?? '';
+
+  static QLActor? maybeFromJson(Map<String, dynamic>? input) =>
+      input == null ? null : QLActor.fromJson(input);
 }
 
 /// 仓库所有者
@@ -304,7 +307,7 @@ class QLRelease {
 
   QLRelease.fromJson(Map<String, dynamic> input)
       : name = input['name'] ?? '',
-        author = QLUser.fromJson(input['author']),
+        author = QLUser.maybeFromJson(input['author']),
         tagName = input['tagName'] ?? '',
         url = input['url'] ?? '',
         isDraft = input['isDraft'] ?? false,
@@ -630,9 +633,8 @@ class QLRepository {
       openPullRequestsCount: _getTotalCount(input['pullRequests']),
       watchersCount: _getTotalCount(input['watchers']),
       mirrorUrl: input['mirrorUrl'] ?? '',
-      defaultBranchRef: input['defaultBranchRef'] == null
-          ? const QLRef()
-          : QLRef.fromJson(input['defaultBranchRef']),
+      defaultBranchRef:
+          QLRef.maybeFromJson(input['defaultBranchRef']) ?? const QLRef(),
       releasesCount: _getTotalCount(input['releases']),
       refsCount: _getTotalCount(input['refs']),
       tagsCount: _getTotalCount(input['tags']),
@@ -680,7 +682,7 @@ class QLUserOrOrganizationCommon extends QLActor {
     this.location = '',
     this.twitterUsername = '',
     this.websiteUrl = '',
-    this.pinnedItems = const QLList.empty(),
+    this.pinnedItems = const QLList(),
     required this.isOrganization,
     this.repositoryCount = 0,
   });
@@ -784,9 +786,12 @@ class QLUser extends QLUserOrOrganizationCommon {
       repositoryCount: _getTotalCount(input['repositories']),
       pinnedItems:
           QLList.maybeFromJson(input['pinnedItems'], QLRepository.fromJson) ??
-              const QLList.empty(),
+              const QLList(),
     );
   }
+
+  static QLUser? maybeFromJson(Map<String, dynamic>? input) =>
+      input == null ? null : QLUser.fromJson(input);
 }
 
 /// 组织用户
@@ -860,7 +865,7 @@ class QLOrganization extends QLUserOrOrganizationCommon {
       repositoryCount: _getTotalCount(input['repositories']),
       pinnedItems:
           QLList.maybeFromJson(input['pinnedItems'], QLRepository.fromJson) ??
-              const QLList.empty(),
+              const QLList(),
     );
   }
 }
@@ -959,7 +964,7 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
     this.number = -1,
     this.title = '',
     this.closedAt,
-    this.labels = const [],
+    this.labels = const QLList(),
     this.commentsCount = 0,
     this.locked = false,
     this.state = 'OPEN',
@@ -977,7 +982,7 @@ class QLIssueOrPullRequest extends QLIssueOrPullRequestOrCommentBase {
   final DateTime? closedAt;
 
   /// `LabelConnection` 标签列表
-  final List<QLLabel> labels;
+  final QLList<QLLabel> labels;
 
   // isAnswered (Boolean)
 
@@ -1058,6 +1063,9 @@ class QLIssueType {
         description = input['description'] ?? '',
         isEnabled = input['isEnabled'] ?? false,
         name = input['name'] ?? '';
+
+  static QLIssueType? maybeFromJson(Map<String, dynamic>? input) =>
+      input == null ? null : QLIssueType.fromJson(input);
 }
 
 /// issue
@@ -1089,32 +1097,28 @@ class QLIssue extends QLIssueOrPullRequest {
   final QLIssueType? issueType;
 
   QLIssue.fromJson(Map<String, dynamic> input)
-      : issueType = input['issueType'] == null
-            ? null
-            : QLIssueType.fromJson(input['issueType']),
+      : issueType = QLIssueType.maybeFromJson(input['issueType']),
         super(
           number: input['number'] ?? 0,
-          author: input['author'] == null
-              ? null
-              : QLActor.fromJson(input['author']),
+          author: QLActor.maybeFromJson(input['author']),
           title: input['title'] ?? '',
           body: input['body'] ?? '',
           //bodyHTML: input['bodyHTML'],
           isMinimized: input['isMinimized'] ?? false,
           closedAt: _parseDateTime(input['closedAt']),
           createdAt: _parseDateTime(input['createdAt']),
-          editor: input['editor'] == null
-              ? null
-              : QLActor.fromJson(input['editor']),
-          labels: input['labels']?['nodes'] == null
-              ? const []
-              : List.from(input['labels']?['nodes'])
-                  .map((e) => QLLabel.fromJson(e))
-                  .toList(),
+          editor: QLActor.maybeFromJson(input['editor']),
+          labels: QLList.maybeFromJson(input['labels'], QLLabel.fromJson) ??
+              const QLList(),
+          // labels: input['labels']?['nodes'] == null
+          //     ? const []
+          //     : List.from(input['labels']?['nodes'])
+          //         .map((e) => QLLabel.fromJson(e))
+          //         .toList(),
           lastEditedAt: _parseDateTime(input['lastEditedAt']),
           locked: input['locked'] ?? false,
           commentsCount: _getTotalCount(input['comments']),
-          state: input['state'],
+          state: input['state'] ?? 'OPEN',
           updatedAt: _parseDateTime(input['updatedAt']),
           viewerCanClose: input['viewerCanClose'] ?? false,
           viewerCanReopen: input['viewerCanReopen'] ?? false,
@@ -1151,23 +1155,21 @@ class QLPullRequest extends QLIssueOrPullRequest {
   QLPullRequest.fromJson(Map<String, dynamic> input)
       : super(
           number: input['number'] ?? 0,
-          author: input['author'] == null
-              ? null
-              : QLActor.fromJson(input['author']),
+          author: QLActor.maybeFromJson(input['author']),
           title: input['title'] ?? '',
           body: input['body'] ?? '',
           //bodyHTML: input['bodyHTML'],
           isMinimized: input['isMinimized'] ?? false,
           closedAt: _parseDateTime(input['closedAt']),
           createdAt: _parseDateTime(input['createdAt']),
-          editor: input['editor'] == null
-              ? null
-              : QLActor.fromJson(input['editor']),
-          labels: input['labels']?['nodes'] == null
-              ? const []
-              : List.from(input['labels']?['nodes'])
-                  .map((e) => QLLabel.fromJson(e))
-                  .toList(),
+          editor: QLActor.maybeFromJson(input['editor']),
+          labels: QLList.maybeFromJson(input['labels'], QLLabel.fromJson) ??
+              const QLList(),
+          // labels: input['labels']?['nodes'] == null
+          //     ? const []
+          //     : List.from(input['labels']?['nodes'])
+          //         .map((e) => QLLabel.fromJson(e))
+          //         .toList(),
           lastEditedAt: _parseDateTime(input['lastEditedAt']),
           locked: input['locked'] ?? false,
           state: input['state'],
@@ -1209,15 +1211,11 @@ class QLComment extends QLIssueOrPullRequestOrCommentBase {
         viewerCanUpdate = input['viewerCanUpdate'] ?? false,
         viewerDidAuthor = input['viewerDidAuthor'] ?? false,
         super(
-          author: input['author'] == null
-              ? null
-              : QLActor.fromJson(input['author']),
+          author: QLActor.maybeFromJson(input['author']),
           body: input['body'] ?? '',
           //bodyHTML: input['bodyHTML'],
           createdAt: _parseDateTime(input['createdAt']),
-          editor: input['editor'] == null
-              ? null
-              : QLActor.fromJson(input['editor']),
+          editor: QLActor.maybeFromJson(input['editor']),
           lastEditedAt: _parseDateTime(input['lastEditedAt']),
           updatedAt: _parseDateTime(input['updatedAt']),
         );
@@ -1271,7 +1269,7 @@ class QLCommit {
     this.authoredDate,
     this.changedFiles = 0,
     this.message = '',
-    this.history = const QLList.empty(),
+    this.history = const QLList(),
     this.messageHeadline = '',
   });
 
@@ -1403,13 +1401,11 @@ class QLCommit {
         changedFiles = json['changedFiles'] ?? 0,
         message = json['message'] ?? '',
         messageHeadline = json['messageHeadline'] ?? '',
-        author =
-            json['author'] == null ? null : QLGitActor.fromJson(json['author']),
+        author = QLGitActor.maybeFromJson(json['author']),
         authoredByCommitter = json['authoredByCommitter'] ?? false,
         authoredDate = _parseDateTime(json['authoredDate']),
-        history = json['history'] == null
-            ? const QLList.empty()
-            : QLList.fromJson(json['history'], QLCommit.fromJson);
+        history = QLList.maybeFromJson(json['history'], QLCommit.fromJson) ??
+            const QLList();
 }
 
 ///==========GitObject 的实现方式
@@ -1636,7 +1632,10 @@ class QLGitActor {
         date = _parseDateTime(json['date']),
         email = json['email'] ?? '',
         name = json['name'] ?? '',
-        user = json['user'] == null ? null : QLUser.fromJson(json['user']);
+        user = QLUser.maybeFromJson(json['user']);
+
+  static QLGitActor? maybeFromJson(Map<String, dynamic>? json) =>
+      json == null ? null : QLGitActor.fromJson(json);
 }
 
 /// https://docs.github.com/zh/graphql/reference/objects#topic

@@ -18,7 +18,7 @@ class _SearchPageState extends State<SearchPage>
   bool _searching = false;
 
   //final List<String> _suggests = ['搜索仓库', '搜索作者', '搜索组织'];
-  QLList<QLRepository> _repos = const QLList.empty();
+  QLList<QLRepository> _repos = const QLList();
 
   @override
   void dispose() {
@@ -31,7 +31,7 @@ class _SearchPageState extends State<SearchPage>
       _showInfo('请输入一个要搜索的仓库关键字', severity: InfoBarSeverity.info);
       return;
     }
-    _repos = const QLList.empty();
+    _repos = const QLList();
     setState(() {
       _searching = true;
     });
@@ -51,7 +51,7 @@ class _SearchPageState extends State<SearchPage>
   }
 
   Future<QLList<QLRepository>> _onLoadData(QLPageInfo? pageInfo) async {
-    if (pageInfo == null || !pageInfo.hasNextPage) return const QLList.empty();
+    if (pageInfo == null || !pageInfo.hasNextPage) return const QLList();
 
     return APIWrap.instance
         .searchRepo(_controller.text.trim(), nextCursor: pageInfo.endCursor);

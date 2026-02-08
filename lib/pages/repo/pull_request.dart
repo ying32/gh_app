@@ -35,7 +35,7 @@ class RepoPullRequestPage extends StatelessWidget {
                 itemBuilder: (_, item, __) => IssueOrPullRequestListItem(item),
                 onLoading: (QLPageInfo? pageInfo) async {
                   if (pageInfo == null || !pageInfo.hasNextPage) {
-                    return const QLList.empty();
+                    return const QLList();
                   }
                   return APIWrap.instance
                       .repoPullRequests(repo, nextCursor: pageInfo.endCursor);

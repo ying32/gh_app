@@ -83,7 +83,7 @@ class _ReposPage extends StatelessWidget {
             repos: repos,
             onLoading: (QLPageInfo? pageInfo) async {
               if (pageInfo == null || !pageInfo.hasNextPage) {
-                return const QLList.empty();
+                return const QLList();
               }
               return APIWrap.instance.userRepos(model.owner,
                   isStarred: model.isStarred,

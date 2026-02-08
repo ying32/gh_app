@@ -18,7 +18,7 @@ import 'markdown_plus.dart';
 class IssueLabels extends StatelessWidget {
   const IssueLabels({super.key, required this.labels});
 
-  final List<QLLabel> labels;
+  final QLList<QLLabel> labels;
 
   static Color _getColor(Color color) {
     if ((0.2126 * color.red + 0.7152 * color.green + 0.0722 * color.blue) /

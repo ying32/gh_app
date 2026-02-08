@@ -266,7 +266,7 @@ class ReleasesPage extends StatelessWidget {
                   },
                   onLoading: (QLPageInfo? pageInfo) async {
                     if (pageInfo == null || !pageInfo.hasNextPage) {
-                      return const QLList.empty();
+                      return const QLList();
                     }
                     return APIWrap.instance
                         .repoReleases(repo, nextCursor: pageInfo.endCursor);

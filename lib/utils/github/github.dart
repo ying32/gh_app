@@ -152,7 +152,7 @@ class APIWrap {
 
     // 内部解析
     QLList<QLRepository> parse(Map<String, dynamic>? json) {
-      if (json == null) return const QLList.empty();
+      if (json == null) return const QLList();
       return QLList.fromJson(
           (json['viewer'] ?? json['user'] ?? json['organization'])?[
               isStarred ? 'starredRepositories' : 'repositories'],
@@ -192,7 +192,7 @@ class APIWrap {
   }) async {
     // 解析
     QLList<QLRelease> parse(Map<String, dynamic>? json) {
-      if (json == null) return const QLList.empty();
+      if (json == null) return const QLList();
       return QLList.fromJson(
           json['repository']?['releases'], QLRelease.fromJson,
           pageSize: count ?? defaultPageSize);
@@ -219,9 +219,9 @@ class APIWrap {
     ValueChanged<QLList<QLReleaseAsset>>? onSecondUpdate,
   }) async {
     QLList<QLReleaseAsset> parse(Map<String, dynamic>? json) {
-      if (json == null) return const QLList.empty();
+      if (json == null) return const QLList();
       final obj = json['repository']?['release']?['releaseAssets'];
-      if (obj == null) return const QLList.empty();
+      if (obj == null) return const QLList();
       return QLList.fromJson(obj, QLReleaseAsset.fromJson,
           pageSize: count ?? defaultPageSize);
     }
@@ -247,7 +247,7 @@ class APIWrap {
   }) async {
     //
     QLList<QLRepository> parse(Map<String, dynamic>? json) {
-      if (json == null) return const QLList.empty();
+      if (json == null) return const QLList();
       return QLList.fromJson(json['search'], QLRepository.fromJson,
           totalCountAlias: 'repositoryCount',
           pageSize: count ?? defaultPageSize);
@@ -275,9 +275,9 @@ class APIWrap {
         QLQueries.queryRepoRefs(repo.owner.login, repo.name,
             count: count, nextCursor: nextCursor, refPrefix: refPrefix),
         force: force);
-    if (res == null) return const QLList.empty();
+    if (res == null) return const QLList();
     final refs = res['repository']?['refs'];
-    if (refs == null) return const QLList.empty();
+    if (refs == null) return const QLList();
     return QLList.fromJson(refs, QLRef.fromJson,
         pageSize: count ?? defaultPageSize);
   }
@@ -341,11 +341,11 @@ class APIWrap {
             count: count,
             nextCursor: nextCursor),
         force: force);
-    if (res == null) return const QLList.empty();
+    if (res == null) return const QLList();
     final input = (res['viewer'] ??
         res['user'] ??
         res['organization'])?[isFollowers ? 'followers' : 'following'];
-    if (input == null) return const QLList.empty();
+    if (input == null) return const QLList();
     return QLList.fromJson(input, QLUser.fromJson,
         pageSize: count ?? defaultPageSize);
   }
@@ -376,9 +376,9 @@ class APIWrap {
   }) async {
     // 内部解析
     QLList<T> parse(Map<String, dynamic>? json) {
-      if (json == null) return const QLList.empty();
+      if (json == null) return const QLList();
       final input = json['repository']?[isIssues ? 'issues' : 'pullRequests'];
-      if (input == null) return const QLList.empty();
+      if (input == null) return const QLList();
       return QLList<T>.fromJson(input, convert,
           pageSize: count ?? defaultPageSize);
     }
@@ -452,10 +452,10 @@ class APIWrap {
     ValueChanged<QLList<QLComment>>? onSecondUpdate,
   }) async {
     QLList<QLComment> parse(Map<String, dynamic>? json) {
-      if (json == null) return const QLList.empty();
+      if (json == null) return const QLList();
       final input =
           json['repository']?[isIssues ? 'issue' : 'pullRequest']?['comments'];
-      if (input == null) return const QLList.empty();
+      if (input == null) return const QLList();
       return QLList.fromJson(input, QLComment.fromJson,
           pageSize: count ?? defaultPageSize);
     }
