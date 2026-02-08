@@ -18,17 +18,23 @@ class RepoTopics extends StatelessWidget {
   Widget build(BuildContext context) {
     if (topics.isEmpty) return const SizedBox.shrink();
     return Wrap(
-        runSpacing: 3.0,
-        spacing: 1.0,
+        runSpacing: 8.0,
+        spacing: 5.0,
         children: topics
-            .map((e) => LinkButton(
-                  padding: EdgeInsets.zero,
-                  borderRadius: BorderRadius.circular(10),
-                  text: TagLabel.other(e.name, color: Colors.blue),
-                  onPressed: () {
-                    launchUrl(Uri.parse('$githubTopicsUrl/$e'));
-                  },
-                ))
+            .map(
+              // (e) => TagLabel.other(e.name,
+              //     color: Colors.blue, fontSize: 12, radius: 10.0),
+              (e) => MaterialStyleButton(
+                padding: EdgeInsets.zero,
+                borderRadius: BorderRadius.circular(10),
+                splashColor: Colors.blue.withOpacity(0.1),
+                child: TagLabel.other(e.name,
+                    color: Colors.blue, fontSize: 12, radius: 10.0),
+                onPressed: () {
+                  launchUrl(Uri.parse('$githubTopicsUrl/$e'));
+                },
+              ),
+            )
             .toList());
   }
 }

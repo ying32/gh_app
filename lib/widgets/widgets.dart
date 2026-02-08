@@ -112,7 +112,8 @@ class TagLabel extends StatelessWidget {
           {Color color = mat.Colors.black,
           EdgeInsetsGeometry? padding,
           double? radius,
-          FontWeight? fontWeight}) =>
+          FontWeight? fontWeight,
+          double? fontSize}) =>
       TagLabel(
           color: color,
           padding: padding,
@@ -121,7 +122,9 @@ class TagLabel extends StatelessWidget {
               ? null
               : Text(text,
                   style: TextStyle(
-                      fontSize: 11, color: color, fontWeight: fontWeight)));
+                      fontSize: fontSize ?? 11.0,
+                      color: color,
+                      fontWeight: fontWeight)));
 }
 
 /// 链接跳转的？？？？
@@ -165,20 +168,23 @@ class MaterialStyleButton extends StatelessWidget {
     required this.onPressed,
     this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
     this.borderRadius,
+    this.splashColor,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onPressed;
   final BorderRadius? borderRadius;
+  final Color? splashColor;
 
   @override
   Widget build(BuildContext context) {
     return mat.Material(
-      // color: Colors.transparent,
+      borderRadius: borderRadius,
       type: mat.MaterialType.transparency,
       child: mat.InkWell(
         borderRadius: borderRadius,
+        splashColor: splashColor,
         onTap: onPressed,
         child: Padding(padding: padding, child: child),
       ),

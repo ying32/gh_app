@@ -218,7 +218,10 @@ class IssueOrPullRequestListItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 5),
               child: IssueTypeLabel((item as QLIssue).issueType!),
             ),
-          Text('#${item.number}'),
+          // TagLabel.other('#${item.number}', fontSize: 12),
+          Text('#${item.number}',
+              style:
+                  const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
           Text(' $dotChar ${item.author?.login ?? ''}'),
           Text(' $dotChar 打开于 ${item.createdAt?.toLabel ?? ''}')
         ],
