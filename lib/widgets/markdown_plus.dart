@@ -55,7 +55,9 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
         textStyle: const TextStyle(
             fontSize: 15, height: 1.8, textBaseline: TextBaseline.ideographic),
         customStylesBuilder: (el) {
-          return el.localName == 'a' ? {'color': 'DodgerBlue'} : null;
+          return el.localName == 'a'
+              ? {'color': 'DodgerBlue', 'text-decoration': 'none'}
+              : null;
         },
         customWidgetBuilder: (el) {
           // <pre><code class="language-json">
