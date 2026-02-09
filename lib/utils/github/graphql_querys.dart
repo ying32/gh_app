@@ -76,11 +76,7 @@ class QLQuery {
 ///
 /// TODO: 正常来说时面的数据都要使用变量来传递，但是我懒得弄哈，以后再优化吧
 class QLQueries {
-  /// 下个游标
-  static String _getNextCursor(String? cursor) =>
-      cursor != null && cursor.isNotEmpty ? ', after: "$cursor"' : '';
-
-  static const _repoLiteFields = '''
+  static const _repoLiteFieldsNoRef = '''
           name
           owner {
             login
@@ -90,10 +86,7 @@ class QLQueries {
           primaryLanguage {
             color
             name
-          }
-          defaultBranchRef {
-            name
-          }     
+          }  
           updatedAt
           url
           forkCount
@@ -112,8 +105,14 @@ class QLQueries {
             }
           }  ''';
 
-  static const _repoLiteFields2 = '''
-         $_repoLiteFields 
+  static const _repoLiteFields = '''
+          $_repoLiteFieldsNoRef
+          defaultBranchRef {
+            name
+          }     
+ ''';
+
+  static const _licAndTopics = '''
           licenseInfo {
              name 
           }      
@@ -124,7 +123,15 @@ class QLQueries {
                  name
                }
              }
-          }
+          }  
+''';
+  static const _repoLiteFields2NoRef = '''
+         $_repoLiteFieldsNoRef
+         $_licAndTopics
+''';
+  static const _repoLiteFields2 = '''
+         $_repoLiteFields 
+         $_licAndTopics 
 ''';
 
   static const _pinnedItemsQuery = '''
@@ -328,10 +335,28 @@ $_userFieldsFragment
     ///      }
     ///   }
     /// }
+    ///
 
     return QLQuery('''query(\$owner:String!,\$name:String!) { 
     repository(owner:\$owner, name:\$name) {
-          $_repoLiteFields2
+          $_repoLiteFields2NoRef
+          defaultBranchRef {
+             name
+             target {
+               __typename
+               ... on Commit {
+                   abbreviatedOid 
+                   author { name avatarUrl } 
+                   committedDate 
+                   message 
+                   messageHeadline
+                   #oid
+                   #blame(path:"README.md") {
+                   #     ranges { commit { author { name } committedDate  message }  }
+                   #}
+                }
+             }
+           }
           archivedAt
           diskUsage
           forkingAllowed

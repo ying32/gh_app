@@ -352,9 +352,7 @@ class QLRef {
   QLRef.fromJson(Map<String, dynamic> json)
       : name = json['name'] ?? 'HEAD',
         prefix = json['prefix'] ?? 'refs/heads/',
-        target = json['target'] == null
-            ? null
-            : QLGitObject.fromJson(json['target']);
+        target = QLGitObject.maybeFromJson(json['target']);
 
   static QLRef? maybeFromJson(Map<String, dynamic>? json) =>
       json == null ? null : QLRef.fromJson(json);
@@ -1267,6 +1265,7 @@ class QLCommit {
     this.author,
     this.authoredByCommitter = false,
     this.authoredDate,
+    this.committedDate,
     this.changedFiles = 0,
     this.message = '',
     this.history = const QLList(),
@@ -1297,7 +1296,8 @@ class QLCommit {
   final int changedFiles;
 // changedFilesIfAvailable (Int)
 // comments (CommitCommentConnection!)
-// committedDate (DateTime!)
+  /// committedDate (DateTime!)
+  final DateTime? committedDate;
 // committer (GitActor)
 // deletions (Int!)
 // file (TreeEntry)
@@ -1402,6 +1402,7 @@ class QLCommit {
         message = json['message'] ?? '',
         messageHeadline = json['messageHeadline'] ?? '',
         author = QLGitActor.maybeFromJson(json['author']),
+        committedDate = _parseDateTime(json['committedDate']),
         authoredByCommitter = json['authoredByCommitter'] ?? false,
         authoredDate = _parseDateTime(json['authoredDate']),
         history = QLList.maybeFromJson(json['history'], QLCommit.fromJson) ??
@@ -1587,6 +1588,9 @@ class QLGitObject {
         blob = !_isType(input, 'Blob') ? null : QLBlob.fromJson(input),
         tree = !_isType(input, 'Tree') ? null : QLTree.fromJson(input),
         commit = !_isType(input, 'Commit') ? null : QLCommit.fromJson(input);
+
+  static QLGitObject? maybeFromJson(Map<String, dynamic>? input) =>
+      input == null ? null : QLGitObject.fromJson(input);
 
   /// 返回一个错误
   QLGitObject.error(Object? err)

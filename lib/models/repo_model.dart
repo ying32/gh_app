@@ -21,6 +21,7 @@ class RepoModel extends ChangeNotifier {
       notifyListeners();
       updateFileObject();
       _ref = _repo.defaultBranchRef.name;
+      commit = _repo.defaultBranchRef.target?.commit;
     }
   }
 
@@ -46,6 +47,15 @@ class RepoModel extends ChangeNotifier {
   set refs(QLList<QLRef> value) {
     if (value == _refs) return;
     _refs = value;
+    notifyListeners();
+  }
+
+  /// last commit
+  QLCommit? _commit;
+  QLCommit? get commit => _commit;
+  set commit(QLCommit? value) {
+    if (value == _commit) return;
+    _commit = value;
     notifyListeners();
   }
 

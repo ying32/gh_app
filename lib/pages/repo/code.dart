@@ -120,7 +120,6 @@ class _TopBar2 extends StatelessWidget {
           SizedBox(width: 10.0),
           Spacer(),
           _TopBar1(useCard: false),
-          SizedBox(width: 10.0),
         ],
       ),
     );
@@ -171,33 +170,19 @@ class _MouseNavigation extends StatelessWidget {
 class RepoCodePage extends StatelessWidget {
   const RepoCodePage({super.key});
 
-  Widget _buildLastCommit(BuildContext context) {
-    final repo = context.read<RepoModel>().repo;
-    print(
-        "===============repo.defaultBranchRef.target?=${repo.defaultBranchRef.target?.typeName} , ${repo.defaultBranchRef.target?.commit?.messageHeadline} ");
-    if (repo.defaultBranchRef.target?.commit?.history.isNotEmpty ?? false) {
-      return Card(
-          child: Text(repo.defaultBranchRef.target!.commit!.history.firstOrNull
-                  ?.messageHeadline ??
-              ''));
-    }
-    return const SizedBox.shrink();
-  }
-
   @override
   Widget build(BuildContext context) {
     return _MouseNavigation(
       child: Column(
         children: [
           const Divider(size: 1),
+          const SizedBox(width: 10.0),
           const _TopBar2(),
-          // 当前分支最后提交记录
-          // _buildLastCommit(context),
+          const SizedBox(width: 10.0),
+
           // 导航指示
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Card(child: RepoBreadcrumbBar()),
-          ),
+          const Card(child: RepoBreadcrumbBar()),
+          const SizedBox(width: 10.0),
           Expanded(
             //TODO: 待优化
             child: ListView(

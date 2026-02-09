@@ -168,7 +168,7 @@ class _InternalRepoPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Row(
           children: [
-            UserHeadImage(
+            ActorHeadImage(
               repo.owner,
               imageSize: 45,
               onPressed: () {

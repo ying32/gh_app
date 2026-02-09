@@ -109,7 +109,7 @@ class RepoListItem extends StatelessWidget {
               if (!isPinStyle && repo.owner.avatarUrl.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: UserHeadImage(repo.owner, imageSize: 35),
+                  child: ActorHeadImage(repo.owner, imageSize: 35),
                 ),
               LinkButton(
                   onPressed: () => RepoPage.createNewTab(context, repo),

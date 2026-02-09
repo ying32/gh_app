@@ -80,7 +80,7 @@ class _UserHeadImageButton extends StatelessWidget {
         if (user == null) {
           return const ApplicationIcon(size: 40);
         }
-        return UserHeadImage(
+        return ActorHeadImage(
           user,
           imageSize: 40,
           tooltip: user.name.isEmpty ? user.login : user.name,

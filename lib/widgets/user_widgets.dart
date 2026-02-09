@@ -12,28 +12,28 @@ import 'package:url_launcher/url_launcher.dart';
 /// 用户头像
 class UserHeadImage extends StatelessWidget {
   const UserHeadImage(
-    this.user, {
+    this.avatarUrl, {
     super.key,
     this.imageSize = 64,
     this.tooltip,
     this.onPressed,
   });
 
-  final QLActor? user;
+  final String? avatarUrl;
   final double imageSize;
   final String? tooltip;
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    if (user == null) {
+    if (avatarUrl == null) {
       return const SizedBox.shrink();
     }
     Widget child = ClipOval(
       child: Container(
         color: Colors.black.withOpacity(0.08),
         child: CachedNetworkImageEx(
-          user!.avatarUrl,
+          avatarUrl!,
           fit: BoxFit.cover,
           width: imageSize,
           height: imageSize,
@@ -55,6 +55,30 @@ class UserHeadImage extends StatelessWidget {
     }
     return child;
   }
+}
+
+class ActorHeadImage extends UserHeadImage {
+  ActorHeadImage(
+    this.user, {
+    super.key,
+    super.imageSize,
+    super.tooltip,
+    super.onPressed,
+  }) : super(user?.avatarUrl);
+
+  final QLActor? user;
+}
+
+class GitActorHeadImage extends UserHeadImage {
+  GitActorHeadImage(
+    this.user, {
+    super.key,
+    super.imageSize,
+    super.tooltip,
+    super.onPressed,
+  }) : super(user?.avatarUrl);
+
+  final QLGitActor? user;
 }
 
 /// 用户名
@@ -178,7 +202,7 @@ class UserInfoPanel extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              UserHeadImage(user, imageSize: 60),
+              ActorHeadImage(user, imageSize: 60),
               const SizedBox(width: 10.0),
               Expanded(child: SelectionArea(child: UserNameWidget(user))),
             ],

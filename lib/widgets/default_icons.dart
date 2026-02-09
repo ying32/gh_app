@@ -39,6 +39,7 @@ class DefaultIcons {
   static const location = Remix.map_pin_line;
   static const mail = Remix.mail_line;
   static const linkSource = FluentIcons.open_source;
+  static const history = Remix.history_line;
 }
 
 class ApplicationIcon extends StatelessWidget {
@@ -171,4 +172,7 @@ class DefaultIcon extends StatelessWidget {
 
   const DefaultIcon.linkSource({super.key, this.size, this.color})
       : icon = DefaultIcons.linkSource;
+
+  const DefaultIcon.history({super.key, this.size, this.color})
+      : icon = DefaultIcons.history;
 }
