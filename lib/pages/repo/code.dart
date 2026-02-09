@@ -71,7 +71,7 @@ class _TopBar1 extends StatelessWidget {
                 : null,
             child: IconText(
               icon: DefaultIcons.fork,
-              text: Text('${repo.forksCount.toKiloString()} 分叉'),
+              text: Text('${repo.forksCount.toKiloString()} 派生'),
             ),
           ),
         ),

@@ -112,6 +112,7 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
                           owner: repo.owner.login,
                           openAuthor: item.author?.login,
                           isFirst: true),
+                      // 余下的项目，需要请求
                       IssuesCommentsView(item, repo: repo),
                     ],
                   ),

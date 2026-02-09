@@ -226,7 +226,7 @@ class RepoItemForkInfo extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
       child: Row(
         children: [
-          const Text('分叉自 ', style: style),
+          const Text('派生自 ', style: style),
           LinkButton(
               text: Text('${repo.parent?.fullName}', style: style),
               onPressed: () {

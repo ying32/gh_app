@@ -70,7 +70,7 @@ class RepoAbout extends StatelessWidget {
             IconText(
                 icon: DefaultIcons.fork,
                 padding: padding,
-                text: Text('${repo.forksCount.toKiloString()} 分叉')),
+                text: Text('${repo.forksCount.toKiloString()} 派生')),
           ],
         );
       },
