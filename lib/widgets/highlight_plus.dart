@@ -16,12 +16,14 @@ class HighlightViewPlus extends StatefulWidget {
     this.language,
     this.byteSize = 0,
     int tabSize = 8, // TODO: https://github.com/flutter/flutter/issues/50087
+    this.selectable = true,
   }) : source = input.replaceAll('\t', ' ' * tabSize);
 
   final String source;
   final String fileName;
   final String? language;
   final int byteSize;
+  final bool selectable;
 
   @override
   State<HighlightViewPlus> createState() => _HighlightViewPlusState();
@@ -160,11 +162,13 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
 
   Widget _defaultSelectableText() {
     return RepaintBoundary(
-      child: SelectableText(
-        widget.source,
-        style: _style,
-        selectionHeightStyle: ui.BoxHeightStyle.max,
-      ),
+      child: widget.selectable
+          ? SelectableText(
+              widget.source,
+              style: _style,
+              selectionHeightStyle: ui.BoxHeightStyle.max,
+            )
+          : Text(widget.source, style: _style),
     );
   }
 
@@ -183,10 +187,12 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
         return _defaultSelectableText();
       }
       return RepaintBoundary(
-        child: SelectableText.rich(
-          TextSpan(style: _style, children: _spans),
-          selectionHeightStyle: ui.BoxHeightStyle.max,
-        ),
+        child: widget.selectable
+            ? SelectableText.rich(
+                TextSpan(style: _style, children: _spans),
+                selectionHeightStyle: ui.BoxHeightStyle.max,
+              )
+            : Text.rich(TextSpan(style: _style, children: _spans)),
       );
     } catch (e) {
       // 如果没有查找到语法他会报一个错误，所以这里直接使用默认的

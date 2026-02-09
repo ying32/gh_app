@@ -131,14 +131,16 @@ class TagLabel extends StatelessWidget {
 class LinkButton extends StatelessWidget {
   const LinkButton({
     super.key,
-    required this.text,
-    required this.onPressed,
+    this.text,
+    this.link,
+    this.onPressed,
     this.padding = const EdgeInsets.symmetric(vertical: 2, horizontal: 5),
     this.borderRadius,
     this.style,
   });
 
-  final Widget text;
+  final Widget? text;
+  final String? link;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onPressed;
   final BorderRadius? borderRadius;
@@ -146,17 +148,34 @@ class LinkButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialStyleButton(
-      onPressed: onPressed,
-      borderRadius: borderRadius,
-      child: DefaultTextStyle(
-          style: FluentTheme.of(context)
-              .typography
-              .body!
-              .copyWith(color: Colors.blue)
-              .merge(style),
-          child: text),
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onPressed ??
+            (link == null || link!.isEmpty
+                ? null
+                : () => launchUrl(Uri.parse(link!))),
+        // borderRadius: borderRadius,
+        child: DefaultTextStyle(
+            style: FluentTheme.of(context)
+                .typography
+                .body!
+                .copyWith(color: Colors.blue)
+                .merge(style),
+            child: text ?? Text(link ?? '')),
+      ),
     );
+    // return MaterialStyleButton(
+    //   onPressed: onPressed,
+    //   borderRadius: borderRadius,
+    //   child: DefaultTextStyle(
+    //       style: FluentTheme.of(context)
+    //           .typography
+    //           .body!
+    //           .copyWith(color: Colors.blue)
+    //           .merge(style),
+    //       child: text),
+    // );
   }
 }
 
@@ -559,10 +578,10 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
           itemBuilder: (context, index) => kDebugMode
               ? Row(
                   children: [
+                    //  Text('$index'),
                     Expanded(
                         child:
                             widget.itemBuilder(context, _list[index], index)),
-                    Text('index=$index')
                   ],
                 )
               : widget.itemBuilder(context, _list[index], index),

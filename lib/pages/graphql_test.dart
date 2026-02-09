@@ -14,7 +14,6 @@ import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class OpenGraphQLIconButton extends StatelessWidget {
   const OpenGraphQLIconButton({super.key});
@@ -250,11 +249,8 @@ class _GraphQLTestState extends State<GraphQLTest> {
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   children: [
-                    LinkButton(
-                        text: const Text("API参考：$_apiURL"),
-                        onPressed: () {
-                          launchUrl(Uri.parse(_apiURL));
-                        }),
+                    const Text('API参考：'),
+                    const LinkButton(link: _apiURL),
                     const Spacer(),
                     DropDownButton(
                       title: const Text('选择查询语句'),

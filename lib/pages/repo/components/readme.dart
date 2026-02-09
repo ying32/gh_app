@@ -34,6 +34,7 @@ class RepoReadMe extends StatelessWidget {
                           )),
                   ],
                 ),
+                const SizedBox(height: 10),
                 MarkdownBlockPlus(content),
               ],
             ),

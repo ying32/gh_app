@@ -80,6 +80,11 @@ class _ReposPage extends StatelessWidget {
       builder: (context, repos, __) {
         final model = context.read<RepoListModel>();
         return RepoListView(
+            padding: const EdgeInsetsDirectional.only(
+              bottom: kPageDefaultVerticalPadding,
+              // start: PageHeader.horizontalPadding(context),
+              end: kPageDefaultVerticalPadding / 2.0,
+            ),
             repos: repos,
             onLoading: (QLPageInfo? pageInfo) async {
               if (pageInfo == null || !pageInfo.hasNextPage) {

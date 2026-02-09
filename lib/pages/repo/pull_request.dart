@@ -19,6 +19,7 @@ class RepoPullRequestPage extends StatelessWidget {
           selector: (_, model) => model.pullRequests,
           builder: (_, pulls, __) {
             return Card(
+              padding: EdgeInsets.zero,
               child: ListViewRefresher(
                 initData: pulls,
                 separator: const Divider(
@@ -27,11 +28,6 @@ class RepoPullRequestPage extends StatelessWidget {
                     style: DividerThemeData(
                         verticalMargin: EdgeInsets.zero,
                         horizontalMargin: EdgeInsets.zero)),
-                padding: EdgeInsetsDirectional.only(
-                  bottom: kPageDefaultVerticalPadding,
-                  // start: PageHeader.horizontalPadding(context),
-                  end: PageHeader.horizontalPadding(context),
-                ),
                 itemBuilder: (_, item, __) => IssueOrPullRequestListItem(item),
                 onLoading: (QLPageInfo? pageInfo) async {
                   if (pageInfo == null || !pageInfo.hasNextPage) {

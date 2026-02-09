@@ -246,12 +246,14 @@ class RepoListView extends StatelessWidget {
     this.showOpenIssues = true,
     this.onRefresh,
     this.onLoading,
+    this.padding,
   });
 
   final QLList<QLRepository> repos;
   final bool showOpenIssues;
   final AsyncQLListGetter<QLRepository>? onRefresh;
   final AsyncNextQLListGetter<QLRepository>? onLoading;
+  final EdgeInsetsGeometry? padding;
 
   @override
   Widget build(BuildContext context) {
@@ -259,11 +261,7 @@ class RepoListView extends StatelessWidget {
     return ListViewRefresher(
       initData: repos,
       separator: const SizedBox(height: 8),
-      padding: EdgeInsetsDirectional.only(
-        bottom: kPageDefaultVerticalPadding,
-        // start: PageHeader.horizontalPadding(context),
-        end: PageHeader.horizontalPadding(context),
-      ),
+      padding: padding,
       itemBuilder: (context, item, index) =>
           RepoListItem(item, showOpenIssues: showOpenIssues),
       onLoading: onLoading,

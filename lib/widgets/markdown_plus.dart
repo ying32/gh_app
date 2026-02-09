@@ -52,45 +52,59 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
     return SelectionArea(
       child: HtmlWidget(
         _body,
+        textStyle: const TextStyle(
+            fontSize: 15, height: 1.8, textBaseline: TextBaseline.ideographic),
         customStylesBuilder: (el) {
           return el.localName == 'a' ? {'color': 'DodgerBlue'} : null;
         },
         customWidgetBuilder: (el) {
           // <pre><code class="language-json">
           //print("e=${el.localName},lang=${el.attributes['class']} ");
-          if (el.localName == 'code') {
+          if (el.localName == 'a') {
+          } else if (el.localName == 'code') {
+            if (el.text.isEmpty) return null;
             var lang = el.attributes['class'];
             if (lang?.startsWith("language-") ?? false) {
               lang = lang!.substring(9);
             }
             // 没有指定语法时，直接只突出显示
             if (lang == null || lang.isEmpty) {
-              return Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                  decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8)),
-                  child: Text(el.text));
+              return InlineCustomWidget(
+                child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+                    decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8)),
+                    child: Text(
+                      el.text,
+                      style: const TextStyle(fontWeight: FontWeight.w500),
+                    )),
+              );
             }
             // 代码块
             //print("e=${el.localName},lang=$lang, text=${el.text}");
-            return Card(
-                child:
-                    HighlightViewPlus(el.text, fileName: '', language: lang));
+            return InlineCustomWidget(
+              child: Card(
+                  padding: const EdgeInsets.all(6.0),
+                  child: HighlightViewPlus(el.text,
+                      fileName: '', language: lang, selectable: false)),
+            );
           } else if (el.localName == "img" && el.attributes['src'] != null) {
             //return SizedBox();
             // 这里替换 img
             //print("=============img=${el.attributes}");
             final imgUrl = el.attributes['src'];
-            return GestureDetector(
-              onDoubleTap: () => showImageDialog(context, imgUrl),
-              child: CachedNetworkImageEx(
-                imgUrl!,
-                width: double.tryParse(el.attributes['width'] ?? ''),
-                height: double.tryParse(el.attributes['height'] ?? ''),
-                alt: el.attributes['alt'],
-                //alignment: Alignment.centerLeft,
+            return InlineCustomWidget(
+              child: GestureDetector(
+                onDoubleTap: () => showImageDialog(context, imgUrl),
+                child: CachedNetworkImageEx(
+                  imgUrl!,
+                  width: double.tryParse(el.attributes['width'] ?? ''),
+                  height: double.tryParse(el.attributes['height'] ?? ''),
+                  alt: el.attributes['alt'],
+                  //alignment: Alignment.centerLeft,
+                ),
               ),
             );
           }
