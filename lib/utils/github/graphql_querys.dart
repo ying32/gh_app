@@ -611,7 +611,7 @@ fragment RepoFields on Repository {
     String owner,
     String name, {
     int? count,
-    String states = 'OPEN',
+    List<String> states = const ['OPEN'],
     bool isIssues = true,
     String sortDirection = "DESC",
     String sortField = "CREATED_AT",
@@ -636,8 +636,10 @@ fragment RepoFields on Repository {
     //                 closed
 
     final func = isIssues ? 'issues' : 'pullRequests';
-    final issueTypeField =
-        isIssues ? 'issueType { color description isEnabled name  }' : '';
+    final issueTypeField = isIssues
+        ? 'issueType { color description isEnabled name  }'
+        : 'isDraft';
+    if (!isIssues) {}
 
     return QLQuery('''
 query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String) { 

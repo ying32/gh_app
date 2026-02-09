@@ -192,28 +192,6 @@ class RepoModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// issues
-  QLList<QLIssue>? _issues;
-
-  QLList<QLIssue>? get issues => _issues;
-
-  set issues(QLList<QLIssue>? value) {
-    if (_issues == value) return;
-    _issues = value;
-    notifyListeners();
-  }
-
-  /// pullRequests
-  QLList<QLPullRequest>? _pullRequests;
-
-  QLList<QLPullRequest>? get pullRequests => _pullRequests;
-
-  set pullRequests(QLList<QLPullRequest>? value) {
-    if (_pullRequests == value) return;
-    _pullRequests = value;
-    notifyListeners();
-  }
-
   /// releases
   QLList<QLRelease>? _releases;
 

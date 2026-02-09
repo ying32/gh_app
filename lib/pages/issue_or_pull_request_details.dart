@@ -90,7 +90,7 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
                     //TODO: 这里还差一个合并的标签
                     const Spacer(),
                     IconLinkButton.linkSource(
-                      "$githubUrl/${repo.fullName}/issues/${item.number}",
+                      "$githubUrl/${repo.fullName}/${_isIssue ? 'issues' : 'pull'}/${item.number}",
                       //message: '在浏览器中打开',
                     ),
                   ],

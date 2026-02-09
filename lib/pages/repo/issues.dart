@@ -1,26 +1,39 @@
 part of '../repo.dart';
 
-class RepoIssuesPage extends StatelessWidget {
-  const RepoIssuesPage(this.repo, {super.key});
+class _IssuesList extends StatelessWidget {
+  const _IssuesList(this.repo, this.isOpen);
 
   final QLRepository repo;
+  final bool isOpen;
+
+  void _update(BuildContext context, QLList<QLIssue> data) {
+    if (isOpen) {
+      context.read<_IssuesOrPullRequestsTabViewModel>().openedCount =
+          data.totalCount;
+    } else {
+      context.read<_IssuesOrPullRequestsTabViewModel>().closedCount =
+          data.totalCount;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return WantKeepAlive(
       onInit: (context) {
-        APIWrap.instance.repoIssues(repo, onSecondUpdate: (value) {
-          context.read<RepoModel>().issues = value;
+        APIWrap.instance.repoIssues(repo, isOpen: isOpen,
+            onSecondUpdate: (value) {
+          context.read<_IssueOrPullRequestListModel<QLIssue>>().items = value;
         }).then((data) {
-          context.read<RepoModel>().issues = data;
+          context.read<_IssueOrPullRequestListModel<QLIssue>>().items = data;
+          _update(context, data);
         });
       },
-      child: SelectorQLList<RepoModel, QLIssue>(
-          selector: (_, model) => model.issues,
+      child: SelectorQLList<_IssueOrPullRequestListModel<QLIssue>, QLIssue>(
+          selector: (_, model) => model.items,
           builder: (_, issues, __) {
             return Card(
               padding: EdgeInsets.zero,
-              child: ListViewRefresher(
+              child: ListViewRefresher<QLIssue>(
                 initData: issues,
                 separator: const Divider(
                     size: 1,
@@ -33,16 +46,37 @@ class RepoIssuesPage extends StatelessWidget {
                   if (pageInfo == null || !pageInfo.hasNextPage) {
                     return const QLList();
                   }
-                  return APIWrap.instance
-                      .repoIssues(repo, nextCursor: pageInfo.endCursor);
+                  return APIWrap.instance.repoIssues(repo,
+                      isOpen: isOpen, nextCursor: pageInfo.endCursor);
                 },
                 onRefresh: () async {
-                  // return const QLList.empty();
-                  return APIWrap.instance.repoIssues(repo, force: true);
+                  final data = await APIWrap.instance
+                      .repoIssues(repo, isOpen: isOpen, force: true);
+                  //????
+                  _update(context, data);
+                  return data;
                 },
               ),
             );
           }),
+    );
+  }
+}
+
+class RepoIssuesPage extends StatelessWidget {
+  const RepoIssuesPage(this.repo, {super.key});
+
+  final QLRepository repo;
+
+  @override
+  Widget build(BuildContext context) {
+    return RepoIssuesOrPullRequestsCommon<QLIssue>(
+      repo,
+      openWidget: _IssuesList(repo, true),
+      openIcon: const DefaultIcon.issues(color: Colors.grey),
+      closedWidget: _IssuesList(repo, false),
+      closedIcon: const DefaultIcon.check(color: Colors.grey),
+      defaultOpenCount: repo.openIssuesCount,
     );
   }
 }

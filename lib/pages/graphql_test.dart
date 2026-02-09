@@ -354,7 +354,8 @@ class _GraphQLTestState extends State<GraphQLTest>
                               final ql =
                                   QLQueries.queryRepoIssuesOrPullRequests(
                                       'ying32', 'govcl',
-                                      isIssues: false);
+                                      isIssues: false,
+                                      states: ['CLOSED', 'MERGED']);
                               _controller.text = ql.document;
                               _argsController.text = _decodeParams(ql);
                             }),

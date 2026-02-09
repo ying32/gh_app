@@ -1145,13 +1145,16 @@ class QLPullRequest extends QLIssueOrPullRequest {
     super.updatedAt,
     super.viewerCanClose,
     super.viewerCanReopen,
+    this.isDraft = false,
   });
 
   /// 是否已经合并
   bool get isMerged => state == 'MERGED';
+  final bool isDraft;
 
   QLPullRequest.fromJson(Map<String, dynamic> input)
-      : super(
+      : isDraft = input['isDraft'] ?? false,
+        super(
           number: input['number'] ?? 0,
           author: QLActor.maybeFromJson(input['author']),
           title: input['title'] ?? '',

@@ -7,6 +7,8 @@ class DefaultIcons {
   static const home = Remix.home_line;
   static const issues = Remix.issues_line;
   static const pullRequest = Remix.git_pull_request_line;
+  static const merged = Remix.git_merge_line;
+  static const closePullRequest = Remix.git_close_pull_request_line;
   static const repository = Remix.git_repository_line;
   static const star = Remix.star_line;
   static const starFill = Remix.star_fill;
@@ -82,6 +84,12 @@ class DefaultIcon extends StatelessWidget {
 
   const DefaultIcon.pullRequest({super.key, this.size, this.color})
       : icon = DefaultIcons.pullRequest;
+
+  const DefaultIcon.merged({super.key, this.size, this.color})
+      : icon = DefaultIcons.merged;
+
+  const DefaultIcon.closePullRequest({super.key, this.size, this.color})
+      : icon = DefaultIcons.closePullRequest;
 
   const DefaultIcon.repository({super.key, this.size, this.color})
       : icon = DefaultIcons.repository;

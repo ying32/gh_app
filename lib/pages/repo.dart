@@ -34,6 +34,7 @@ part 'repo/components/refs.dart';
 part 'repo/components/releases.dart';
 part 'repo/components/tree_entries_view.dart';
 part 'repo/issues.dart';
+part 'repo/issues_or_pull_requests.dart';
 part 'repo/pull_request.dart';
 part 'repo/wiki.dart';
 

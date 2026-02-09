@@ -383,14 +383,13 @@ class APIWrap {
           pageSize: count ?? defaultPageSize);
     }
 
-    //open, closed, all
+    final List<String> states = [isOpen ? 'OPEN' : 'CLOSED'];
+    if (!isIssues && isMerged) {
+      states.add('MERGED');
+    }
     final res = await gitHubAPI.query(
         QLQueries.queryRepoIssuesOrPullRequests(repo.owner.login, repo.name,
-            states: isMerged
-                ? 'MERGED'
-                : isOpen
-                    ? 'OPEN'
-                    : 'CLOSED',
+            states: states,
             isIssues: isIssues,
             count: count,
             nextCursor: nextCursor),

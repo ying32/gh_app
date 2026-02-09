@@ -193,13 +193,41 @@ class IssueOrPullRequestListItem extends StatelessWidget {
 
   final QLIssueOrPullRequest item;
 
+  bool get _isIssue => item is QLIssue;
+  QLIssue get issue => item as QLIssue;
+  bool get _isPull => item is QLPullRequest;
+  QLPullRequest get pull => item as QLPullRequest;
+
+  String get _openInfo {
+    var str = item.isOpen ? '打开于' : '关闭于';
+    if (_isPull) {
+      if (pull.isDraft) {
+        str = 'Draft 于';
+      } else if (pull.isMerged) {
+        str = '合并于';
+      }
+    }
+    return str;
+  }
+
+  DefaultIcon get _icon {
+    if (_isIssue) {
+      return DefaultIcon.issues(color: item.isOpen ? Colors.green : Colors.red);
+    }
+    if (item.isOpen) {
+      return pull.isDraft
+          ? const DefaultIcon.closePullRequest(color: Colors.grey)
+          : DefaultIcon.pullRequest(color: Colors.orange);
+    }
+    return (item.isClosed
+        ? DefaultIcon.closePullRequest(color: Colors.red)
+        : DefaultIcon.merged(color: Colors.purple));
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: item is QLIssue
-          ? DefaultIcon.issues(color: item.isOpen ? Colors.green : Colors.red)
-          : DefaultIcon.pullRequest(
-              color: item.isOpen ? Colors.green : Colors.red),
+      leading: _icon,
       title: Padding(
         padding: const EdgeInsets.symmetric(vertical: 5.0),
         child: Wrap(
@@ -217,7 +245,7 @@ class IssueOrPullRequestListItem extends StatelessWidget {
       ),
       subtitle: Row(
         children: [
-          if (item is QLIssue && (item as QLIssue).issueType != null)
+          if (_isIssue && issue.issueType != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5),
               child: IssueTypeLabel((item as QLIssue).issueType!),
@@ -227,7 +255,7 @@ class IssueOrPullRequestListItem extends StatelessWidget {
               style:
                   const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
           Text(' $dotChar ${item.author?.login ?? ''}'),
-          Text(' $dotChar 打开于 ${item.createdAt?.toLabel ?? ''}')
+          Text(' $dotChar $_openInfo${item.createdAt?.toLabel ?? ''}')
         ],
       ),
       trailing: item.commentsCount == 0
