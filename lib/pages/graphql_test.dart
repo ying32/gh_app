@@ -67,7 +67,8 @@ class GraphQLTest extends StatefulWidget {
   State<GraphQLTest> createState() => _GraphQLTestState();
 }
 
-class _GraphQLTestState extends State<GraphQLTest> {
+class _GraphQLTestState extends State<GraphQLTest>
+    with AutomaticKeepAliveClientMixin {
   static const _apiURL = 'https://docs.github.com/zh/graphql';
 
   final _controller = TextEditingController();
@@ -232,6 +233,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     const style =
         TextStyle(fontFamily: 'monospace', fontSize: 16.0, height: 1.5);
     final prism = Prism(
@@ -490,4 +492,7 @@ class _GraphQLTestState extends State<GraphQLTest> {
       ],
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

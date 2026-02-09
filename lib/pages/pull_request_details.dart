@@ -2,13 +2,12 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
-import 'package:gh_app/widgets/default_icons.dart';
-import 'package:gh_app/widgets/issues_widgets.dart';
-import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
 
-class PullRequestDetails extends StatelessWidget {
-  const PullRequestDetails(
+import 'issue_or_pull_request_details.dart';
+
+class PullRequestDetailsPage extends StatelessWidget {
+  const PullRequestDetailsPage(
     this.pull, {
     super.key,
     required this.repo,
@@ -18,161 +17,14 @@ class PullRequestDetails extends StatelessWidget {
   final QLPullRequest pull;
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsetsDirectional.only(
-        bottom: kPageDefaultVerticalPadding / 2.0,
-        // start: PageHeader.horizontalPadding(context),
-        // end: PageHeader.horizontalPadding(context),
-        // end: kPageDefaultVerticalPadding / 2.0,
-      ),
-      child: Card(
-        child: ListView(
-          children: [
-            Wrap(
-              runAlignment: WrapAlignment.start,
-              runSpacing: 10,
-              spacing: 10,
-              children: [
-                Text(
-                  pull.title,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 20),
-                ),
-                Text(
-                  '# ${pull.number}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.w400, fontSize: 20),
-                ),
-                Row(
-                  children: [
-                    TagLabel(
-                        opacity: 1,
-                        radius: 15,
-                        text: Row(
-                          children: [
-                            const DefaultIcon.issues(color: Colors.white),
-                            const SizedBox(width: 5),
-                            Text(pull.isOpen ? '打开' : '关闭',
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500)),
-                          ],
-                        ),
-                        color: pull.isOpen
-                            ? Colors.green.lighter
-                            : Colors.red.lighter),
-                    const Spacer(),
-                    IconLinkButton.linkSource(
-                        "$githubUrl/${repo.fullName}/pull/${pull.number}"
-                        //message: '在浏览器中打开',
-                        ),
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(height: 10),
-            const Divider(direction: Axis.horizontal),
-            // 首个
-            const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                    child: Column(
-                  children: [
-                    IssueCommentItem(
-                        item: pull,
-                        owner: repo.owner.login,
-                        openAuthor: pull.author?.login,
-                        isFirst: true),
-                    IssuesCommentsView(pull, repo: repo),
-                  ],
-                )),
-                const SizedBox(width: 15),
-                SizedBox(
-                  width: 200,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Assignees'),
-                      const SizedBox(height: 10),
-                      const Text('No one assigned'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(),
-                      ),
-                      //
-                      const Text('标签'),
-                      const SizedBox(height: 10),
-                      if (pull.labels.isNotEmpty)
-                        IssueLabels(
-                            labels: (pull as QLIssueOrPullRequest).labels)
-                      else
-                        const Text('No labels'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(),
-                      ),
-                      //
-                      const Text('Projects'),
-                      const SizedBox(height: 10),
-                      const Text('No projects'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(),
-                      ),
-                      //
-                      const Text('Milestone'),
-                      const SizedBox(height: 10),
-                      const Text('No milestone'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(),
-                      ),
-                      //
-                      const Text('Relationships'),
-                      const SizedBox(height: 10),
-                      const Text('None yet'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(),
-                      ),
-                      //
-                      const Text('Development'),
-                      const SizedBox(height: 10),
-                      const Text('No branches or pull requests'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(),
-                      ),
-                      //
-                      const Text('Participants'),
-                      const SizedBox(height: 10),
-                      const Text('参与者的头像'),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Divider(),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-
-            // 列表
-          ],
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      IssueOrPullRequestDetailsPage(pull, repo: repo);
 
   /// 创建一个仓库页
   static void createNewTab(
       BuildContext context, QLRepository repo, QLPullRequest pull) {
     context.read<TabviewModel>().addTab(
-          PullRequestDetails(pull, repo: repo),
+          PullRequestDetailsPage(pull, repo: repo),
           key: ValueKey("${RouterTable.pulls}/${repo.fullName}/${pull.number}"),
           title: "合并请求 #${pull.number} - ${repo.fullName}",
         );

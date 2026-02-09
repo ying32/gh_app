@@ -117,7 +117,11 @@ class IssueCommentItem extends StatelessWidget {
                 ),
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Divider(),
+                  child: Divider(
+                      direction: Axis.horizontal,
+                      style: DividerThemeData(
+                          verticalMargin: EdgeInsets.zero,
+                          horizontalMargin: EdgeInsets.zero)),
                 ),
                 if (item?.body.isNotEmpty ?? false)
                   MarkdownBlockPlus(item!.body),
@@ -240,7 +244,7 @@ class IssueOrPullRequestListItem extends StatelessWidget {
           IssueDetailsPage.createNewTab(
               context, context.read<RepoModel>().repo, item as QLIssue);
         } else if (item is QLPullRequest) {
-          PullRequestDetails.createNewTab(
+          PullRequestDetailsPage.createNewTab(
               context, context.read<RepoModel>().repo, item as QLPullRequest);
         }
       },

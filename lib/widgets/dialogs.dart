@@ -130,7 +130,7 @@ void goMainTabView(BuildContext context, dynamic value) {
   } else if (value is QLIssueWrap) {
     IssueDetailsPage.createNewTab(context, value.repo, value.issue);
   } else if (value is QLPullRequestWrap) {
-    PullRequestDetails.createNewTab(context, value.repo, value.pull);
+    PullRequestDetailsPage.createNewTab(context, value.repo, value.pull);
   } else if (value is QLReleaseWrap) {
     ReleasesPage.createNewTab(context, value.repo);
   }
