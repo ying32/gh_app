@@ -58,6 +58,20 @@
 * [GraphQL v4](https://docs.github.com/zh/graphql)
 * ~~[REST v3](https://docs.github.com/zh/rest)~~
 
+### 代码修改
+
+* [markdown_viewer-0.6.2](https://pub.dev/packages/markdown_viewer)
+```
+  // 修改原因，因为作者有很久没更新了，有些属性变化了
+  //  markdown_viewer-0.6.2\lib\src\renderer.dart
+  // 行： 50
+  // 原： 
+  ? Theme.of(context).textTheme.bodyText2?.color
+  // 之后  
+  ? Theme.of(context).textTheme.bodyMedium?.color
+ 
+```
+
 ### API 的限制
 
 * [GraphQL API 的速率限制和查询限制](https://docs.github.com/zh/graphql/overview/rate-limits-and-query-limits-for-the-graphql-api)

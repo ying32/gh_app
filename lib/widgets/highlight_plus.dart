@@ -8,6 +8,90 @@ import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:path/path.dart' as path_lib;
 
+// 因为有些不能根据扩展名识别，所以这里维护一个
+const _extHighlights = {
+  "xml": {"iml", "manifest", "dproj"},
+  "c": {"rc"},
+  "json": {"arb", "firebaserc", "jsonc"},
+  "pascal": {
+    "fmx",
+    "lfm",
+    "dfm",
+    "dpr",
+    "lpr",
+    "inc",
+    "dpk",
+    "lpk",
+    "pas",
+    "pp"
+  },
+  "batch": {"bat", "cmd"},
+  "ini": {"dof", "desktop"},
+  "rust": {"rs"},
+  "cpp": {"h"},
+};
+
+/// 这个是查询纯文件名的
+const _fileHighlights = {
+  "cmake": {"CMakeLists.txt"},
+  "ruby": {"Podfile"},
+  "makefile": {"Makefile"},
+};
+
+//当 language不为null时，则查询下这个的，
+const _langAlias = {
+  "golang": "go",
+  "delphi": "pascal",
+};
+
+/// 这个正则还要重新弄下，这个识别不太好
+final _xmlStartPattern = RegExp(r'\<\?xml|\<.+?xmlns\=\"');
+
+/// 默认代码样式
+const defaultCodeStyle = TextStyle(
+  // fontFamily: 'Courier New',
+  fontFamily: 'monospace',
+  fontSize: 16.0,
+  height: 1.5,
+);
+
+/// 尝试解析语言枨，从文件名，给定语言或者源码
+String tryGetLanguage(String fileName, {String? language, String source = ''}) {
+  if (language != null) {
+    return _langAlias[language] ?? language;
+  }
+
+  // 根据文件名查询语法
+  final shortName = path_lib.basename(fileName);
+
+  // 匹配文件全名
+  for (final key in _fileHighlights.keys) {
+    if (_fileHighlights[key]?.contains(shortName) ?? false) {
+      return key;
+    }
+  }
+  // 根据扩展名查询
+  var ext = path_lib.extension(shortName).toLowerCase();
+  // 如果没有提取到扩展，但是shortName不为空，则说明是纯扩展名的文件
+  if (ext.isEmpty && shortName.startsWith(".")) {
+    ext = shortName;
+  }
+  if (ext.startsWith(".")) ext = ext.substring(1);
+  // 这个只是临时的，想要好的，还得做内容识别
+  // 匹配扩展名
+  for (final key in _extHighlights.keys) {
+    if (_extHighlights[key]?.contains(ext) ?? false) {
+      return key;
+    }
+  }
+  // 根据文件内容判断，这里判断为xml格式的
+  if (source.startsWith(_xmlStartPattern)) {
+    return "xml";
+  }
+  // 没有找到自定义的
+  return ext;
+}
+
 class HighlightViewPlus extends StatefulWidget {
   HighlightViewPlus(
     String input, {
@@ -30,89 +114,12 @@ class HighlightViewPlus extends StatefulWidget {
 }
 
 class _HighlightViewPlusState extends State<HighlightViewPlus> {
-  // 因为有些不能根据扩展名识别，所以这里维护一个
-  static final _extHighlights = {
-    "xml": {"iml", "manifest", "dproj"},
-    "c": {"rc"},
-    "json": {"arb", "firebaserc", "jsonc"},
-    "pascal": {
-      "fmx",
-      "lfm",
-      "dfm",
-      "dpr",
-      "lpr",
-      "inc",
-      "dpk",
-      "lpk",
-      "pas",
-      "pp"
-    },
-    "batch": {"bat", "cmd"},
-    "ini": {"dof", "desktop"},
-    "rust": {"rs"},
-    "cpp": {"h"},
-  };
-
-  /// 这个是查询纯文件名的
-  static final _fileHighlights = {
-    "cmake": {"CMakeLists.txt"},
-    "ruby": {"Podfile"},
-    "makefile": {"Makefile"},
-  };
-
-  //当 language不为null时，则查询下这个的，
-  static final _langAlias = {
-    "golang": "go",
-    "delphi": "pascal",
-  };
-
-  /// 这个正则还要重新弄下，这个识别不太好
-  static final _xmlStartPattern = RegExp(r'\<\?xml|\<.+?xmlns\=\"');
-
-  static const _style = TextStyle(
-    // fontFamily: 'Courier New',
-    fontFamily: 'monospace',
-    fontSize: 16.0,
-    height: 1.5,
-  );
-
   bool get _canHighlight => widget.byteSize < k1KB * 200;
 
   /// 查询语法高亮
   String get _getLang {
-    if (widget.language != null) {
-      return _langAlias[widget.language] ?? widget.language!;
-    }
-
-    // 根据文件名查询语法
-    final shortName = path_lib.basename(widget.fileName);
-
-    // 匹配文件全名
-    for (final key in _fileHighlights.keys) {
-      if (_fileHighlights[key]?.contains(shortName) ?? false) {
-        return key;
-      }
-    }
-    // 根据扩展名查询
-    var ext = path_lib.extension(shortName).toLowerCase();
-    // 如果没有提取到扩展，但是shortName不为空，则说明是纯扩展名的文件
-    if (ext.isEmpty && shortName.startsWith(".")) {
-      ext = shortName;
-    }
-    if (ext.startsWith(".")) ext = ext.substring(1);
-    // 这个只是临时的，想要好的，还得做内容识别
-    // 匹配扩展名
-    for (final key in _extHighlights.keys) {
-      if (_extHighlights[key]?.contains(ext) ?? false) {
-        return key;
-      }
-    }
-    // 根据文件内容判断，这里判断为xml格式的
-    if (widget.source.startsWith(_xmlStartPattern)) {
-      return "xml";
-    }
-    // 没有找到自定义的
-    return ext;
+    return tryGetLanguage(widget.fileName,
+        language: widget.language, source: widget.source);
   }
 
   // static Widget _defaultContextMenuBuilder(
@@ -165,10 +172,10 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
       child: widget.selectable
           ? SelectableText(
               widget.source,
-              style: _style,
+              style: defaultCodeStyle,
               selectionHeightStyle: ui.BoxHeightStyle.max,
             )
-          : Text(widget.source, style: _style),
+          : Text(widget.source, style: defaultCodeStyle),
     );
   }
 
@@ -189,10 +196,10 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
       return RepaintBoundary(
         child: widget.selectable
             ? SelectableText.rich(
-                TextSpan(style: _style, children: _spans),
+                TextSpan(style: defaultCodeStyle, children: _spans),
                 selectionHeightStyle: ui.BoxHeightStyle.max,
               )
-            : Text.rich(TextSpan(style: _style, children: _spans)),
+            : Text.rich(TextSpan(style: defaultCodeStyle, children: _spans)),
       );
     } catch (e) {
       // 如果没有查找到语法他会报一个错误，所以这里直接使用默认的

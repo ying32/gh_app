@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:gh_app/utils/consts.dart';
 
 final appTheme = AppTheme();
 
@@ -21,7 +20,7 @@ class AppTheme extends ChangeNotifier {
 
   bool get isDark => _mode == ThemeMode.dark;
 
-  String? _fontFamily = Platform.isWindows ? '微软雅黑' : null;
+  String? _fontFamily = defaultFontName;
   String? get fontFamily => _fontFamily;
   set fontFamily(String? value) {
     _fontFamily = value;

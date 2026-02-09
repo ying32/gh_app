@@ -1,11 +1,33 @@
 import 'package:fluent_ui/fluent_ui.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
+import 'package:flutter_prism/flutter_prism.dart';
 import 'package:gh_app/models/repo_model.dart';
+import 'package:gh_app/utils/consts.dart';
+import 'package:gh_app/utils/helpers.dart';
+import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
+import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
 import 'package:gh_app/widgets/highlight_plus.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:markdown/markdown.dart' as md;
+import 'package:markdown_viewer/markdown_viewer.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+/// An example of creating a element builder.
+// class ExImageBuilder extends ImageBuilder {
+//   ExImageBuilder()
+//       : super(
+//     textStyle: const TextStyle(
+//       color: Colors.green,
+//       decoration: TextDecoration.underline,
+//     ),
+//   );
+//
+//   @override
+//   bool isBlock(element) => false;
+//
+//   @override
+//   List<String> matchTypes = <String>['example'];
+// }
 
 import 'dialogs.dart';
 
@@ -46,10 +68,95 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
     }
   }
 
+  bool _doLink(String link) {
+    try {
+      final uri = Uri.tryParse(link);
+      if (uri != null) {
+        //print("uri=$uri");
+        switch (uri.scheme.trim().toLowerCase()) {
+          case "" || "http" || "https":
+            // 没有host当对目录的
+            if (uri.host.isEmpty && uri.path.isNotEmpty) {
+              context.read<RepoModel>().path = uri.path;
+            } else {
+              onDefaultLinkAction(context, link);
+            }
+          //case "mailto" || "file" || "ft"
+          default:
+            launchUrl(uri);
+            break;
+        }
+        //print("uri scheme=${uri.scheme}, host=${uri.host}");
+      }
+    } catch (e) {
+      //onDefaultLinkAction(context, link);
+    }
+    // print("click=$link");
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_body.isEmpty) return const SizedBox.shrink();
-    return SelectionArea(
+
+    return MarkdownViewer(
+      // selectable: widget
+      widget.body,
+      enableTaskList: true,
+      enableSuperscript: false,
+      enableSubscript: false,
+      enableFootnote: false,
+      enableImageSize: false,
+      enableKbd: false,
+      syntaxExtensions: const [],
+      imageBuilder: (Uri uri, MarkdownImageInfo info) {
+        return GestureDetector(
+          onDoubleTap: () => showImageDialog(context, uri.toString()),
+          child: CachedNetworkImageEx(uri.toString(),
+              width: info.width, height: info.height, alt: info.description
+              //alignment: Alignment.centerLeft,
+              ),
+        );
+      },
+      elementBuilders: const [],
+
+      highlightBuilder: (text, language, infoString) {
+        //return [];
+        // return  HighlightViewPlus( text,
+        //     fileName: '', language: language, selectable: false);
+        try {
+          final prism = Prism(
+            mouseCursor: SystemMouseCursors.text,
+            style: context.isDark
+                ? const PrismColdarkDarkStyle()
+                : const PrismColdarkColdStyle(),
+          );
+          final lang = tryGetLanguage('', language: language, source: text);
+          return prism.render(text, lang.isEmpty ? 'plain' : lang);
+        } catch (e) {
+          return [];
+        }
+      },
+      onTapLink: (href, title) {
+        if (href == null || href.isEmpty) {
+          return;
+        }
+        _doLink(href);
+      },
+      // elementBuilders: [
+      //   ExampleBuilder(),
+      // ],
+      styleSheet: MarkdownStyle(
+        textStyle: TextStyle(fontFamily: defaultFontName),
+        // listItemMarkerTrailingSpace: 12,
+        // codeSpan: TextStyle(
+        //   fontFamily: 'RobotoMono',
+        // ),
+        codeBlock: defaultCodeStyle,
+      ),
+    );
+
+    /*  return SelectionArea(
       child: HtmlWidget(
         _body,
         textStyle: const TextStyle(
@@ -102,9 +209,12 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
             // 代码块
             //print("e=${el.localName},lang=$lang, text=${el.text}");
             return InlineCustomWidget(
-              child: Card(
-                  child: HighlightViewPlus(el.text,
-                      fileName: '', language: lang, selectable: false)),
+              child: Container(
+                padding: const EdgeInsets.all(8.0),
+                color: Colors.grey.withOpacity(0.05),
+                child: HighlightViewPlus(el.text,
+                    fileName: '', language: lang, selectable: false),
+              ),
             );
           } else if (el.localName == "img" && el.attributes['src'] != null) {
             //return SizedBox();
@@ -126,33 +236,8 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
           }
           return null;
         },
-        onTapUrl: (link) {
-          try {
-            final uri = Uri.tryParse(link);
-            if (uri != null) {
-              //print("uri=$uri");
-              switch (uri.scheme.trim().toLowerCase()) {
-                case "" || "http" || "https":
-                  // 没有host当对目录的
-                  if (uri.host.isEmpty && uri.path.isNotEmpty) {
-                    context.read<RepoModel>().path = uri.path;
-                  } else {
-                    onDefaultLinkAction(context, link);
-                  }
-                //case "mailto" || "file" || "ft"
-                default:
-                  launchUrl(uri);
-                  break;
-              }
-              //print("uri scheme=${uri.scheme}, host=${uri.host}");
-            }
-          } catch (e) {
-            //onDefaultLinkAction(context, link);
-          }
-          // print("click=$link");
-          return true;
-        },
+        onTapUrl: _doLink,
       ),
-    );
+    );*/
   }
 }

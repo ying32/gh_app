@@ -1,7 +1,12 @@
+import 'dart:io';
+
 const String appTitle = 'GitHub桌面板';
 
 /// 皮肤对应的颜色
 const themeModeStrings = ['跟随系统', '浅色模式', '深色模式'];
+
+/// 默认字体名
+String? get defaultFontName => Platform.isWindows ? '微软雅黑' : null;
 
 /// 跳由表
 class RouterTable {
