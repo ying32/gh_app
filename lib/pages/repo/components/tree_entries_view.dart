@@ -1,94 +1,5 @@
 part of '../../repo.dart';
 
-class _LastRepoCommitBar extends StatelessWidget {
-  const _LastRepoCommitBar({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Selector<RepoModel, QLCommit?>(
-      selector: (_, model) => model.commit,
-      builder: (_, commit, __) {
-        if (commit == null) {
-          return const SizedBox.shrink();
-        }
-        return Card(
-          child: Row(
-            children: [
-              Expanded(
-                child: Text.rich(
-                  TextSpan(children: [
-                    if (commit.author != null) ...[
-                      WidgetSpan(
-                        child: GitActorHeadImage(commit.author, imageSize: 24),
-                      ),
-                      const TextSpan(text: ' '),
-                      TextSpan(
-                          text: commit.author!.name,
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
-                      const TextSpan(text: ' '),
-                      TextSpan(text: commit.messageHeadline),
-                    ],
-                  ]),
-                  style: TextStyle(color: Colors.grey.withOpacity(0.8)),
-                ),
-              ),
-              Text.rich(
-                TextSpan(children: [
-                  TextSpan(text: commit.abbreviatedOid),
-                  const TextSpan(text: ' $dotChar '),
-                  TextSpan(text: commit.committedDate?.toLabel),
-                  const TextSpan(text: '  '),
-                  const WidgetSpan(child: DefaultIcon.history()),
-                  const TextSpan(text: ' '),
-                  const TextSpan(text: '0'),
-                  const TextSpan(text: ' 个提交'),
-                ]),
-                style: TextStyle(color: Colors.grey.withOpacity(0.8)),
-              )
-            ],
-          ),
-        );
-      },
-    );
-
-    final repo = context.read<RepoModel>().repo;
-
-    if (repo.defaultBranchRef.target?.commit != null) {
-      return Card(
-        child: Row(
-          children: [
-            Expanded(
-              child: Text.rich(
-                TextSpan(children: [
-                  if (repo.defaultBranchRef.target?.commit!.author != null) ...[
-                    WidgetSpan(
-                      child: GitActorHeadImage(
-                          repo.defaultBranchRef.target?.commit!.author,
-                          imageSize: 24),
-                    ),
-                    const TextSpan(text: ' '),
-                    TextSpan(
-                        text:
-                            repo.defaultBranchRef.target!.commit!.author!.name,
-                        style: const TextStyle(fontWeight: FontWeight.w600)),
-                    const TextSpan(text: ' '),
-                    TextSpan(
-                        text: repo
-                            .defaultBranchRef.target!.commit!.messageHeadline),
-                  ],
-                ]),
-                style: TextStyle(color: Colors.grey.withOpacity(0.8)),
-              ),
-            ),
-            Text('右边'),
-          ],
-        ),
-      );
-    }
-    return const SizedBox.shrink();
-  }
-}
-
 /// 仓库目录列表
 class RepoTreeEntriesView extends StatelessWidget {
   const RepoTreeEntriesView({
@@ -120,19 +31,15 @@ class RepoTreeEntriesView extends StatelessWidget {
   }
 
   // 构建目录，这个还可以再优化的，不使用Column，暂时先这样吧
-  Widget _buildTree(BuildContext context, List<QLTreeEntry> entries) => Card(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...entries
-                .where((e) => e.isDir || e.isSubmodule)
-                .map((e) => _buildItem(context, e)),
-            ...entries
-                .where((e) => e.isFile)
-                .map((e) => _buildItem(context, e)),
-          ],
-        ),
+  Widget _buildTree(BuildContext context, List<QLTreeEntry> entries) => Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...entries
+              .where((e) => e.isDir || e.isSubmodule)
+              .map((e) => _buildItem(context, e)),
+          ...entries.where((e) => e.isFile).map((e) => _buildItem(context, e)),
+        ],
       );
 
   Widget _buildContent(
@@ -144,13 +51,11 @@ class RepoTreeEntriesView extends StatelessWidget {
       }
       // blob不为null时
       if (object.blob != null && object.blob!.text != null) {
-        return Card(
-          child: SizedBox(
-            width: double.infinity,
-            child: RepoFileContentView(
-              object.blob!,
-              filename: p.basename(context.read<RepoModel>().path),
-            ),
+        return SizedBox(
+          width: double.infinity,
+          child: RepoFileContentView(
+            object.blob!,
+            filename: p.basename(context.read<RepoModel>().path),
           ),
         );
       }
@@ -172,7 +77,6 @@ class RepoTreeEntriesView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.max,
       children: [
-        const _LastRepoCommitBar(),
         // 监视文件对象改变
         Selector<RepoModel, QLGitObject?>(
             selector: (_, model) => model.object,
@@ -180,14 +84,11 @@ class RepoTreeEntriesView extends StatelessWidget {
               if (object == null) {
                 return SizedBox(
                     height: MediaQuery.of(context).size.height / 2,
-                    child: const Center(child: ProgressRing()));
+                    child: const LoadingRing());
               }
               return _buildContent(
                   context, object, context.read<RepoModel>().repo);
             }),
-        // readme
-        const SizedBox(height: 8.0),
-        const RepoReadMe(),
       ],
     );
   }

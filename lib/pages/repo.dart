@@ -211,6 +211,7 @@ class _InternalRepoPage extends StatelessWidget {
                 child: TagLabel.archived(),
               ),
             const Spacer(),
+            const _TopBar1(useCard: false),
             // 这东西竟然会引起一堆问题？？？
             IconLinkButton.linkSource(repo.url, message: '在浏览器中打开')
           ],
@@ -241,6 +242,11 @@ class _InternalRepoPage extends StatelessWidget {
             child: Column(
               children: [
                 _buildHeader(context, repo),
+                const Divider(
+                  direction: Axis.horizontal,
+                  style: DividerThemeData(horizontalMargin: EdgeInsets.zero),
+                ),
+                const SizedBox(height: 8.0),
                 const Expanded(child: _TabPages()),
               ],
             ),

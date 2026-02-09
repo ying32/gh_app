@@ -111,17 +111,15 @@ class _TopBar2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Card(
-      child: Row(
-        children: [
-          _RepoBranches(),
-          SizedBox(width: 10.0),
-          _BranchAndTagsCount(),
-          SizedBox(width: 10.0),
-          Spacer(),
-          _TopBar1(useCard: false),
-        ],
-      ),
+    return const Row(
+      children: [
+        _RepoBranches(),
+        SizedBox(width: 10.0),
+        _BranchAndTagsCount(),
+        SizedBox(width: 10.0),
+        Spacer(),
+        // _TopBar1(useCard: false),
+      ],
     );
   }
 }
@@ -166,6 +164,80 @@ class _MouseNavigation extends StatelessWidget {
   }
 }
 
+class _LastRepoCommitBar extends StatelessWidget {
+  const _LastRepoCommitBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Selector<RepoModel, QLCommit?>(
+      selector: (_, model) => model.commit,
+      builder: (_, commit, __) {
+        if (commit == null) {
+          return const SizedBox.shrink();
+        }
+        return Row(
+          children: [
+            if (commit.author != null)
+              GitActorHeadImage(commit.author, imageSize: 24),
+            Expanded(
+              child: Text.rich(
+                TextSpan(children: [
+                  const TextSpan(text: ' '),
+                  TextSpan(
+                      text: commit.author?.name ?? '',
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
+                  const TextSpan(text: ' '),
+                  TextSpan(text: commit.messageHeadline),
+                ]),
+                style: TextStyle(color: Colors.grey.withOpacity(0.8)),
+              ),
+            ),
+            Text.rich(
+              TextSpan(children: [
+                TextSpan(text: commit.abbreviatedOid),
+                const TextSpan(text: ' $dotChar '),
+                TextSpan(text: commit.committedDate?.toLabel),
+                const TextSpan(text: '  '),
+                const WidgetSpan(child: DefaultIcon.history()),
+                const TextSpan(text: ' '),
+                const TextSpan(text: '0'),
+                const TextSpan(text: ' 个提交'),
+              ]),
+              style: TextStyle(color: Colors.grey.withOpacity(0.8)),
+            )
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ContentWidget extends StatelessWidget {
+  const _ContentWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        Divider(
+            direction: Axis.horizontal,
+            style: DividerThemeData(
+                verticalMargin: EdgeInsets.zero,
+                horizontalMargin: EdgeInsets.zero)),
+        Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: _LastRepoCommitBar()),
+        Divider(
+            direction: Axis.horizontal,
+            style: DividerThemeData(
+                verticalMargin: EdgeInsets.zero,
+                horizontalMargin: EdgeInsets.zero)),
+        RepoTreeEntriesView(),
+      ],
+    );
+  }
+}
+
 /// 代码页面
 class RepoCodePage extends StatelessWidget {
   const RepoCodePage({super.key});
@@ -175,14 +247,15 @@ class RepoCodePage extends StatelessWidget {
     return _MouseNavigation(
       child: Column(
         children: [
-          const Divider(size: 1),
-          const SizedBox(width: 10.0),
-          const _TopBar2(),
-          const SizedBox(width: 10.0),
-
+          const Card(child: _TopBar2()),
+          const SizedBox(height: 4.0),
           // 导航指示
-          const Card(child: RepoBreadcrumbBar()),
-          const SizedBox(width: 10.0),
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: RepoBreadcrumbBar(),
+            ),
+          ),
           Expanded(
             //TODO: 待优化
             child: ListView(
@@ -191,7 +264,16 @@ class RepoCodePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 内容树
-                    Expanded(child: RepoTreeEntriesView()),
+                    Expanded(
+                        child: Column(
+                      children: [
+                        // 导航指示
+                        Card(child: _ContentWidget()),
+                        // readme
+                        SizedBox(height: 8.0),
+                        RepoReadMe(),
+                      ],
+                    )),
                     SizedBox(width: 10.0),
 
                     // 右边

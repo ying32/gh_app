@@ -679,7 +679,7 @@ class APIFutureBuilder<T> extends StatelessWidget {
         builder: (BuildContext context, AsyncSnapshot<T> snapshot) {
           // 如果未完成，则显示加载进度指示
           if (snapshot.connectionState != ConnectionState.done) {
-            return waitingWidget ?? const Center(child: ProgressRing());
+            return waitingWidget ?? const LoadingRing();
           }
           // 有错误，显示错误
           if (snapshot.hasError) {
