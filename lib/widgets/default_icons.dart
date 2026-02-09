@@ -9,6 +9,7 @@ class DefaultIcons {
   static const pullRequest = Remix.git_pull_request_line;
   static const merged = Remix.git_merge_line;
   static const closePullRequest = Remix.git_close_pull_request_line;
+  static const pullRequestDraft = Remix.git_pr_draft_line;
   static const repository = Remix.git_repository_line;
   static const star = Remix.star_line;
   static const starFill = Remix.star_fill;
@@ -90,6 +91,9 @@ class DefaultIcon extends StatelessWidget {
 
   const DefaultIcon.closePullRequest({super.key, this.size, this.color})
       : icon = DefaultIcons.closePullRequest;
+
+  const DefaultIcon.pullRequestDraft({super.key, this.size, this.color})
+      : icon = DefaultIcons.pullRequestDraft;
 
   const DefaultIcon.repository({super.key, this.size, this.color})
       : icon = DefaultIcons.repository;

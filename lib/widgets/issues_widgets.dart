@@ -216,8 +216,9 @@ class IssueOrPullRequestListItem extends StatelessWidget {
     }
     if (item.isOpen) {
       return pull.isDraft
-          ? const DefaultIcon.closePullRequest(color: Colors.grey)
-          : DefaultIcon.pullRequest(color: Colors.orange);
+          ? const DefaultIcon.pullRequestDraft(color: Colors.grey)
+          : const DefaultIcon.pullRequest(
+              color: Color.fromARGB(255, 188, 76, 0));
     }
     return (item.isClosed
         ? DefaultIcon.closePullRequest(color: Colors.red)
@@ -268,12 +269,12 @@ class IssueOrPullRequestListItem extends StatelessWidget {
               ),
             ),
       onPressed: () {
-        if (item is QLIssue) {
+        if (_isIssue) {
           IssueDetailsPage.createNewTab(
-              context, context.read<RepoModel>().repo, item as QLIssue);
-        } else if (item is QLPullRequest) {
+              context, context.read<RepoModel>().repo, issue);
+        } else if (_isPull) {
           PullRequestDetailsPage.createNewTab(
-              context, context.read<RepoModel>().repo, item as QLPullRequest);
+              context, context.read<RepoModel>().repo, pull);
         }
       },
     );

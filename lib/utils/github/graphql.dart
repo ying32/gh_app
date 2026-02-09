@@ -1150,7 +1150,31 @@ class QLPullRequest extends QLIssueOrPullRequest {
 
   /// 是否已经合并
   bool get isMerged => state == 'MERGED';
+
+  /// `Boolean!`
   final bool isDraft;
+
+  // /// `Boolean!`
+  // final bool isInMergeQueue;
+  //
+  // /// `Boolean!`
+  // final bool isReadByViewer;
+  //mergeStateStatus (MergeStateStatus!)
+  //
+  // Detailed information about the current pull request merge state status.
+  //
+  // mergeable (MergeableState!)
+  //
+  // Whether or not the pull request can be merged based on the existence of merge conflicts.
+  //merged (Boolean!)
+  //
+  // Whether or not the pull request was merged.
+  //
+  // mergedAt (DateTime)
+  //
+  // The date and time that the pull request was merged.
+  //
+  // mergedBy (Actor)
 
   QLPullRequest.fromJson(Map<String, dynamic> input)
       : isDraft = input['isDraft'] ?? false,
