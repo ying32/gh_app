@@ -80,6 +80,7 @@ class _ReposPage extends StatelessWidget {
       builder: (context, repos, __) {
         final model = context.read<RepoListModel>();
         return RepoListView(
+            showOpenIssues: !model.isStarred,
             padding: const EdgeInsetsDirectional.only(
               bottom: kPageDefaultVerticalPadding,
               // start: PageHeader.horizontalPadding(context),

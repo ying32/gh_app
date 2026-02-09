@@ -526,6 +526,8 @@ $_userFieldsFragment
     final func = isStarred ? 'starredRepositories' : 'repositories';
     final sortField = isStarred ? 'STARRED_AT' : 'STARGAZERS';
     //final fragmentType = isOrganization ? 'Organization' : 'User';
+    final openIssueCount =
+        isStarred ? '' : 'issues(states: OPEN) { totalCount }';
 
 //     const starReposField = '''
 //   # StarredRepositoryConnection
@@ -552,6 +554,7 @@ query(\$first:Int!, \$after:String)  {
       $_pageInfo
       nodes {
         ...RepoFields
+        $openIssueCount
       }
     }
   }
