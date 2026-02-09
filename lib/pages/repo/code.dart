@@ -11,17 +11,17 @@ class _BranchAndTagsCount extends StatelessWidget {
         builder: (_, repo, __) {
           return Row(
             children: [
-              LinkButton(
-                style: TextStyle(color: context.textColor200),
+              HyperlinkButton(
+                //style: TextStyle(color: context.textColor200),
                 onPressed: () {},
-                text: IconText(
+                child: IconText(
                     icon: DefaultIcons.branch, text: Text("${repo.refsCount}")),
               ),
               const SizedBox(width: 10.0),
-              LinkButton(
-                style: TextStyle(color: context.textColor200),
+              HyperlinkButton(
+                //style: TextStyle(color: context.textColor200),
                 onPressed: () {},
-                text: IconText(
+                child: IconText(
                     icon: DefaultIcons.tags, text: Text("${repo.tagsCount}")),
               ),
             ],

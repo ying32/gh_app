@@ -70,7 +70,7 @@ class _TabPagesState extends State<_TabPages> {
               if (repo.hasIssuesEnabled)
                 Tab(
                   key: _getKey(repo, RepoSubPage.issues),
-                  text: Text('问题 ${repo.openIssuesCount.toKiloString()}'),
+                  text: Text('问题 (${repo.openIssuesCount.toKiloString()})'),
                   icon: const DefaultIcon.issues(),
                   closeIcon: null,
                   body: RepoIssuesPage(repo),
@@ -78,7 +78,8 @@ class _TabPagesState extends State<_TabPages> {
 
               Tab(
                 key: _getKey(repo, RepoSubPage.pullRequests),
-                text: Text('合并请求 ${repo.openPullRequestsCount.toKiloString()}'),
+                text:
+                    Text('合并请求 (${repo.openPullRequestsCount.toKiloString()})'),
                 icon: const DefaultIcon.pullRequest(),
                 closeIcon: null,
                 body: RepoPullRequestPage(repo),

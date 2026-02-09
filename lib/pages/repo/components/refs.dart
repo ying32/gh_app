@@ -13,7 +13,7 @@ class _RepoBranches extends StatelessWidget {
       flyout: ChangeNotifierProvider.value(
         value: context.read<RepoModel>(),
         child: FlyoutContent(
-          constraints: const BoxConstraints(maxWidth: 300.0, maxHeight: 300),
+          constraints: const BoxConstraints(maxWidth: 240.0, maxHeight: 300),
           child: Selector<RepoModel, QLList<QLRef>>(
             selector: (_, model) => model.refs,
             builder: (_, refs, __) {
@@ -31,8 +31,8 @@ class _RepoBranches extends StatelessWidget {
                     children: refs.data
                         .map((e) => Tooltip(
                               message: e.name,
-                              child: LinkButton(
-                                  style: TextStyle(color: context.textColor200),
+                              child: MaterialStyleButton(
+                                  //style: TextStyle(color: context.textColor200),
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                     context.read<RepoModel>().ref =
@@ -40,7 +40,7 @@ class _RepoBranches extends StatelessWidget {
                                             ? null
                                             : e.name;
                                   },
-                                  text: SizedBox(
+                                  child: SizedBox(
                                     height: 30,
                                     child: Row(
                                       children: [

@@ -46,3 +46,4 @@ generated_plugin*
 *.lock
 Generated.xcconfig
 flutter_export_environment.sh
+/test/README.zh-CN.md

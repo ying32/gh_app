@@ -61,6 +61,21 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
           // <pre><code class="language-json">
           //print("e=${el.localName},lang=${el.attributes['class']} ");
           if (el.localName == 'a') {
+          } else if (el.localName == 'blockquote') {
+            return InlineCustomWidget(
+              child: Row(
+                children: [
+                  Container(
+                      margin: const EdgeInsets.only(right: 10.0),
+                      width: 2.0,
+                      height: 24.0,
+                      color: Colors.grey.withOpacity(0.5)),
+                  Text(el.text),
+                ],
+              ),
+            );
+          } else if (el.localName == "hr") {
+            return Container(height: 2, color: Colors.grey.withOpacity(0.5));
           } else if (el.localName == 'code') {
             if (el.text.isEmpty) return null;
             var lang = el.attributes['class'];
@@ -86,7 +101,6 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
             //print("e=${el.localName},lang=$lang, text=${el.text}");
             return InlineCustomWidget(
               child: Card(
-                  padding: const EdgeInsets.all(6.0),
                   child: HighlightViewPlus(el.text,
                       fileName: '', language: lang, selectable: false)),
             );
