@@ -96,7 +96,7 @@ class UserNameWidget extends StatelessWidget {
     final nickName = user.name.isEmpty ? user.login : user.name;
     if (onlyNickName) return nickName;
     if (nickName == "" || nickName == user.login) {
-      return user.login ?? '';
+      return user.login;
     }
     return "${user.login}${"($nickName)"}";
   }
@@ -240,14 +240,14 @@ class UserInfoPanel extends StatelessWidget {
                   onPressed: () {
                     // pushRoute(context, RouterTable.followers);
                   },
-                  child: Text("${_user.followersCount ?? 0}个关注者"),
+                  child: Text("${_user.followersCount}个关注者"),
                 ),
                 const Text(dotChar),
                 HyperlinkButton(
                   onPressed: () {
                     //pushRoute(context, RouterTable.following);
                   },
-                  child: Text("${_user.followingCount ?? 0}个关注"),
+                  child: Text("${_user.followingCount}个关注"),
                 ),
               ],
             ),

@@ -22,10 +22,11 @@ class IssueDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        bottom: kPageDefaultVerticalPadding,
+      padding: const EdgeInsetsDirectional.only(
+        bottom: kPageDefaultVerticalPadding / 2.0,
         // start: PageHeader.horizontalPadding(context),
-        end: PageHeader.horizontalPadding(context),
+        //end: PageHeader.horizontalPadding(context),
+        // end: kPageDefaultVerticalPadding / 2.0,
       ),
       child: Card(
         child: ListView(

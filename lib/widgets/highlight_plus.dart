@@ -157,7 +157,7 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
       if (_spans.isNotEmpty && mounted) {
         setState(() {});
       }
-    } catch (e) {}
+    } catch (e) {} //ignore:empty_catches
   }
 
   Widget _defaultSelectableText() {

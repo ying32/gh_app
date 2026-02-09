@@ -143,8 +143,9 @@ class _CodePageRight extends StatelessWidget {
   }
 }
 
+/// 鼠标导航
 class _MouseNavigation extends StatelessWidget {
-  const _MouseNavigation({super.key, required this.child});
+  const _MouseNavigation({required this.child});
 
   final Widget child;
 
@@ -164,8 +165,9 @@ class _MouseNavigation extends StatelessWidget {
   }
 }
 
+//TODO: 这个还没完善，只能列出默认分支的
 class _LastRepoCommitBar extends StatelessWidget {
-  const _LastRepoCommitBar({super.key});
+  const _LastRepoCommitBar();
 
   @override
   Widget build(BuildContext context) {
@@ -212,6 +214,7 @@ class _LastRepoCommitBar extends StatelessWidget {
   }
 }
 
+/// 内容组合
 class _ContentWidget extends StatelessWidget {
   const _ContentWidget();
 
@@ -219,11 +222,11 @@ class _ContentWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Column(
       children: [
-        Divider(
-            direction: Axis.horizontal,
-            style: DividerThemeData(
-                verticalMargin: EdgeInsets.zero,
-                horizontalMargin: EdgeInsets.zero)),
+        // Divider(
+        //     direction: Axis.horizontal,
+        //     style: DividerThemeData(
+        //         verticalMargin: EdgeInsets.zero,
+        //         horizontalMargin: EdgeInsets.zero)),
         Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
             child: _LastRepoCommitBar()),
@@ -248,14 +251,10 @@ class RepoCodePage extends StatelessWidget {
       child: Column(
         children: [
           const Card(child: _TopBar2()),
-          const SizedBox(height: 4.0),
+          const SizedBox(height: 2.0),
           // 导航指示
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: RepoBreadcrumbBar(),
-            ),
-          ),
+          const Card(child: RepoBreadcrumbBar()),
+          const SizedBox(height: 2.0),
           Expanded(
             //TODO: 待优化
             child: ListView(
