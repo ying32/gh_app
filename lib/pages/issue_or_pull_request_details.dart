@@ -19,6 +19,7 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
 
   bool get _isIssue => item is QLIssue;
   QLIssue get _issue => (item as QLIssue);
+  bool get _isPull => item is QLPullRequest;
   QLPullRequest get _pull => (item as QLPullRequest);
 
   @override
@@ -65,26 +66,45 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
                 ),
                 Row(
                   children: [
-                    TagLabel(
-                        opacity: 1,
-                        radius: 15,
-                        text: Row(
-                          children: [
-                            const DefaultIcon.issues(color: Colors.white),
-                            const SizedBox(width: 5),
-                            Text(item.isOpen ? '打开' : '关闭',
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                      child: TagLabel(
+                          opacity: 1,
+                          radius: 15,
+                          text: IconText(
+                            icon: DefaultIcons.issues,
+                            iconColor: Colors.white,
+                            spacing: 4,
+                            text: Text(item.isOpen ? '打开' : '关闭',
                                 style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500)),
-                          ],
-                        ),
-                        color: item.isOpen
-                            ? Colors.green.lighter
-                            : Colors.red.lighter),
+                          ),
+                          color: item.isOpen
+                              ? Colors.green.lighter
+                              : Colors.red.lighter),
+                    ),
+                    if (_isPull && _pull.isMerged)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: TagLabel(
+                            opacity: 1,
+                            radius: 15,
+                            text: const IconText(
+                                spacing: 4,
+                                icon: DefaultIcons.merged,
+                                iconColor: Colors.white,
+                                text: Text('已合并',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500))),
+                            color: Colors.purple),
+                      ),
                     if (_isIssue && _issue.issueType != null)
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
                         child: IssueTypeLabel(_issue.issueType!, fontSize: 14),
                       ),
                     //TODO: 这里还差一个合并的标签
