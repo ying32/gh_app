@@ -88,6 +88,14 @@ class QLReleaseWrap {
   final QLRepository repo;
 }
 
+class QLUserWrap {
+  const QLUserWrap(this.user);
+  final QLUserOrOrganizationCommon user;
+
+  QLUserWrap copyWith({QLUserOrOrganizationCommon? user}) =>
+      QLUserWrap(user ?? this.user);
+}
+
 /// Github的API包装
 class APIWrap {
   APIWrap._();
@@ -516,7 +524,10 @@ class APIWrap {
     // TODO: 先不弄了
     final login = segments[0].trim();
     // 最少2个
-    if (segments.length < 2) return null;
+    if (segments.length < 2) {
+      return QLUserWrap(
+          QLUserOrOrganizationCommon(login: login, isOrganization: false));
+    }
     var repoName = segments[1].trim();
     if (repoName.endsWith(".git")) {
       repoName = repoName.substring(0, repoName.length - 4);

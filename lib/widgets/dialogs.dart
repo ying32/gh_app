@@ -5,6 +5,7 @@ import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/pull_request_details.dart';
 import 'package:gh_app/pages/releases.dart';
 import 'package:gh_app/pages/repo.dart';
+import 'package:gh_app/pages/user_info.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/widgets/widgets.dart';
@@ -106,6 +107,17 @@ bool goToRepoPageByUri(
       onComplete?.call();
     });
     return true;
+  } else if (res is QLUserWrap) {
+    APIWrap.instance.ownerInfo(res.user.login).then((e) {
+      onSuccess(res.copyWith(user: e));
+    }).onError((e, s) {
+      onFailed?.call(e);
+    }).whenComplete(() {
+      if (useLoading) {
+        closeDialog(context);
+      }
+      onComplete?.call();
+    });
   } else if (res is QLReleaseWrap) {
     if (useLoading) {
       closeDialog(context);
@@ -133,6 +145,8 @@ void goMainTabView(BuildContext context, dynamic value) {
     PullRequestDetailsPage.createNewTab(context, value.repo, value.pull);
   } else if (value is QLReleaseWrap) {
     ReleasesPage.createNewTab(context, value.repo);
+  } else if (value is QLUserWrap) {
+    UserInfoPage.createNewTab(context, value.user);
   }
 }
 
@@ -216,7 +230,7 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
       return;
     }
     final segments = u.pathSegments.where((e) => e.isNotEmpty).toList();
-    if (segments.length < 2) {
+    if (segments.isEmpty) {
       showInfoDialog('请输入一个github仓库链接',
           context: context, severity: InfoBarSeverity.error);
       return;
