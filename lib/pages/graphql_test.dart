@@ -9,8 +9,7 @@ import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/github/graphql_querys.dart';
 import 'package:gh_app/utils/helpers.dart';
-import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
-import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
+import 'package:gh_app/utils/prism_themes/prism_coldark.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:provider/provider.dart';
@@ -238,8 +237,8 @@ class _GraphQLTestState extends State<GraphQLTest>
         TextStyle(fontFamily: 'monospace', fontSize: 16.0, height: 1.5);
     final prism = Prism(
         style: context.isDark
-            ? const PrismColdarkDarkStyle()
-            : const PrismColdarkColdStyle());
+            ? const PrismColDarkStyle.dark()
+            : const PrismColDarkStyle.light());
     final textSpans = prism.render(_resultText, 'json');
     return Row(
       children: [

@@ -4,8 +4,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_prism/flutter_prism.dart';
 import 'package:gh_app/utils/helpers.dart';
-import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
-import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
+import 'package:gh_app/utils/prism_themes/prism_coldark.dart';
 import 'package:path/path.dart' as path_lib;
 
 // 因为有些不能根据扩展名识别，所以这里维护一个
@@ -157,8 +156,8 @@ class _HighlightViewPlusState extends State<HighlightViewPlus> {
     if (!_canHighlight) return;
     final prism = Prism(
         style: context.isDark
-            ? const PrismColdarkDarkStyle()
-            : const PrismColdarkColdStyle());
+            ? const PrismColDarkStyle.dark()
+            : const PrismColDarkStyle.light());
     try {
       _spans = prism.render(widget.source, _lang);
       if (_spans.isNotEmpty && mounted) {

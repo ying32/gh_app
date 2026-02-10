@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:csslib/parser.dart' as css;
 import 'package:csslib/visitor.dart';
-import 'package:path/path.dart' as p;
 
 class HexColor {
   HexColor([this.text = "", this.value = 0]);
@@ -99,37 +98,19 @@ void main(List<String> arguments) {
   //     prismStyleFileToDart(entity.path);
   //   }
   // });
-  prismStyleFileToDart(
-      r"F:\StudyDiskJ\GitRepo\prism-themes\themes\prism-a11y-dark.css");
-  prismStyleFileToDart(
-      r"F:\StudyDiskJ\GitRepo\prism-themes\themes\prism-coldark-cold.css");
-  prismStyleFileToDart(
-      r"F:\StudyDiskJ\GitRepo\prism-themes\themes\prism-coldark-dark.css");
+  const prismThemesRoot = r'F:\StudyDiskJ\GitRepo\prism-themes\themes';
+  prismStyleFileToDart('A11y',
+      darkCssFileName: "$prismThemesRoot\\prism-a11y-dark.css");
+  prismStyleFileToDart('ColDark',
+      lightCssFileName: "$prismThemesRoot\\prism-coldark-cold.css",
+      darkCssFileName: "$prismThemesRoot\\prism-coldark-dark.css");
 }
 
-void prismStyleFileToDart(String filename) {
-  final file = File(filename);
-  var stylesheet = css.parse(file.readAsStringSync(),
-      options: const css.PreprocessorOptions(
-          useColors: true,
-          checked: true,
-          warningsAsErrors: false,
-          inputFile: 'memory'));
-  final clsVisits = RuleSetVisitor()..visitTree(stylesheet);
-  writeToFile(
-      p
-          .withoutExtension(p.basename(file.path))
-          .replaceAll(RegExp(r"-|\."), "_"),
-      clsVisits);
-}
-
-void writeToFile(String fileName, RuleSetVisitor visitor) {
-  final className = fileName
-      .split("_")
-      .map((e) => e.isEmpty ? '' : e[0].toUpperCase() + e.substring(1))
-      .join();
-
-  final dartClassName = "${className}Style";
+void prismStyleFileToDart(String className,
+    {String lightCssFileName = '',
+    String darkCssFileName = '',
+    String? styleName}) {
+  final dartClassName = "Prism${className}Style";
 
   final fileBuff = StringBuffer();
   fileBuff.writeln("//");
@@ -140,7 +121,38 @@ void writeToFile(String fileName, RuleSetVisitor visitor) {
   fileBuff.writeln();
   fileBuff.writeln("/// Creates a $className style.");
   fileBuff.writeln("class $dartClassName extends p.PrismStyle<TextStyle> {");
-  fileBuff.writeln("  const $dartClassName({");
+
+  if (lightCssFileName.isNotEmpty) {
+    writeConstructor(
+        fileBuff, dartClassName, lightCssFileName, styleName ?? 'light');
+  }
+  if (darkCssFileName.isNotEmpty) {
+    fileBuff.writeln();
+    writeConstructor(
+        fileBuff, dartClassName, darkCssFileName, styleName ?? 'dark');
+  }
+
+  fileBuff.writeln("}");
+
+  // print(fileBuff.toString());
+  final file =
+      File("lib/utils/prism_themes/prism_${className.toLowerCase()}.dart")
+        ..createSync(recursive: true);
+  file.writeAsStringSync(fileBuff.toString());
+}
+
+void writeConstructor(StringBuffer fileBuff, String dartClassName,
+    String inputFileName, String styleName) {
+  final file = File(inputFileName);
+  var stylesheet = css.parse(file.readAsStringSync(),
+      options: const css.PreprocessorOptions(
+          useColors: true,
+          checked: true,
+          warningsAsErrors: false,
+          inputFile: 'memory'));
+  final clsVisits = RuleSetVisitor()..visitTree(stylesheet);
+
+  fileBuff.writeln("  const $dartClassName.$styleName({");
 
   const unsupportedProperties = [
     "variable",
@@ -170,12 +182,12 @@ void writeToFile(String fileName, RuleSetVisitor visitor) {
   ];
 
   // 写数据
-  for (var key in visitor.classNames.keys) {
+  for (var key in clsVisits.classNames.keys) {
     if (unsupportedProperties.contains(key)) {
       continue;
     }
     // 取值
-    final value = visitor.classNames[key];
+    final value = clsVisits.classNames[key];
     // 重新调整为dart能用的key
     key = key
         .split("-")
@@ -188,13 +200,13 @@ void writeToFile(String fileName, RuleSetVisitor visitor) {
 
     // 重调整
     if (key == "class") {
-      if (visitor.classNames['class-name'] == null) {
+      if (clsVisits.classNames['class-name'] == null) {
         key = "className";
       } else {
         continue;
       }
     } else if (key == "attribute") {
-      if (visitor.classNames['atrule'] == null) {
+      if (clsVisits.classNames['atrule'] == null) {
         key = "atrule";
       } else {
         continue;
@@ -238,10 +250,4 @@ void writeToFile(String fileName, RuleSetVisitor visitor) {
     fileBuff.writeln("),");
   }
   fileBuff.writeln("  });");
-  fileBuff.writeln("}");
-
-  // print(fileBuff.toString());
-  final file = File("lib/utils/prism_themes/$fileName.dart")
-    ..createSync(recursive: true);
-  file.writeAsStringSync(fileBuff.toString());
 }

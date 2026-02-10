@@ -3,8 +3,7 @@ import 'package:flutter_prism/flutter_prism.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/helpers.dart';
-import 'package:gh_app/utils/prism_themes/prism_coldark_cold.dart';
-import 'package:gh_app/utils/prism_themes/prism_coldark_dark.dart';
+import 'package:gh_app/utils/prism_themes/prism_coldark.dart';
 import 'package:gh_app/widgets/highlight_plus.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:markdown/markdown.dart' as md;
@@ -128,8 +127,8 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
           final prism = Prism(
             mouseCursor: SystemMouseCursors.text,
             style: context.isDark
-                ? const PrismColdarkDarkStyle()
-                : const PrismColdarkColdStyle(),
+                ? const PrismColDarkStyle.dark()
+                : const PrismColDarkStyle.light(),
           );
           final lang = tryGetLanguage('', language: language, source: text);
           return prism.render(text, lang.isEmpty ? 'plain' : lang);

@@ -4,9 +4,10 @@
 import 'package:dart_prism/dart_prism.dart' as p;
 import 'package:flutter/painting.dart';
 
-/// Creates a PrismA11yDark style.
-class PrismA11yDarkStyle extends p.PrismStyle<TextStyle> {
-  const PrismA11yDarkStyle({
+/// Creates a A11y style.
+class PrismA11yStyle extends p.PrismStyle<TextStyle> {
+
+  const PrismA11yStyle.dark({
     super.comment = const TextStyle(color: Color(0xffd4d0ab)),
     super.prolog = const TextStyle(color: Color(0xffd4d0ab)),
     super.doctype = const TextStyle(color: Color(0xffd4d0ab)),
