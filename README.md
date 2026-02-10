@@ -70,6 +70,13 @@
   // 之后  
   ? Theme.of(context).textTheme.bodyMedium?.color
  
+  // 作者默认关闭了html的，但又没提供开关
+  // markdown_viewer-0.6.2\lib\src\widget.dart
+  // 行99-100
+  // Widget _buildMarkdown({SelectionRegistrar? selectionRegistrar}) {
+    final markdown = md.Markdown(
+      enableHtmlBlock: true, // false -> true
+      enableRawHtml: true,   // false -> true
 ```
 
 ### API 的限制

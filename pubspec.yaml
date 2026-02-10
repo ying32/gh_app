@@ -67,10 +67,11 @@ dependencies:
   dart_prism: ^0.2.1
   flutter_prism: ^0.2.2
   markdown_viewer: ^0.6.2
+
   # 下拉刷新+上拉加载
   pull_to_refresh: ^2.0.0
   # HTML显示组件
-  #flutter_widget_from_html_core: ^0.15.2
+  flutter_widget_from_html_core: ^0.15.2
 
   # 先放着用不用再说
   # pretty_diff_text: ^2.1.0

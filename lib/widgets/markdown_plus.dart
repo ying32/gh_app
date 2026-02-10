@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter_prism/flutter_prism.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -117,7 +118,9 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
               ),
         );
       },
-      elementBuilders: const [],
+      elementBuilders: [
+        HtmlBlockBuilder(onTapUrl: _doLink, context: context),
+      ],
 
       highlightBuilder: (text, language, infoString) {
         //return [];
@@ -142,15 +145,8 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
         }
         _doLink(href);
       },
-      // elementBuilders: [
-      //   ExampleBuilder(),
-      // ],
       styleSheet: MarkdownStyle(
         textStyle: TextStyle(fontFamily: defaultFontName),
-        // listItemMarkerTrailingSpace: 12,
-        // codeSpan: TextStyle(
-        //   fontFamily: 'RobotoMono',
-        // ),
         codeBlock: defaultCodeStyle,
       ),
     );
@@ -238,5 +234,84 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
         onTapUrl: _doLink,
       ),
     );*/
+  }
+}
+
+class HtmlBlockBuilder extends MarkdownElementBuilder {
+  HtmlBlockBuilder({
+    TextStyle? textStyle,
+    super.context,
+    this.onTapUrl,
+  }) : super(
+          textStyleMap: {
+            'htmlBlock': TextStyle(
+              color: context?.isDark ?? false
+                  ? const Color(0xffcccccc)
+                  : const Color(0xff333333),
+            ).merge(textStyle),
+            'rawHtml': TextStyle(
+              color: context?.isDark ?? false
+                  ? const Color(0xffcccccc)
+                  : const Color(0xff333333),
+            ).merge(textStyle),
+          },
+        );
+
+  final bool Function(String link)? onTapUrl;
+
+  @override
+  final matchTypes = ['htmlBlock', 'rawHtml'];
+
+  @override
+  bool isBlock(element) => element.type == 'htmlBlock';
+
+  Widget _build(String text) {
+    return HtmlWidget(
+      text,
+      textStyle: textStyle,
+      customStylesBuilder: (el) {
+        return el.localName == 'a'
+            ? {'color': 'DodgerBlue', 'text-decoration': 'none'}
+            : null;
+      },
+      customWidgetBuilder: (el) {
+        if (el.localName == "img" && el.attributes['src'] != null) {
+          final imgUrl = el.attributes['src'];
+          return InlineCustomWidget(
+            child: GestureDetector(
+              onDoubleTap: () =>
+                  context == null ? null : showImageDialog(context!, imgUrl),
+              child: CachedNetworkImageEx(
+                imgUrl!,
+                width: double.tryParse(el.attributes['width'] ?? ''),
+                height: double.tryParse(el.attributes['height'] ?? ''),
+                alt: el.attributes['alt'],
+                //alignment: Alignment.centerLeft,
+              ),
+            ),
+          );
+        }
+        return null;
+      },
+      onTapUrl: onTapUrl,
+    );
+  }
+
+  @override
+  Widget? buildWidget(element, parent) {
+    final children = element.element.toMap()['children'];
+    if (children != null) {
+      final buff = StringBuffer();
+      for (final child in children) {
+        buff.write(child['text'] ?? '');
+      }
+      return RichText(
+        text: WidgetSpan(child: _build(buff.toString())),
+      );
+    }
+    if (element.children.isNotEmpty) {
+      return element.children.single;
+    }
+    return null;
   }
 }
