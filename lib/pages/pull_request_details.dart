@@ -23,7 +23,7 @@ class PullRequestDetailsPage extends StatelessWidget {
   /// 创建一个仓库页
   static void createNewTab(
       BuildContext context, QLRepository repo, QLPullRequest pull) {
-    context.read<TabviewModel>().addTab(
+    context.read<TabViewModel>().addTab(
           PullRequestDetailsPage(pull, repo: repo),
           key: ValueKey("${RouterTable.pulls}/${repo.fullName}/${pull.number}"),
           title: "合并请求 #${pull.number} - ${repo.fullName}",

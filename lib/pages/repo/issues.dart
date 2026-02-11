@@ -8,8 +8,7 @@ class _IssuesList extends StatelessWidget {
 
   void _update(BuildContext context, QLList<QLIssue> data) {
     if (isOpen) {
-      context.read<_IssuesOrPullRequestsTabViewModel>().openedCount =
-          data.totalCount;
+      context.read<RepoModel>().openIssueCount = data.totalCount;
     } else {
       context.read<_IssuesOrPullRequestsTabViewModel>().closedCount =
           data.totalCount;
@@ -76,7 +75,7 @@ class RepoIssuesPage extends StatelessWidget {
       openIcon: const DefaultIcon.issues(color: Colors.grey),
       closedWidget: _IssuesList(repo, false),
       closedIcon: const DefaultIcon.check(color: Colors.grey),
-      defaultOpenCount: repo.openIssuesCount,
+      isIssue: true,
     );
   }
 }

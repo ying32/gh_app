@@ -3,12 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/widgets.dart';
 
 /// 仓库模型
 class RepoModel extends ChangeNotifier {
   RepoModel(this._repo, {this.subPage, String? ref, String? path})
-      : _ref = ref {
+      : _ref = ref,
+        _openIssueCount = _repo.openIssuesCount,
+        _openPullRequestCount = _repo.openPullRequestsCount {
     this.path = path ?? '';
   }
 
@@ -24,6 +27,8 @@ class RepoModel extends ChangeNotifier {
       updateFileObject();
       _ref = _repo.defaultBranchRef.name;
       commit = _repo.defaultBranchRef.target?.commit;
+      openIssueCount = _repo.openIssuesCount;
+      openPullRequestCount = _repo.openPullRequestsCount;
     }
   }
 
@@ -205,6 +210,24 @@ class RepoModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// issues打开总数
+  int _openIssueCount;
+  int get openIssueCount => _openIssueCount;
+  set openIssueCount(int value) {
+    if (_openIssueCount == value) return;
+    _openIssueCount = value;
+    notifyListeners();
+  }
+
+  /// pull Request打开总数
+  int _openPullRequestCount;
+  int get openPullRequestCount => _openPullRequestCount;
+  set openPullRequestCount(int value) {
+    if (_openPullRequestCount == value) return;
+    _openPullRequestCount = value;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     if (kDebugMode) {
@@ -267,4 +290,28 @@ class RepoSelector extends RepoModelSelector<QLRepository> {
   }) : super(
             selector: (model) => model.repo,
             builder: (context, QLRepository value) => builder(context, value));
+}
+
+/// 仓库打开的issue总数
+class RepoOpenIssueCountSelector extends RepoModelSelector<int> {
+  RepoOpenIssueCountSelector({
+    super.key,
+    super.shouldRebuild,
+    bool showShortValue = true,
+  }) : super(
+            selector: (model) => model.openIssueCount,
+            builder: (context, int value) => Text(
+                '(${showShortValue ? value.toKiloString() : value.toString()})'));
+}
+
+/// 仓库打开的pull request总数
+class RepoOpenPullRequestCountSelector extends RepoModelSelector<int> {
+  RepoOpenPullRequestCountSelector({
+    super.key,
+    super.shouldRebuild,
+    bool showShortValue = true,
+  }) : super(
+            selector: (model) => model.openPullRequestCount,
+            builder: (context, int value) => Text(
+                '(${showShortValue ? value.toKiloString() : value.toString()})'));
 }

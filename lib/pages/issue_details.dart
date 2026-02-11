@@ -23,7 +23,7 @@ class IssueDetailsPage extends StatelessWidget {
   /// 创建一个仓库页
   static void createNewTab(
       BuildContext context, QLRepository repo, QLIssue issue) {
-    context.read<TabviewModel>().addTab(
+    context.read<TabViewModel>().addTab(
           IssueDetailsPage(issue, repo: repo),
           key: ValueKey(
               "${RouterTable.issues}/${repo.fullName}/${issue.number}"),

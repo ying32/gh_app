@@ -69,7 +69,12 @@ class _TabPagesState extends State<_TabPages> {
           if (repo.hasIssuesEnabled)
             Tab(
               key: _getKey(repo, RepoSubPage.issues),
-              text: Text('问题 (${repo.openIssuesCount.toKiloString()})'),
+              text: Row(
+                children: [
+                  const Text('问题 '),
+                  RepoOpenIssueCountSelector(),
+                ],
+              ),
               icon: const DefaultIcon.issues(),
               closeIcon: null,
               body: RepoIssuesPage(repo),
@@ -77,7 +82,12 @@ class _TabPagesState extends State<_TabPages> {
 
           Tab(
             key: _getKey(repo, RepoSubPage.pullRequests),
-            text: Text('合并请求 (${repo.openPullRequestsCount.toKiloString()})'),
+            text: Row(
+              children: [
+                const Text('合并请求'),
+                RepoOpenPullRequestCountSelector(),
+              ],
+            ),
             icon: const DefaultIcon.pullRequest(),
             closeIcon: null,
             body: RepoPullRequestPage(repo),
@@ -144,14 +154,14 @@ class RepoPage extends StatelessWidget {
       print("subPage=$subPage, ref=$ref, path=$path");
     }
     //TODO: 这里还要优化下？
-    final tabView = context.read<TabviewModel>();
+    final tabView = context.read<TabViewModel>();
     final tabKey = ValueKey("${RouterTable.repo}/${repo.fullName}");
     final index = tabView.indexOf(tabKey);
     if (index != -1) {
       tabView.goToTab(index);
       return;
     }
-    context.read<TabviewModel>().addTab(
+    context.read<TabViewModel>().addTab(
           RepoPage(repo, subPage: subPage, ref: ref, path: path),
           key: tabKey,
           title: repo.fullName,

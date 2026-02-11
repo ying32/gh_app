@@ -46,7 +46,7 @@ class ReposPage extends StatelessWidget {
   static void createNewTab(
       BuildContext context, QLUserOrOrganizationCommon user,
       {bool isStarred = false}) {
-    final tabView = context.read<TabviewModel>();
+    final tabView = context.read<TabViewModel>();
     // 不会有叫viewer的用户吧？
     final isMy = context.read<CurrentUserModel>().user?.login == user.login;
     final tabKey = ValueKey(
@@ -56,7 +56,7 @@ class ReposPage extends StatelessWidget {
       tabView.goToTab(index);
       return;
     }
-    context.read<TabviewModel>().addTab(
+    context.read<TabViewModel>().addTab(
           ReposPage(
               owner: isMy ? '' : user.login,
               isStarred: isStarred,

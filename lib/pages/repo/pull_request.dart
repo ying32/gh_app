@@ -8,8 +8,7 @@ class _PullRequestsList extends StatelessWidget {
 
   void _update(BuildContext context, QLList<QLPullRequest> data) {
     if (isOpen) {
-      context.read<_IssuesOrPullRequestsTabViewModel>().openedCount =
-          data.totalCount;
+      context.read<RepoModel>().openPullRequestCount = data.totalCount;
     } else {
       context.read<_IssuesOrPullRequestsTabViewModel>().closedCount =
           data.totalCount;
@@ -81,7 +80,7 @@ class RepoPullRequestPage extends StatelessWidget {
       openIcon: const DefaultIcon.pullRequest(color: Colors.grey),
       closedWidget: _PullRequestsList(repo, false),
       closedIcon: const DefaultIcon.check(color: Colors.grey),
-      defaultOpenCount: repo.openPullRequestsCount,
+      isIssue: false,
     );
   }
 }

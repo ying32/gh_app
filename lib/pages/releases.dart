@@ -277,7 +277,7 @@ class ReleasesPage extends StatelessWidget {
   }
 
   static void createNewTab(BuildContext context, QLRepository repo) {
-    context.read<TabviewModel>().addTab(
+    context.read<TabViewModel>().addTab(
           ReleasesPage(repo: repo),
           key: ValueKey("${RouterTable.release}/${repo.fullName}"),
           title: '释出 - ${repo.fullName}',

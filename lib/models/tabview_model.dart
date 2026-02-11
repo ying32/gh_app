@@ -1,8 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 
-class TabviewModel extends ChangeNotifier {
-  TabviewModel(this._tabs);
+class TabViewModel extends ChangeNotifier {
+  TabViewModel(this._tabs);
 
   int _currentIndex = 0;
   int get currentIndex => _currentIndex;

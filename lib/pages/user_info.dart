@@ -37,7 +37,7 @@ class UserInfoPage extends StatelessWidget {
 
   static void createNewTab(
       BuildContext context, QLUserOrOrganizationCommon user) {
-    context.read<TabviewModel>().addTab(
+    context.read<TabViewModel>().addTab(
           UserInfoPage(user),
           key: ValueKey("${RouterTable.user}/${user.login}"),
           title: user.name,

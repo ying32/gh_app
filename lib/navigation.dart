@@ -58,7 +58,7 @@ class _NavItemIconButton extends StatelessWidget {
             onPressed: disabled
                 ? null
                 : () {
-                    context.read<TabviewModel>().addTab(
+                    context.read<TabViewModel>().addTab(
                         key: item.key,
                         item.body,
                         title: item.title,
@@ -97,8 +97,8 @@ class NavigationPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<TabviewModel>(
-        create: (_) => TabviewModel([
+    return ChangeNotifierProvider<TabViewModel>(
+        create: (_) => TabViewModel([
               Tab(
                 key: const ValueKey(RouterTable.root),
                 text: const Text('我的'),
@@ -219,13 +219,13 @@ class _MainTabView extends StatelessWidget {
       children: [
         SizedBox(width: 50, child: _LeftNav()),
         Expanded(
-          child: SimplifySelector<TabviewModel, ({List<Tab> tabs, int index})>(
+          child: SimplifySelector<TabViewModel, ({List<Tab> tabs, int index})>(
             selector: (model) => (tabs: model.tabs, index: model.currentIndex),
             builder: (_, value) => TabView(
               tabs: value.tabs,
               currentIndex: value.index,
               onChanged: (index) {
-                context.read<TabviewModel>().currentIndex = index;
+                context.read<TabViewModel>().currentIndex = index;
               },
               shortcutsEnabled: false,
               tabWidthBehavior: TabWidthBehavior.sizeToContent,

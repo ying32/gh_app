@@ -3,14 +3,6 @@ part of '../repo.dart';
 class _IssuesOrPullRequestsTabViewModel extends ChangeNotifier {
   _IssuesOrPullRequestsTabViewModel();
 
-  int? _openCount;
-  int? get openCount => _openCount;
-  set openedCount(int? value) {
-    if (value == _openCount) return;
-    _openCount = value;
-    notifyListeners();
-  }
-
   int? _closedCount;
   int? get closedCount => _closedCount;
   set closedCount(int? value) {
@@ -49,7 +41,7 @@ class RepoIssuesOrPullRequestsCommon<T> extends StatelessWidget {
     required this.openIcon,
     required this.closedWidget,
     required this.closedIcon,
-    required this.defaultOpenCount,
+    required this.isIssue,
   });
 
   final QLRepository repo;
@@ -57,7 +49,7 @@ class RepoIssuesOrPullRequestsCommon<T> extends StatelessWidget {
   final DefaultIcon openIcon;
   final Widget closedWidget;
   final DefaultIcon closedIcon;
-  final int defaultOpenCount;
+  final bool isIssue;
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +66,15 @@ class RepoIssuesOrPullRequestsCommon<T> extends StatelessWidget {
               tabs: [
                 Tab(
                     icon: openIcon,
-                    text: Text(
-                        '打开的 (${(context.select<_IssuesOrPullRequestsTabViewModel, int?>((p) => p.openCount) ?? defaultOpenCount)})'),
+                    text: Row(
+                      children: [
+                        const Text('打开的'),
+                        isIssue
+                            ? RepoOpenIssueCountSelector(showShortValue: false)
+                            : RepoOpenPullRequestCountSelector(
+                                showShortValue: false)
+                      ],
+                    ),
                     body: ChangeNotifierProvider(
                         create: (_) => _IssueOrPullRequestListModel<T>(),
                         child: openWidget)),

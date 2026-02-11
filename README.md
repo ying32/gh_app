@@ -61,7 +61,7 @@
 ### 代码修改
 
 * [markdown_viewer-0.6.2](https://pub.dev/packages/markdown_viewer)
-```
+```dart
   // 修改原因，因为作者有很久没更新了，有些属性变化了
   //  markdown_viewer-0.6.2\lib\src\renderer.dart
   // 行： 50
@@ -77,6 +77,10 @@
     final markdown = md.Markdown(
       enableHtmlBlock: true, // false -> true
       enableRawHtml: true,   // false -> true
+      
+ // markdown_viewer-0.6.2\lib\src\builders\code_block_builder.dart     
+ // 行85，移除 Scrollbar
+ 
 ```
 
 ### API 的限制

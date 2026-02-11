@@ -26,7 +26,7 @@ class OpenGraphQLIconButton extends StatelessWidget {
         child: IconButton(
             icon: const Icon(Remix.paragraph, size: 18),
             onPressed: () {
-              context.read<TabviewModel>().addTab(
+              context.read<TabViewModel>().addTab(
                   key: const ValueKey('/graphql/test'),
                   const GraphQLTest(),
                   title: 'GraphQL测试',
