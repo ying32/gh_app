@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/widgets/default_icons.dart';
 import 'package:provider/provider.dart';
 
 import 'issue_or_pull_request_details.dart';
@@ -28,6 +29,7 @@ class IssueDetailsPage extends StatelessWidget {
           key: ValueKey(
               "${RouterTable.issues}/${repo.fullName}/${issue.number}"),
           title: "问题 #${issue.number} - ${repo.fullName}",
+          icon: const DefaultIcon.issues(),
         );
   }
 }

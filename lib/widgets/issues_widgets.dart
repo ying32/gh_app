@@ -116,7 +116,7 @@ class IssueCommentItem extends StatelessWidget {
                       if (!isFirst && (item?.author?.login.isNotEmpty ?? false))
                         TagLabel.other(
                             item?.author?.login == owner
-                                ? '所有者'
+                                ? '仓库所有者'
                                 : item?.author?.login == openAuthor
                                     ? '作者'
                                     : '',
@@ -149,28 +149,35 @@ class IssuesCommentsView extends StatelessWidget {
     this.data, {
     super.key,
     required this.repo,
+    required this.first,
   });
 
   final QLRepository repo;
   final QLIssueOrPullRequest data;
+  final Widget first;
 
   @override
   Widget build(BuildContext context) {
-    return APIFutureBuilder(
-        noDataWidget: const SizedBox.shrink(),
-        future: APIWrap.instance.repoIssueOrPullRequestComments(repo,
-            number: data.number, isIssues: data is QLIssue),
-        builder: (_, snapshot) {
-          return Column(
-            children: snapshot.data
-                .map((e) => IssueCommentItem(
-                      item: e,
-                      owner: repo.owner.login,
-                      openAuthor: data.author?.login,
-                    ))
-                .toList(),
-          );
-        });
+    return Column(
+      children: [
+        first,
+        APIFutureBuilder(
+            noDataWidget: const SizedBox.shrink(),
+            future: APIWrap.instance.repoIssueOrPullRequestComments(repo,
+                number: data.number, isIssues: data is QLIssue),
+            builder: (_, snapshot) {
+              return Column(
+                children: snapshot.data
+                    .map((e) => IssueCommentItem(
+                          item: e,
+                          owner: repo.owner.login,
+                          openAuthor: data.author?.login,
+                        ))
+                    .toList(),
+              );
+            }),
+      ],
+    );
   }
 }
 

@@ -105,7 +105,7 @@ class NavigationPage extends StatelessWidget {
                 // semanticLabel: 'Document #$index',
                 icon: const DefaultIcon.home(),
                 body: const HomePage(),
-                closeIcon: null,
+                closeIcon: const SizedBox.shrink(),
                 onClosed: null,
               )
             ]),
