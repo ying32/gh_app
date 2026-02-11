@@ -40,7 +40,7 @@ class UserInfoPage extends StatelessWidget {
     context.read<TabViewModel>().addTab(
           UserInfoPage(user),
           key: ValueKey("${RouterTable.user}/${user.login}"),
-          title: user.name,
+          title: user.nonEmptyName,
           icon: const DefaultIcon.user(),
         );
   }

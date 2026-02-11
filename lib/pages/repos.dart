@@ -62,9 +62,7 @@ class ReposPage extends StatelessWidget {
               isStarred: isStarred,
               isOrganization: user.isOrganization),
           key: tabKey,
-          title: isMy
-              ? '我的仓库'
-              : "${user.name.isEmpty ? user.login : user.name} 的仓库",
+          title: isMy ? '我的仓库' : "${user.nonEmptyName} 的仓库",
           icon: const DefaultIcon.repository(),
         );
   }

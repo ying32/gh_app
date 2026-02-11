@@ -712,6 +712,9 @@ class QLUserOrOrganizationCommon extends QLActor {
   /// 仓库总数，
   /// repositories (RepositoryConnection!)  A list of repositories that the user owns.
   final int repositoryCount;
+
+  /// name或者login，有一个不为空的，优先name
+  String get nonEmptyName => name.isEmpty ? login : name;
 }
 
 /// 个人用户
