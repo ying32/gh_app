@@ -396,6 +396,15 @@ class _GraphQLTestState extends State<GraphQLTest>
                               _controller.text = ql.document;
                               _argsController.text = _decodeParams(ql);
                             }),
+                        MenuFlyoutItem(
+                            text: const Text('仓库commit信息'),
+                            onPressed: () {
+                              final ql = QLQueries.queryRepoCommits(
+                                  'ying32', 'govcl',
+                                  qualifiedName: 'master', count: 3);
+                              _controller.text = ql.document;
+                              _argsController.text = _decodeParams(ql);
+                            }),
                         const MenuFlyoutSeparator(),
                         MenuFlyoutItem(
                             text: const Text('搜索仓库'),

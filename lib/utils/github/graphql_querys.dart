@@ -337,25 +337,28 @@ $_userFieldsFragment
     /// }
     ///
 
+    ///    defaultBranchRef {
+    //              name
+    //              target {
+    //                __typename
+    //                ... on Commit {
+    //                    abbreviatedOid
+    //                    author { name avatarUrl }
+    //                    committedDate
+    //                    message
+    //                    messageHeadline
+    //                    #oid
+    //                    #blame(path:"README.md") {
+    //                    #     ranges { commit { author { name } committedDate  message }  }
+    //                    #}
+    //                 }
+    //              }
+    //            }
     return QLQuery('''query(\$owner:String!,\$name:String!) { 
     repository(owner:\$owner, name:\$name) {
           $_repoLiteFields2NoRef
           defaultBranchRef {
              name
-             target {
-               __typename
-               ... on Commit {
-                   abbreviatedOid 
-                   author { name avatarUrl } 
-                   committedDate 
-                   message 
-                   messageHeadline
-                   #oid
-                   #blame(path:"README.md") {
-                   #     ranges { commit { author { name } committedDate  message }  }
-                   #}
-                }
-             }
            }
           archivedAt
           diskUsage
@@ -613,8 +616,8 @@ fragment RepoFields on Repository {
     int? count,
     List<String> states = const ['OPEN'],
     bool isIssues = true,
-    String sortDirection = "DESC",
-    String sortField = "CREATED_AT",
+    //String sortDirection = "DESC",
+    //String sortField = "CREATED_AT",
     String? nextCursor,
   }) {
     // 查询一个仓库的issues信息
@@ -644,7 +647,7 @@ fragment RepoFields on Repository {
     return QLQuery('''
 query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String) { 
   repository(owner:\$owner, name:\$name) {
-    $func(first: \$first, after:\$after, states:$states, orderBy: { direction:$sortDirection, field: $sortField} ) {
+    $func(first: \$first, after:\$after, states:$states, orderBy: { direction:DESC, field: CREATED_AT} ) {
        totalCount
        $_pageInfo
        nodes {
@@ -776,7 +779,7 @@ query(\$owner:String!, \$name:String!, \$expression:String!) {
 }''', variables: {
       "owner": owner,
       "name": name,
-      "expression": "${ref == null || ref.isEmpty ? 'HEAD' : ref}:$path"
+      "expression": "${ref == null || ref.isEmpty ? 'HEAD' : ref}:$path",
     });
   }
 
@@ -896,6 +899,77 @@ query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String, \$refPrefix
       {int? count, bool isIssues = true, String? nextCursor}) {
     // 排序的字段可取值： ALPHABETICAL  TAG_COMMIT_DATE
 
+    const timelineItems = '''
+  timelineItems(first: 15) {
+              nodes {
+               __typename
+                ... on IssueComment {
+                    author { ...actorFields }
+                    body
+                    createdAt 
+                }
+                ... on IssueTypeAddedEvent {
+                    actor  { ...actorFields }
+                    createdAt
+                    issueType { color name }
+                }
+                ... on IssueTypeRemovedEvent {
+                    actor  { ...actorFields }
+                    createdAt
+                    issueType { color name }
+                }
+                ... on IssueTypeChangedEvent {
+                    actor  { ...actorFields }
+                    createdAt
+                    issueType { color name }
+				            prevIssueType { color name }
+                }
+                ... on AssignedEvent {
+                    actor  { ...actorFields }
+                    createdAt 
+                }
+                ... on ClosedEvent {
+                    actor  { ...actorFields }
+                    createdAt  
+                }
+                ... on SubscribedEvent  {
+                    actor  { ...actorFields }
+                    createdAt 
+                }
+                ... on CommentDeletedEvent {
+                    actor  { ...actorFields }
+                    createdAt 
+                    deletedCommentAuthor  { ...actorFields }
+                }
+                ... on RenamedTitleEvent  {
+                    actor  { ...actorFields }
+                    createdAt 
+                    currentTitle 
+                    previousTitle 
+                }
+                ... on LabeledEvent  {
+                    actor  { ...actorFields }
+                    createdAt 
+                    label {
+                    color name
+                    }
+                    labelable { labels(first:10) { nodes { color name } } }
+                 }
+                ... on LockedEvent {
+                    actor  { ...actorFields }
+                    createdAt 
+                    lockReason 
+                } 
+                ... on ReopenedEvent {
+                    actor  { ...actorFields }
+                    createdAt 
+                    stateReason 
+                }
+              }
+            }    
+''';
+
+    //  $timelineItems
     final func = isIssues ? 'issue' : 'pullRequest';
     return QLQuery('''query(\$owner:String!, \$name:String!, \$number:Int!, \$first:Int!, \$after:String) { 
    repository(owner:\$owner, name:\$name) {
@@ -904,11 +978,11 @@ query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String, \$refPrefix
                totalCount
                $_pageInfo
                nodes {
-                  author { login avatarUrl }
+                  author { ...actorFields }
                   body
                   #bodyHTML
                   createdAt 
-                  editor { login avatarUrl  }
+                  editor { ...actorFields }
                   lastEditedAt 
                   publishedAt 
                   updatedAt 
@@ -917,11 +991,16 @@ query(\$owner:String!, \$name:String!, \$first:Int!, \$after:String, \$refPrefix
                   viewerCanDelete
                   viewerCanUpdate 
                   viewerDidAuthor 
-                }
-          }   
-       }
-     }
-}''', variables: {
+              }
+          }  
+         
+      }
+   }
+}
+fragment actorFields on Actor {
+  login avatarUrl
+}
+''', variables: {
       "owner": owner,
       "name": name,
       "number": number,
@@ -1038,6 +1117,48 @@ $_organizationFieldsFragment
       "login": login,
     });
   }
+
+  static QLQuery queryRepoCommits(
+    String owner,
+    String name, {
+    required String qualifiedName,
+    required int count,
+    String? path,
+  }) {
+    return QLQuery(r'''
+query($owner:String!, $name:String!, $qualifiedName:String!,$first:Int!,$path:String) {
+    repository(owner:$owner, name:$name) {
+        ref(qualifiedName:$qualifiedName) {
+             name
+             target {
+                 __typename
+                 ... on Commit {
+                 abbreviatedOid 
+                 author { name avatarUrl } 
+                 committedDate 
+                 messageHeadline
+                 history(first:$first, path:$path) {
+                       totalCount
+                       nodes {
+                          abbreviatedOid 
+                          committedDate 
+                          messageHeadline
+                      }
+                   }
+
+                }
+            }
+        }
+    }
+}      
+''', variables: {
+      "owner": owner,
+      "name": name,
+      "qualifiedName": "refs/heads/$qualifiedName", // 这个其实也可以省略 refs/heads/
+      "first": count,
+      "path": path,
+    });
+  }
 }
 
 ///issue timelines
@@ -1069,20 +1190,47 @@ $_organizationFieldsFragment
 /// UnlockedEvent
 /// UnsubscribedEvent
 /// UserBlockedEvent
+///
+
 //query {
-//    repository(owner:"zed-industries", name:"zed") {
-//        issue(number: 48231) {
-//           timeline(first: 15) {
-//             nodes {
-//              __typename
-//               ... on Commit { author { __typename name } message }
-//               ... on IssueComment { author { login } body }
-//               ... on AssignedEvent { actor  { login }   }
-//               ... on ClosedEvent  { actor  { login }   }
-//               ... on SubscribedEvent   { actor  { login }   }
-//               ... on LabeledEvent    { actor  { __typename login } label { __typename color name  } }
+//      repository(owner:"zed-industries", name:"zed") {
+//          issue(number: 48231) {
+//             timelineItems(first: 15) {
+//               nodes {
+//                __typename
+//                 ... on Commit {
+//                    author { name avatarUrl  }
+//                    messageHeadline
+//                 }
+//                 ... on IssueComment {
+//                    author { ...actorFields }
+//                    body
+//                 }
+//                 ... on AssignedEvent {
+//                     actor  { ...actorFields }
+//                 }
+//                 ... on ClosedEvent {
+//                     actor  { ...actorFields }
+//                 }
+//                 ... on SubscribedEvent  {
+//                     actor  { ...actorFields }
+//                 }
+//                 ... on RenamedTitleEvent  {
+//                      actor  { ...actorFields }
+//                 }
+//                 ... on ReferencedEvent  {   actor  { ...actorFields }  }
+//                 ... on LabeledEvent {
+//                     actor  { ...actorFields }
+//                     label {
+//                       color name
+//                     }
+//                     labelable  { labels(first:10) { nodes { color name } } }
+//                  }
+//               }
 //             }
-//           }
-//        }
-//    }
-// }
+//          }
+//      }
+//   }
+//  fragment actorFields on Actor {
+//     login avatarUrl
+//  }

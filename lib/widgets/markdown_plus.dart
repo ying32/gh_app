@@ -134,7 +134,8 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
                 : const PrismColDarkStyle.light(),
           );
           final lang = tryGetLanguage('', language: language, source: text);
-          return prism.render(text, lang.isEmpty ? 'plain' : lang);
+          return prism.render(
+              text.replaceAll('\t', ' ' * 8), lang.isEmpty ? 'plain' : lang);
         } catch (e) {
           return [];
         }

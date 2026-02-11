@@ -98,35 +98,44 @@ class IssueCommentItem extends StatelessWidget {
         ),
         Expanded(
           child: _IssueLine(
-            child: Card(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                        '${item?.author?.login} 打开于 ${item?.createdAt?.toLabel}'),
-                    const Spacer(),
-                    if (!isFirst && (item?.author?.login.isNotEmpty ?? false))
-                      TagLabel.other(item?.author?.login == owner
-                          ? '所有者'
-                          : item?.author?.login == openAuthor
-                              ? '作者'
-                              : ''),
-                  ],
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Divider(
-                      direction: Axis.horizontal,
-                      style: DividerThemeData(
-                          verticalMargin: EdgeInsets.zero,
-                          horizontalMargin: EdgeInsets.zero)),
-                ),
-                if (item?.body.isNotEmpty ?? false)
-                  MarkdownBlockPlus(item!.body),
-              ],
-            )),
+            child: Container(
+              color: item?.author?.login == owner
+                  ? Colors.blue.lighter.withOpacity(0.01)
+                  : item?.author?.login == openAuthor
+                      ? Colors.green.lighter.withOpacity(0.01)
+                      : null,
+              child: Card(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                          '${item?.author?.login} 打开于 ${item?.createdAt?.toLabel}'),
+                      const Spacer(),
+                      if (!isFirst && (item?.author?.login.isNotEmpty ?? false))
+                        TagLabel.other(
+                            item?.author?.login == owner
+                                ? '所有者'
+                                : item?.author?.login == openAuthor
+                                    ? '作者'
+                                    : '',
+                            color: context.textColor200),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8.0),
+                    child: Divider(
+                        direction: Axis.horizontal,
+                        style: DividerThemeData(
+                            verticalMargin: EdgeInsets.zero,
+                            horizontalMargin: EdgeInsets.zero)),
+                  ),
+                  if (item?.body.isNotEmpty ?? false)
+                    MarkdownBlockPlus(item!.body),
+                ],
+              )),
+            ),
           ),
         ),
       ],

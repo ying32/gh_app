@@ -202,9 +202,18 @@ class UserInfoPanel extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Row(
             children: [
-              ActorHeadImage(user, imageSize: 60),
+              ActorHeadImage(user, imageSize: 80.0),
               const SizedBox(width: 10.0),
-              Expanded(child: SelectionArea(child: UserNameWidget(user))),
+              Expanded(
+                child: SelectableText.rich(TextSpan(children: [
+                  TextSpan(
+                      text: user.name,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.w600)),
+                  const TextSpan(text: "\n"),
+                  TextSpan(text: user.login),
+                ], style: TextStyle(color: context.textColor200))),
+              ),
             ],
           ),
         ),
@@ -212,11 +221,6 @@ class UserInfoPanel extends StatelessWidget {
           // 签名信息
           SelectableText(_user.bio,
               style: TextStyle(color: context.textColor200)),
-          // SelectionArea(
-          //     child: UserLineInfo(
-          //         icon: null,
-          //         value: _user.bio,
-          //         textColor: context.textColor200)),
           const SizedBox(height: 8),
           // 心情
           if (_user.status != null &&
@@ -284,17 +288,11 @@ class UserInfoPanel extends StatelessWidget {
         if (user.repositoryCount > 0)
           UserLineInfo(
               icon: DefaultIcons.repository,
-              value: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text("仓库数：", style: TextStyle(color: context.textColor200)),
-                  HyperlinkButton(
-                    child: Text("( ${user.repositoryCount} )"),
-                    onPressed: () {
-                      ReposPage.createNewTab(context, user);
-                    },
-                  ),
-                ],
+              value: HyperlinkButton(
+                child: Text("仓库 ( ${user.repositoryCount} )"),
+                onPressed: () {
+                  ReposPage.createNewTab(context, user);
+                },
               )),
       ],
     );
