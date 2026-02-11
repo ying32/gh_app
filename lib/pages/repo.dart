@@ -54,61 +54,58 @@ class _TabPagesState extends State<_TabPages> {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, QLRepository>(
-        selector: (_, model) => model.repo,
-        builder: (_, repo, __) {
-          return TabView(
-            currentIndex: currentIndex,
-            tabs: [
-              Tab(
-                key: _getKey(repo, RepoSubPage.code),
-                text: const Text('代码'),
-                icon: const DefaultIcon.code(),
-                closeIcon: null,
-                body: const RepoCodePage(),
-              ),
-              // issues
-              if (repo.hasIssuesEnabled)
-                Tab(
-                  key: _getKey(repo, RepoSubPage.issues),
-                  text: Text('问题 (${repo.openIssuesCount.toKiloString()})'),
-                  icon: const DefaultIcon.issues(),
-                  closeIcon: null,
-                  body: RepoIssuesPage(repo),
-                ),
+    return RepoSelector(builder: (_, repo) {
+      return TabView(
+        currentIndex: currentIndex,
+        tabs: [
+          Tab(
+            key: _getKey(repo, RepoSubPage.code),
+            text: const Text('代码'),
+            icon: const DefaultIcon.code(),
+            closeIcon: null,
+            body: const RepoCodePage(),
+          ),
+          // issues
+          if (repo.hasIssuesEnabled)
+            Tab(
+              key: _getKey(repo, RepoSubPage.issues),
+              text: Text('问题 (${repo.openIssuesCount.toKiloString()})'),
+              icon: const DefaultIcon.issues(),
+              closeIcon: null,
+              body: RepoIssuesPage(repo),
+            ),
 
-              Tab(
-                key: _getKey(repo, RepoSubPage.pullRequests),
-                text:
-                    Text('合并请求 (${repo.openPullRequestsCount.toKiloString()})'),
-                icon: const DefaultIcon.pullRequest(),
-                closeIcon: null,
-                body: RepoPullRequestPage(repo),
-              ),
-              Tab(
-                key: _getKey(repo, RepoSubPage.actions),
-                text: const Text('Actions'),
-                icon: const DefaultIcon.action(),
-                closeIcon: null,
-                body: RepoActionPage(repo),
-              ),
-              if (repo.hasWikiEnabled)
-                Tab(
-                  key: _getKey(repo, RepoSubPage.wiki),
-                  text: const Text('Wiki'),
-                  icon: const DefaultIcon.wiki(),
-                  closeIcon: null,
-                  body: RepoWikiPage(repo),
-                ),
-            ],
-            onChanged: (index) {
-              setState(() => currentIndex = index);
-            },
-            shortcutsEnabled: false,
-            tabWidthBehavior: TabWidthBehavior.sizeToContent,
-            closeButtonVisibility: CloseButtonVisibilityMode.never,
-          );
-        });
+          Tab(
+            key: _getKey(repo, RepoSubPage.pullRequests),
+            text: Text('合并请求 (${repo.openPullRequestsCount.toKiloString()})'),
+            icon: const DefaultIcon.pullRequest(),
+            closeIcon: null,
+            body: RepoPullRequestPage(repo),
+          ),
+          Tab(
+            key: _getKey(repo, RepoSubPage.actions),
+            text: const Text('Actions'),
+            icon: const DefaultIcon.action(),
+            closeIcon: null,
+            body: RepoActionPage(repo),
+          ),
+          if (repo.hasWikiEnabled)
+            Tab(
+              key: _getKey(repo, RepoSubPage.wiki),
+              text: const Text('Wiki'),
+              icon: const DefaultIcon.wiki(),
+              closeIcon: null,
+              body: RepoWikiPage(repo),
+            ),
+        ],
+        onChanged: (index) {
+          setState(() => currentIndex = index);
+        },
+        shortcutsEnabled: false,
+        tabWidthBehavior: TabWidthBehavior.sizeToContent,
+        closeButtonVisibility: CloseButtonVisibilityMode.never,
+      );
+    });
   }
 }
 
@@ -231,9 +228,8 @@ class _InternalRepoPage extends StatelessWidget {
           controller.refreshFailed();
         });
       },
-      listview: Selector<RepoModel, QLRepository>(
-        selector: (_, model) => model.repo,
-        builder: (_, repo, __) {
+      listview: RepoSelector(
+        builder: (_, repo) {
           return Padding(
             padding: const EdgeInsetsDirectional.only(
               bottom: kPageDefaultVerticalPadding / 2.0,

@@ -76,9 +76,8 @@ class RepoReleases extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, QLRepository>(
-      selector: (_, model) => model.repo,
-      builder: (_, repo, __) => repo.latestRelease == null
+    return RepoSelector(
+      builder: (_, repo) => repo.latestRelease == null
           ? const SizedBox.shrink()
           : _buildBody(context, repo),
     );

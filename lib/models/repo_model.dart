@@ -1,7 +1,9 @@
+import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/widgets/widgets.dart';
 
 /// 仓库模型
 class RepoModel extends ChangeNotifier {
@@ -241,4 +243,28 @@ class RepoListModel extends ChangeNotifier {
     }
     super.dispose();
   }
+}
+
+// ---------------------------------------------------------------------------
+/// 仓库模型简化
+class RepoModelSelector<S> extends SimplifySelector<RepoModel, S> {
+  RepoModelSelector({
+    super.key,
+    required Widget Function(BuildContext, S value) builder,
+    required S Function(RepoModel) selector,
+    super.shouldRebuild,
+  }) : super(
+            selector: (model) => selector(model),
+            builder: (context, S value) => builder(context, value));
+}
+
+/// 仓库选择器
+class RepoSelector extends RepoModelSelector<QLRepository> {
+  RepoSelector({
+    super.key,
+    required Widget Function(BuildContext, QLRepository value) builder,
+    super.shouldRebuild,
+  }) : super(
+            selector: (model) => model.repo,
+            builder: (context, QLRepository value) => builder(context, value));
 }

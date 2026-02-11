@@ -39,9 +39,8 @@ class HomePage extends StatelessWidget {
         end: PageHeader.horizontalPadding(context),
       ),
       child: Card(
-        child: Selector<CurrentUserModel, QLUser?>(
-            selector: (_, model) => model.user,
-            builder: (_, user, __) => user == null
+        child: UserSelector(
+            builder: (_, user) => user == null
                 ? const LoadingRing()
                 : EasyListViewRefresher(
                     onRefresh: (controller) => _onRefresh(context, controller),

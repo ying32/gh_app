@@ -7,9 +7,8 @@ class RepoAbout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const padding = EdgeInsets.symmetric(horizontal: 2, vertical: 8);
-    return Selector<RepoModel, QLRepository>(
-      selector: (_, model) => model.repo,
-      builder: (_, repo, __) {
+    return RepoSelector(
+      builder: (_, repo) {
         return Column(
           // mainAxisSize: MainAxisSize.max,
           // mainAxisAlignment: MainAxisAlignment.start,

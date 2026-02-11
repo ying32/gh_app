@@ -74,9 +74,8 @@ class _UserHeadImageButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<CurrentUserModel, QLUser?>(
-      selector: (_, model) => model.user,
-      builder: (context, user, __) {
+    return UserSelector(
+      builder: (context, user) {
         if (user == null) {
           return const ApplicationIcon(size: 40);
         }
@@ -220,10 +219,9 @@ class _MainTabView extends StatelessWidget {
       children: [
         SizedBox(width: 50, child: _LeftNav()),
         Expanded(
-          child: Selector<TabviewModel, ({List<Tab> tabs, int index})>(
-            selector: (_, model) =>
-                (tabs: model.tabs, index: model.currentIndex),
-            builder: (_, value, __) => TabView(
+          child: SimplifySelector<TabviewModel, ({List<Tab> tabs, int index})>(
+            selector: (model) => (tabs: model.tabs, index: model.currentIndex),
+            builder: (_, value) => TabView(
               tabs: value.tabs,
               currentIndex: value.index,
               onChanged: (index) {
@@ -342,13 +340,9 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
                 const WindowButtons(),
               ]),
       ),
-      content: Selector<CurrentUserModel, QLUser?>(
-          selector: (_, model) => model.user,
-          builder: (_, user, __) {
-            return gitHubAPI.isAnonymous
-                ? const LoginPage()
-                : const _MainTabView();
-          }),
+      content: UserSelector(builder: (_, user) {
+        return gitHubAPI.isAnonymous ? const LoginPage() : const _MainTabView();
+      }),
     );
   }
 

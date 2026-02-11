@@ -78,9 +78,9 @@ class RepoTreeEntriesView extends StatelessWidget {
       mainAxisSize: MainAxisSize.max,
       children: [
         // 监视文件对象改变
-        Selector<RepoModel, QLGitObject?>(
-            selector: (_, model) => model.object,
-            builder: (_, object, __) {
+        RepoModelSelector<QLGitObject?>(
+            selector: (model) => model.object,
+            builder: (_, object) {
               if (object == null) {
                 return SizedBox(
                     height: MediaQuery.of(context).size.height / 2,

@@ -38,9 +38,8 @@ class RepoLanguages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, QLRepository>(
-      selector: (_, model) => model.repo,
-      builder: (_, repo, __) => repo.languages == null
+    return RepoSelector(
+      builder: (_, repo) => repo.languages == null
           ? const SizedBox.shrink()
           : _buildBody(context, repo),
     );

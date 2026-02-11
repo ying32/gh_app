@@ -9,9 +9,9 @@ class RepoBreadcrumbBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //return Consumer<RepoModel>(
-    return Selector<RepoModel, List<String>>(
-      selector: (_, model) => model.segmentedPaths,
-      builder: (context, segmentedPaths, __) {
+    return RepoModelSelector<List<String>>(
+      selector: (model) => model.segmentedPaths,
+      builder: (context, segmentedPaths) {
         final r = repo ?? context.read<RepoModel>().repo;
         return BreadcrumbBar(
           items: segmentedPaths

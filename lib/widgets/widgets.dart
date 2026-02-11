@@ -933,3 +933,16 @@ class SelectorQLList<A, S> extends Selector0<QLList<S>?> {
               return builder(context, value, child);
             });
 }
+
+/// 简化选择
+class SimplifySelector<A, S> extends Selector<A, S> {
+  SimplifySelector({
+    super.key,
+    required Widget Function(BuildContext, S value) builder,
+    required S Function(A) selector,
+    super.shouldRebuild,
+  }) : super(
+            selector: (context, model) => selector(model),
+            builder: (context, S value, Widget? child) =>
+                builder(context, value));
+}

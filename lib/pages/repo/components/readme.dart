@@ -6,9 +6,9 @@ class RepoReadMe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, String>(
-        selector: (_, model) => model.readmeContent,
-        builder: (context, content, __) {
+    return RepoModelSelector<String>(
+        selector: (model) => model.readmeContent,
+        builder: (context, content) {
           final repo = context.read<RepoModel>().repo;
           if (content.isEmpty) {
             return const SizedBox.shrink();

@@ -6,27 +6,25 @@ class _BranchAndTagsCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, QLRepository>(
-        selector: (_, model) => model.repo,
-        builder: (_, repo, __) {
-          return Row(
-            children: [
-              HyperlinkButton(
-                //style: TextStyle(color: context.textColor200),
-                onPressed: () {},
-                child: IconText(
-                    icon: DefaultIcons.branch, text: Text("${repo.refsCount}")),
-              ),
-              const SizedBox(width: 10.0),
-              HyperlinkButton(
-                //style: TextStyle(color: context.textColor200),
-                onPressed: () {},
-                child: IconText(
-                    icon: DefaultIcons.tags, text: Text("${repo.tagsCount}")),
-              ),
-            ],
-          );
-        });
+    return RepoSelector(builder: (_, repo) {
+      return Row(
+        children: [
+          HyperlinkButton(
+            //style: TextStyle(color: context.textColor200),
+            onPressed: () {},
+            child: IconText(
+                icon: DefaultIcons.branch, text: Text("${repo.refsCount}")),
+          ),
+          const SizedBox(width: 10.0),
+          HyperlinkButton(
+            //style: TextStyle(color: context.textColor200),
+            onPressed: () {},
+            child: IconText(
+                icon: DefaultIcons.tags, text: Text("${repo.tagsCount}")),
+          ),
+        ],
+      );
+    });
   }
 }
 
@@ -99,10 +97,7 @@ class _TopBar1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, QLRepository>(
-      selector: (_, model) => model.repo,
-      builder: (_, repo, __) => _buildChild(repo),
-    );
+    return RepoSelector(builder: (_, repo) => _buildChild(repo));
   }
 }
 
@@ -171,9 +166,9 @@ class _LastRepoCommitBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<RepoModel, QLCommit?>(
-      selector: (_, model) => model.commit,
-      builder: (_, commit, __) {
+    return RepoModelSelector<QLCommit?>(
+      selector: (model) => model.commit,
+      builder: (_, commit) {
         if (commit == null) {
           return const SizedBox.shrink();
         }

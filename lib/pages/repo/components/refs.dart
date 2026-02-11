@@ -14,9 +14,9 @@ class _RepoBranches extends StatelessWidget {
         value: context.read<RepoModel>(),
         child: FlyoutContent(
           constraints: const BoxConstraints(maxWidth: 240.0, maxHeight: 300),
-          child: Selector<RepoModel, QLList<QLRef>>(
-            selector: (_, model) => model.refs,
-            builder: (_, refs, __) {
+          child: RepoModelSelector<QLList<QLRef>>(
+            selector: (model) => model.refs,
+            builder: (_, refs) {
               if (refs.isEmpty) {
                 return const SizedBox(
                     height: 30,
@@ -96,9 +96,9 @@ class _RepoBranches extends StatelessWidget {
           //     }) ??
           //     repo.defaultBranchRef.name),
           // 实际测试使用Selector可以比context.select要少些刷新次数
-          text: Selector<RepoModel, String?>(
-              selector: (_, model) => model.ref,
-              builder: (_, ref, __) {
+          text: RepoModelSelector<String?>(
+              selector: (model) => model.ref,
+              builder: (_, ref) {
                 //print("=========更新");
                 //print("ref=$ref, default=${repo.defaultBranchRef.name}");
                 return Text(ref ?? repo.defaultBranchRef.name);

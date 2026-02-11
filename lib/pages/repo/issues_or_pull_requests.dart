@@ -63,9 +63,9 @@ class RepoIssuesOrPullRequestsCommon<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => _IssuesOrPullRequestsTabViewModel(),
-      child: Selector<_IssuesOrPullRequestsTabViewModel, int>(
-          selector: (_, model) => model.currentIndex,
-          builder: (context, currentIndex, __) {
+      child: SimplifySelector<_IssuesOrPullRequestsTabViewModel, int>(
+          selector: (model) => model.currentIndex,
+          builder: (context, currentIndex) {
             return TabView(
               currentIndex: currentIndex,
               shortcutsEnabled: false,
