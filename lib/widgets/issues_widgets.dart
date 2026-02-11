@@ -3,7 +3,6 @@ import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/pages/issue_details.dart';
 import 'package:gh_app/pages/pull_request_details.dart';
 import 'package:gh_app/utils/consts.dart';
-import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
@@ -138,44 +137,6 @@ class IssueCommentItem extends StatelessWidget {
             ),
           ),
         ),
-      ],
-    );
-  }
-}
-
-/// issues的评论显示
-class IssuesCommentsView extends StatelessWidget {
-  const IssuesCommentsView(
-    this.data, {
-    super.key,
-    required this.repo,
-    required this.first,
-  });
-
-  final QLRepository repo;
-  final QLIssueOrPullRequest data;
-  final Widget first;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        first,
-        APIFutureBuilder(
-            noDataWidget: const SizedBox.shrink(),
-            future: APIWrap.instance.repoIssueOrPullRequestComments(repo,
-                number: data.number, isIssues: data is QLIssue),
-            builder: (_, snapshot) {
-              return Column(
-                children: snapshot.data
-                    .map((e) => IssueCommentItem(
-                          item: e,
-                          owner: repo.owner.login,
-                          openAuthor: data.author?.login,
-                        ))
-                    .toList(),
-              );
-            }),
       ],
     );
   }

@@ -575,16 +575,8 @@ class _ListViewRefresherState<T> extends State<ListViewRefresher<T>> {
           // addAutomaticKeepAlives: true,
           padding: widget.padding,
           itemCount: _list.length,
-          itemBuilder: (context, index) => kDebugMode
-              ? Row(
-                  children: [
-                    //  Text('$index'),
-                    Expanded(
-                        child:
-                            widget.itemBuilder(context, _list[index], index)),
-                  ],
-                )
-              : widget.itemBuilder(context, _list[index], index),
+          itemBuilder: (context, index) =>
+              widget.itemBuilder(context, _list[index], index),
           separatorBuilder: (context, index) =>
               widget.separator ?? const SizedBox.shrink(),
         ),
@@ -921,14 +913,22 @@ class SelectorQLList<A, S> extends Selector0<QLList<S>?> {
     required QLList<S>? Function(BuildContext, A) selector,
     super.shouldRebuild,
     super.child,
+    Widget? defaultChild,
   }) : super(
             selector: (context) => selector(context, Provider.of(context)),
             builder: (context, QLList<S>? value, Widget? child) {
               if (value == null) {
-                return const LoadingRing();
+                return defaultChild != null
+                    ? Column(
+                        children: [
+                          Expanded(child: defaultChild),
+                          const Center(child: LoadingRing()),
+                        ],
+                      )
+                    : const LoadingRing();
               }
               if (value.isEmpty) {
-                return const Center(child: Text('没有数据'));
+                return defaultChild ?? const Center(child: Text('没有数据'));
               }
               return builder(context, value, child);
             });
