@@ -111,6 +111,7 @@ class APIWrap {
     if (gitHubAPI.isAnonymous) {
       return null;
     }
+    //TODO: 这里的解析还要判断是否为组织的，先不管了
     return gitHubAPI.query(QLQueries.queryViewer(),
         convert: QLUser.fromJson,
         force: force,
@@ -521,7 +522,6 @@ class APIWrap {
     final segments = uri.pathSegments.where((e) => e.isNotEmpty).toList();
     if (segments.isEmpty) return null;
     // 只有一个的时候，是组织或者用户名
-    // TODO: 先不弄了
     final login = segments[0].trim();
     // 最少2个
     if (segments.length < 2) {
