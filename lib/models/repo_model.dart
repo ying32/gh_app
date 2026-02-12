@@ -239,6 +239,7 @@ class RepoModel extends ChangeNotifier {
 }
 
 extension CurRepoContextHelper on BuildContext {
+  /// 当前仓库模型，context中必须存在
   RepoModel get curRepo => read<RepoModel>();
 }
 

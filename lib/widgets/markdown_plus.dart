@@ -7,7 +7,6 @@ import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark.dart';
 import 'package:gh_app/widgets/highlight_plus.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_viewer/markdown_viewer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -45,26 +44,19 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
   @override
   void initState() {
     super.initState();
-    _convertMarkdown();
-  }
-
-  void _convertMarkdown() async {
-    // https://pub.dev/packages/markdown
-    _body = md.markdownToHtml(
-      widget.body,
-      extensionSet: md.ExtensionSet.gitHubWeb,
-    );
-    if (mounted) {
-      setState(() {});
-    }
+    processText();
   }
 
   @override
   void didUpdateWidget(covariant MarkdownBlockPlus oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.body != widget.body) {
-      _convertMarkdown();
+    if (widget.body != oldWidget.body) {
+      processText();
     }
+  }
+
+  void processText() {
+    _body = widget.body.replaceAll("\r", "");
   }
 
   bool _doLink(String link) {
@@ -100,7 +92,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
 
     return MarkdownViewer(
       // selectable: widget
-      widget.body,
+      _body,
       enableTaskList: true,
       enableSuperscript: false,
       enableSubscript: false,
@@ -120,11 +112,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
       elementBuilders: [
         HtmlBlockBuilder(onTapUrl: _doLink, context: context),
       ],
-
       highlightBuilder: (text, language, infoString) {
-        //return [];
-        // return  HighlightViewPlus( text,
-        //     fileName: '', language: language, selectable: false);
         try {
           final prism = Prism(
             mouseCursor: SystemMouseCursors.text,

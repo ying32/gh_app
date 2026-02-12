@@ -112,12 +112,15 @@ class IssueCommentItem extends StatelessWidget {
                           '${item?.author?.login} 打开于 ${item?.createdAt?.toLabel}'),
                       const Spacer(),
                       if (!isFirst && (item?.author?.login.isNotEmpty ?? false))
+                        //TODO: 这里显示还有点问题，不太对，应该还有啥字段要判断
                         TagLabel.other(
-                            item?.author?.login == owner
-                                ? '仓库所有者'
-                                : item?.author?.login == openAuthor
-                                    ? '作者'
-                                    : '',
+                            item?.author?.login == null
+                                ? ''
+                                : item?.author?.login == owner
+                                    ? '仓库所有者'
+                                    : item?.author?.login == openAuthor
+                                        ? '作者'
+                                        : '', //TODO: 这里还有个作合者，还有个啥判断
                             color: context.textColor200),
                     ],
                   ),

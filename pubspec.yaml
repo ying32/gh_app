@@ -67,6 +67,8 @@ dependencies:
   dart_prism: ^0.2.1
   flutter_prism: ^0.2.2
   markdown_viewer: ^0.6.2
+#  markdown_viewer:
+#    path: modules/markdown_viewer-0.6.2
 
   # 下拉刷新+上拉加载
   pull_to_refresh: ^2.0.0
