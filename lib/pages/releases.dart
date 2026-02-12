@@ -247,7 +247,7 @@ class ReleasesPage extends StatelessWidget {
       child: WantKeepAlive(
           onInit: (context) {
             APIWrap.instance.repoReleases(repo).then((data) {
-              context.read<RepoModel>().releases = data;
+              context.curRepo.releases = data;
             });
           },
           child: SelectorQLList<RepoModel, QLRelease>(
@@ -277,11 +277,11 @@ class ReleasesPage extends StatelessWidget {
   }
 
   static void createNewTab(BuildContext context, QLRepository repo) {
-    context.read<TabViewModel>().addTab(
-          ReleasesPage(repo: repo),
-          key: ValueKey("${RouterTable.release}/${repo.fullName}"),
-          title: '释出 - ${repo.fullName}',
-          icon: const DefaultIcon.tag(),
-        );
+    context.mainTabView.addTab(
+      ReleasesPage(repo: repo),
+      key: ValueKey("${RouterTable.release}/${repo.fullName}"),
+      title: '释出 - ${repo.fullName}',
+      icon: const DefaultIcon.tag(),
+    );
   }
 }

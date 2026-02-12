@@ -4,7 +4,6 @@ import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
-import 'package:provider/provider.dart';
 
 class UserInfoPage extends StatelessWidget {
   const UserInfoPage(this.user, {super.key});
@@ -37,11 +36,11 @@ class UserInfoPage extends StatelessWidget {
 
   static void createNewTab(
       BuildContext context, QLUserOrOrganizationCommon user) {
-    context.read<TabViewModel>().addTab(
-          UserInfoPage(user),
-          key: ValueKey("${RouterTable.user}/${user.login}"),
-          title: user.nonEmptyName,
-          icon: const DefaultIcon.user(),
-        );
+    context.mainTabView.addTab(
+      UserInfoPage(user),
+      key: ValueKey("${RouterTable.user}/${user.login}"),
+      title: user.nonEmptyName,
+      icon: const DefaultIcon.user(),
+    );
   }
 }

@@ -46,9 +46,9 @@ class ReposPage extends StatelessWidget {
   static void createNewTab(
       BuildContext context, QLUserOrOrganizationCommon user,
       {bool isStarred = false}) {
-    final tabView = context.read<TabViewModel>();
+    final tabView = context.mainTabView;
     // 不会有叫viewer的用户吧？
-    final isMy = context.read<CurrentUserModel>().user?.login == user.login;
+    final isMy = context.curUser.user?.login == user.login;
     final tabKey = ValueKey(
         "${isStarred ? RouterTable.stars : RouterTable.repos}/${isMy ? 'viewer' : user.login}");
     final index = tabView.indexOf(tabKey);
@@ -56,15 +56,15 @@ class ReposPage extends StatelessWidget {
       tabView.goToTab(index);
       return;
     }
-    context.read<TabViewModel>().addTab(
-          ReposPage(
-              owner: isMy ? '' : user.login,
-              isStarred: isStarred,
-              isOrganization: user.isOrganization),
-          key: tabKey,
-          title: isMy ? '我的仓库' : "${user.nonEmptyName} 的仓库",
-          icon: const DefaultIcon.repository(),
-        );
+    tabView.addTab(
+      ReposPage(
+          owner: isMy ? '' : user.login,
+          isStarred: isStarred,
+          isOrganization: user.isOrganization),
+      key: tabKey,
+      title: isMy ? '我的仓库' : "${user.nonEmptyName} 的仓库",
+      icon: const DefaultIcon.repository(),
+    );
   }
 }
 

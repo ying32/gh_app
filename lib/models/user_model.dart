@@ -2,14 +2,15 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 class CurrentUserModel extends ChangeNotifier {
   CurrentUserModel(this._user);
 
   /// 当前仓库信息
-  QLUser? _user;
-  QLUser? get user => _user;
-  set user(QLUser? value) {
+  QLUserOrOrganizationCommon? _user;
+  QLUserOrOrganizationCommon? get user => _user;
+  set user(QLUserOrOrganizationCommon? value) {
     if (value != _user) {
       _user = value;
       notifyListeners();
@@ -40,12 +41,18 @@ class UserModelSelector<S> extends SimplifySelector<CurrentUserModel, S> {
 }
 
 /// 用户选择器
-class UserSelector extends UserModelSelector<QLUser?> {
+class UserSelector extends UserModelSelector<QLUserOrOrganizationCommon?> {
   UserSelector({
     super.key,
-    required Widget Function(BuildContext, QLUser? value) builder,
+    required Widget Function(BuildContext, QLUserOrOrganizationCommon? value)
+        builder,
     super.shouldRebuild,
   }) : super(
             selector: (model) => model.user,
-            builder: (context, QLUser? value) => builder(context, value));
+            builder: (context, QLUserOrOrganizationCommon? value) =>
+                builder(context, value));
+}
+
+extension CurUserContextHelper on BuildContext {
+  CurrentUserModel get curUser => read<CurrentUserModel>();
 }

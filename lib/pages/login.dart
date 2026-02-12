@@ -7,7 +7,6 @@ import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/dialogs.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const _authTypeStrings = ["匿名", "Access Token", "OAuth2"];
@@ -54,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
           try {
             final user = await APIWrap.instance.currentUser(force: true);
             if (mounted) {
-              context.read<CurrentUserModel>().user = user;
+              context.curUser.user = user;
             }
             _showInfo('登录成功');
           } on GitHubGraphQLError catch (e) {

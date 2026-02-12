@@ -8,7 +8,7 @@ class _PullRequestsList extends StatelessWidget {
 
   void _update(BuildContext context, QLList<QLPullRequest> data) {
     if (isOpen) {
-      context.read<RepoModel>().openPullRequestCount = data.totalCount;
+      context.curRepo.openPullRequestCount = data.totalCount;
     } else {
       context.read<_IssuesOrPullRequestsTabViewModel>().closedCount =
           data.totalCount;

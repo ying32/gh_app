@@ -1,5 +1,6 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:gh_app/widgets/default_icons.dart';
+import 'package:provider/provider.dart';
 
 class TabViewModel extends ChangeNotifier {
   TabViewModel(this._tabs);
@@ -61,4 +62,8 @@ class TabViewModel extends ChangeNotifier {
     notifyListeners();
     return true;
   }
+}
+
+extension TabViewContextHelper on BuildContext {
+  TabViewModel get mainTabView => read<TabViewModel>();
 }

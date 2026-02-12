@@ -140,7 +140,7 @@ class RepoPage extends StatelessWidget {
         child: WantKeepAlive(
             onInit: (context) {
               APIWrap.instance.userRepo(repo).then((e) {
-                context.read<RepoModel>().repo = e!;
+                context.curRepo.repo = e!;
               });
             },
             child: const _InternalRepoPage()));
@@ -154,18 +154,18 @@ class RepoPage extends StatelessWidget {
       print("subPage=$subPage, ref=$ref, path=$path");
     }
     //TODO: 这里还要优化下？
-    final tabView = context.read<TabViewModel>();
+    final tabView = context.mainTabView;
     final tabKey = ValueKey("${RouterTable.repo}/${repo.fullName}");
     final index = tabView.indexOf(tabKey);
     if (index != -1) {
       tabView.goToTab(index);
       return;
     }
-    context.read<TabViewModel>().addTab(
-          RepoPage(repo, subPage: subPage, ref: ref, path: path),
-          key: tabKey,
-          title: repo.fullName,
-        );
+    context.mainTabView.addTab(
+      RepoPage(repo, subPage: subPage, ref: ref, path: path),
+      key: tabKey,
+      title: repo.fullName,
+    );
   }
 }
 
@@ -230,8 +230,8 @@ class _InternalRepoPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return EasyListViewRefresher(
       onRefresh: (controller) {
-        APIWrap.instance.userRepo(context.read<RepoModel>().repo).then((e) {
-          context.read<RepoModel>().repo = e!;
+        APIWrap.instance.userRepo(context.curRepo.repo).then((e) {
+          context.curRepo.repo = e!;
 
           controller.refreshCompleted();
         }).onError((e, s) {

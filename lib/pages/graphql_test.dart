@@ -12,7 +12,6 @@ import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark.dart';
 import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:provider/provider.dart';
 
 class OpenGraphQLIconButton extends StatelessWidget {
   const OpenGraphQLIconButton({super.key});
@@ -26,7 +25,7 @@ class OpenGraphQLIconButton extends StatelessWidget {
         child: IconButton(
             icon: const Icon(Remix.paragraph, size: 18),
             onPressed: () {
-              context.read<TabViewModel>().addTab(
+              context.mainTabView.addTab(
                   key: const ValueKey('/graphql/test'),
                   const GraphQLTest(),
                   title: 'GraphQL测试',

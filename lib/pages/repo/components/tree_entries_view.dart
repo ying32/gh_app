@@ -25,7 +25,7 @@ class RepoTreeEntriesView extends StatelessWidget {
           //print('object=${file.submodule?.gitUrl}');
           return;
         }
-        context.read<RepoModel>().path = tree.path;
+        context.curRepo.path = tree.path;
       },
     );
   }
@@ -55,7 +55,7 @@ class RepoTreeEntriesView extends StatelessWidget {
           width: double.infinity,
           child: RepoFileContentView(
             object.blob!,
-            filename: p.basename(context.read<RepoModel>().path),
+            filename: p.basename(context.curRepo.path),
           ),
         );
       }
@@ -86,8 +86,7 @@ class RepoTreeEntriesView extends StatelessWidget {
                     height: MediaQuery.of(context).size.height / 2,
                     child: const LoadingRing());
               }
-              return _buildContent(
-                  context, object, context.read<RepoModel>().repo);
+              return _buildContent(context, object, context.curRepo.repo);
             }),
       ],
     );

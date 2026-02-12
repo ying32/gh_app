@@ -58,7 +58,7 @@ class _NavItemIconButton extends StatelessWidget {
             onPressed: disabled
                 ? null
                 : () {
-                    context.read<TabViewModel>().addTab(
+                    context.mainTabView.addTab(
                         key: item.key,
                         item.body,
                         title: item.title,
@@ -225,7 +225,7 @@ class _MainTabView extends StatelessWidget {
               tabs: value.tabs,
               currentIndex: value.index,
               onChanged: (index) {
-                context.read<TabViewModel>().currentIndex = index;
+                context.mainTabView.currentIndex = index;
               },
               shortcutsEnabled: false,
               tabWidthBehavior: TabWidthBehavior.sizeToContent,
@@ -233,7 +233,7 @@ class _MainTabView extends StatelessWidget {
               showScrollButtons: false,
               onNewPressed: () {
                 GoGithubDialog.show(context, onSuccess: (data) {
-                  goMainTabView(context, data);
+                  gotoMainTabView(context, data);
                 });
               },
               // onReorder: (oldIndex, newIndex) {
@@ -277,12 +277,12 @@ class _InternalNavigationPageState extends State<_InternalNavigationPage>
     super.initState();
     // 获取当前user
     APIWrap.instance.currentUser(onSecondUpdate: (value) {
-      context.read<CurrentUserModel>().user = value;
+      context.curUser.user = value;
     }).then((data) {
-      context.read<CurrentUserModel>().user = data;
+      context.curUser.user = data;
     }).onError((e, s) {
       if (e is GitHubGraphQLError && e.isBadCredentials) {
-        context.read<CurrentUserModel>().clearLogin();
+        context.curUser.clearLogin();
         if (mounted) {
           setState(() {});
         }

@@ -12,7 +12,7 @@ class RepoBreadcrumbBar extends StatelessWidget {
     return RepoModelSelector<List<String>>(
       selector: (model) => model.segmentedPaths,
       builder: (context, segmentedPaths) {
-        final r = repo ?? context.read<RepoModel>().repo;
+        final r = repo ?? context.curRepo.repo;
         return BreadcrumbBar(
           items: segmentedPaths
               .map((e) => BreadcrumbItem(
@@ -22,7 +22,7 @@ class RepoBreadcrumbBar extends StatelessWidget {
               .toList(),
           onItemPressed: (item) {
             final key = "/${item.value}";
-            final model = context.read<RepoModel>();
+            final model = context.curRepo;
             final path = "/${model.path}";
             final pos = path.indexOf(key);
             if (pos != -1) {

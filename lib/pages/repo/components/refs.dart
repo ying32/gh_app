@@ -7,11 +7,11 @@ class _RepoBranches extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final repo = context.read<RepoModel>().repo;
+    final repo = context.curRepo.repo;
 
     return DropdownPanelButton(
       flyout: ChangeNotifierProvider.value(
-        value: context.read<RepoModel>(),
+        value: context.curRepo,
         child: FlyoutContent(
           constraints: const BoxConstraints(maxWidth: 240.0, maxHeight: 300),
           child: RepoModelSelector<QLList<QLRef>>(
@@ -35,7 +35,7 @@ class _RepoBranches extends StatelessWidget {
                                   //style: TextStyle(color: context.textColor200),
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                    context.read<RepoModel>().ref =
+                                    context.curRepo.ref =
                                         e.name == repo.defaultBranchRef.name
                                             ? null
                                             : e.name;
@@ -45,7 +45,7 @@ class _RepoBranches extends StatelessWidget {
                                     child: Row(
                                       children: [
                                         if (e.name ==
-                                            (context.read<RepoModel>().ref ??
+                                            (context.curRepo.ref ??
                                                 repo.defaultBranchRef.name))
                                           const Padding(
                                             padding: EdgeInsets.symmetric(
@@ -80,9 +80,9 @@ class _RepoBranches extends StatelessWidget {
       ),
       onOpen: () {
         // 下拉时
-        if (context.read<RepoModel>().refs.isEmpty) {
+        if (context.curRepo.refs.isEmpty) {
           APIWrap.instance.repoRefs(repo).then((res) {
-            context.read<RepoModel>().refs = res;
+            context.curRepo.refs = res;
           });
         }
       },

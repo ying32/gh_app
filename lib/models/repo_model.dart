@@ -5,6 +5,7 @@ import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/widgets/widgets.dart';
+import 'package:provider/provider.dart';
 
 /// 仓库模型
 class RepoModel extends ChangeNotifier {
@@ -235,6 +236,10 @@ class RepoModel extends ChangeNotifier {
     }
     super.dispose();
   }
+}
+
+extension CurRepoContextHelper on BuildContext {
+  RepoModel get curRepo => read<RepoModel>();
 }
 
 /// 仓库列表

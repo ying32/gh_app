@@ -8,7 +8,6 @@ import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:provider/provider.dart';
 
 import 'default_icons.dart';
 import 'markdown_plus.dart';
@@ -247,11 +246,10 @@ class IssueOrPullRequestListItem extends StatelessWidget {
             ),
       onPressed: () {
         if (_isIssue) {
-          IssueDetailsPage.createNewTab(
-              context, context.read<RepoModel>().repo, issue);
+          IssueDetailsPage.createNewTab(context, context.curRepo.repo, issue);
         } else if (_isPull) {
           PullRequestDetailsPage.createNewTab(
-              context, context.read<RepoModel>().repo, pull);
+              context, context.curRepo.repo, pull);
         }
       },
     );

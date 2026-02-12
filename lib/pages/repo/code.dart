@@ -151,9 +151,9 @@ class _MouseNavigation extends StatelessWidget {
           //print("event.buttons=${event.buttons}");
           switch (event.buttons) {
             case 0x8: // 后退键(扩展键1)
-              context.read<RepoModel>().pathMouseBack();
+              context.curRepo.pathMouseBack();
             case 0x10: // 前进键(扩展键2)
-              context.read<RepoModel>().pathMouseForward();
+              context.curRepo.pathMouseForward();
           }
         },
         child: child);

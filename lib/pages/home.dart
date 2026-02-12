@@ -4,7 +4,6 @@ import 'package:gh_app/pages/user_info.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/widgets/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomePage extends StatelessWidget {
@@ -15,14 +14,14 @@ class HomePage extends StatelessWidget {
       final user = await APIWrap.instance.currentUser(force: true);
       if (user != null) {
         //ignore: use_build_context_synchronously
-        context.read<CurrentUserModel>().user = user;
+        context.curUser.user = user;
       }
       controller.refreshCompleted();
       controller.resetNoData();
     } on GitHubGraphQLError catch (e) {
       if (e.isBadCredentials) {
         //ignore: use_build_context_synchronously
-        context.read<CurrentUserModel>().clearLogin();
+        context.curUser.clearLogin();
       }
       controller.refreshFailed();
     } catch (e) {

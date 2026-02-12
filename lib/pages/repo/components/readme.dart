@@ -9,7 +9,7 @@ class RepoReadMe extends StatelessWidget {
     return RepoModelSelector<String>(
         selector: (model) => model.readmeContent,
         builder: (context, content) {
-          final repo = context.read<RepoModel>().repo;
+          final repo = context.curRepo.repo;
           if (content.isEmpty) {
             return const SizedBox.shrink();
           }

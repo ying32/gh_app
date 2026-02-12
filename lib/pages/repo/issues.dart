@@ -8,7 +8,7 @@ class _IssuesList extends StatelessWidget {
 
   void _update(BuildContext context, QLList<QLIssue> data) {
     if (isOpen) {
-      context.read<RepoModel>().openIssueCount = data.totalCount;
+      context.curRepo.openIssueCount = data.totalCount;
     } else {
       context.read<_IssuesOrPullRequestsTabViewModel>().closedCount =
           data.totalCount;

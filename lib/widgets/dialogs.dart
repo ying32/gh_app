@@ -47,7 +47,7 @@ void showImageDialog(BuildContext context, String? imageURL) {
 
 /// 跳转github仓库
 /// TODO: 这个先实现，后面再重构
-bool goToRepoPageByUri(
+bool gotoRepoPageByUri(
   Uri uri, {
   required BuildContext context,
   required ValueChanged<dynamic> onSuccess,
@@ -135,7 +135,7 @@ bool goToRepoPageByUri(
   return false;
 }
 
-void goMainTabView(BuildContext context, dynamic value) {
+void gotoMainTabView(BuildContext context, dynamic value) {
   if (value is QLRepositoryWrap) {
     RepoPage.createNewTab(context, value.repo,
         subPage: value.subPage, ref: value.ref, path: value.path);
@@ -154,8 +154,8 @@ void goMainTabView(BuildContext context, dynamic value) {
 void onDefaultLinkAction(BuildContext context, String link) {
   final uri = Uri.tryParse(link);
   if (uri == null) return;
-  goToRepoPageByUri(uri, context: context, onSuccess: (value) {
-    goMainTabView(context, value);
+  gotoRepoPageByUri(uri, context: context, onSuccess: (value) {
+    gotoMainTabView(context, value);
   });
 }
 
@@ -239,7 +239,7 @@ class _GoGithubDialogState extends State<GoGithubDialog> {
       print("segments=$segments");
     }
     setState(() => _loading = true);
-    goToRepoPageByUri(u, useLoading: false, context: context,
+    gotoRepoPageByUri(u, useLoading: false, context: context,
         onSuccess: (value) {
       _close();
       widget.onSuccess?.call(value);

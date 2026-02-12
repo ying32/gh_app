@@ -9,7 +9,6 @@ import 'package:gh_app/widgets/highlight_plus.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:markdown_viewer/markdown_viewer.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// An example of creating a element builder.
@@ -77,7 +76,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
           case "" || "http" || "https":
             // 没有host当对目录的
             if (uri.host.isEmpty && uri.path.isNotEmpty) {
-              context.read<RepoModel>().path = uri.path;
+              context.curRepo.path = uri.path;
             } else {
               onDefaultLinkAction(context, link);
             }
