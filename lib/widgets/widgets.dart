@@ -919,16 +919,22 @@ class SelectorQLList<A, S> extends Selector0<QLList<S>?> {
             builder: (context, QLList<S>? value, Widget? child) {
               if (value == null) {
                 return defaultChild != null
-                    ? Column(
-                        children: [
-                          Expanded(child: defaultChild),
-                          const Center(child: LoadingRing()),
-                        ],
+                    ? SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            defaultChild,
+                            const Center(child: LoadingRing()),
+                          ],
+                        ),
                       )
                     : const LoadingRing();
               }
               if (value.isEmpty) {
-                return defaultChild ?? const Center(child: Text('没有数据'));
+                return SingleChildScrollView(
+                    child: defaultChild ?? const Center(child: Text('没有数据')));
               }
               return builder(context, value, child);
             });

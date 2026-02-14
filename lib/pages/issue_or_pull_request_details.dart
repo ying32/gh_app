@@ -257,6 +257,8 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
           ),
           child: Card(
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitle(),
                 const Padding(
@@ -265,6 +267,8 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
                 ),
                 Expanded(
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: SelectorQLList<_IssueOrPullRequestDetailsModel,
@@ -310,8 +314,7 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
                               // },
                             );
                           },
-                          defaultChild:
-                              ListView(children: [_buildDefaultItem()]),
+                          defaultChild: _buildDefaultItem(),
                         ),
                       ),
                       const SizedBox(width: 15),
