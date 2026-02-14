@@ -114,6 +114,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
       ],
       highlightBuilder: (text, language, infoString) {
         try {
+          // print("language=$language, infoString=$infoString");
           final prism = Prism(
             mouseCursor: SystemMouseCursors.text,
             style: context.isDark
@@ -124,7 +125,7 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
           return prism.render(
               text.replaceAll('\t', ' ' * 8), lang.isEmpty ? 'plain' : lang);
         } catch (e) {
-          return [];
+          return [TextSpan(text: text)];
         }
       },
       onTapLink: (href, title) {

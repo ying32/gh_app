@@ -57,7 +57,7 @@ const defaultCodeStyle = TextStyle(
 /// 尝试解析语言枨，从文件名，给定语言或者源码
 String tryGetLanguage(String fileName, {String? language, String source = ''}) {
   if (language != null) {
-    return _langAlias[language] ?? language;
+    return _langAlias[language.toLowerCase()] ?? language.toLowerCase();
   }
 
   // 根据文件名查询语法

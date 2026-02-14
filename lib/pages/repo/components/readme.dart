@@ -15,6 +15,8 @@ class RepoReadMe extends StatelessWidget {
           }
           return Card(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Row(
                   children: [

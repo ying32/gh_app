@@ -43,11 +43,11 @@ class RepoAbout extends StatelessWidget {
                 padding: padding,
                 child: RepoTopics(repo.repositoryTopics!),
               ),
-
-            const IconText(
-                icon: DefaultIcons.readme,
-                padding: padding,
-                text: Text('Readme')),
+            //
+            // const IconText(
+            //     icon: DefaultIcons.readme,
+            //     padding: padding,
+            //     text: Text('Readme')),
             if (repo.licenseInfo?.name.isNotEmpty ?? false)
               IconText(
                   icon: DefaultIcons.license,
