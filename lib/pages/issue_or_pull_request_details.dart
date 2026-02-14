@@ -76,6 +76,49 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
   bool get _isPull => item is QLPullRequest;
   QLPullRequest get _pull => (item as QLPullRequest);
 
+  IconData get _tagIcon {
+    if (_isIssue) {
+      return DefaultIcons.issues;
+    } else if (_pull.isMerged) {
+      return DefaultIcons.merged;
+    } else if (_pull.isDraft) {
+      return DefaultIcons.pullRequestDraft;
+    } else if (_pull.isOpen) {
+      return DefaultIcons.pullRequest;
+    }
+    return DefaultIcons.closePullRequest;
+  }
+
+  String get _tagTitle {
+    if (_isIssue && _issue.isOpen) {
+      return '打开';
+    }
+    if (_isPull) {
+      if (_pull.isDraft) {
+        return '草稿';
+      } else if (_pull.isMerged) {
+        return '已合并';
+      } else if (_pull.isOpen) {
+        return '打开';
+      }
+    }
+    return '关闭';
+  }
+
+  Color get _tagColor {
+    if (_isPull) {
+      if (_pull.isDraft) {
+        return Colors.orange.lighter;
+      } else if (_pull.isMerged) {
+        return Colors.purple;
+      }
+    }
+    if (item.isOpen) {
+      return Colors.green.lighter;
+    }
+    return Colors.red.lighter;
+  }
+
   Widget _buildTitle() {
     return Wrap(
       runAlignment: WrapAlignment.start,
@@ -104,35 +147,17 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
                   opacity: 1,
                   radius: 15,
                   text: IconText(
-                    icon: DefaultIcons.issues,
+                    icon: _tagIcon,
                     iconColor: Colors.white,
                     spacing: 4,
-                    text: Text(item.isOpen ? '打开' : '关闭',
+                    text: Text(_tagTitle,
                         style: const TextStyle(
                             color: Colors.white,
                             fontSize: 14,
                             fontWeight: FontWeight.w500)),
                   ),
-                  color:
-                      item.isOpen ? Colors.green.lighter : Colors.red.lighter),
+                  color: _tagColor),
             ),
-            if (_isPull && _pull.isMerged)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                child: TagLabel(
-                    opacity: 1,
-                    radius: 15,
-                    text: const IconText(
-                        spacing: 4,
-                        icon: DefaultIcons.merged,
-                        iconColor: Colors.white,
-                        text: Text('已合并',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500))),
-                    color: Colors.purple),
-              ),
             if (_isIssue && _issue.issueType != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
