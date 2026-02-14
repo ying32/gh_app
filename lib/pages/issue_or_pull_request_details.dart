@@ -12,54 +12,93 @@ import 'package:provider/provider.dart';
 class _IssueOrPullRequestDetailsModel extends ChangeNotifier {
   _IssueOrPullRequestDetailsModel();
 
-  QLList<QLComment>? _comments;
+  final List<QLComment> comments = [];
+  QLPageInfo? pageInfo;
+  bool loading = true;
 
-  QLList<QLComment>? get comments => _comments;
-
-  set comments(QLList<QLComment>? value) {
-    if (_comments == value) return;
-    _comments = value;
+  void add(QLList<QLComment> data) {
+    loading = false;
+    pageInfo = data.pageInfo;
+    if (data.isEmpty) {
+      comments.addAll(data.data);
+    }
     notifyListeners();
   }
 }
 
 /// issues的评论显示
-// class IssuesCommentsView extends StatelessWidget {
-//   const IssuesCommentsView(
-//     this.data, {
-//     super.key,
-//     required this.repo,
-//     required this.first,
-//   });
-//
-//   final QLRepository repo;
-//   final QLIssueOrPullRequest data;
-//   final Widget first;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Column(
-//       children: [
-//         first,
-//         APIFutureBuilder(
-//             noDataWidget: const SizedBox.shrink(),
-//             future: APIWrap.instance.repoIssueOrPullRequestComments(repo,
-//                 number: data.number, isIssues: data is QLIssue),
-//             builder: (_, snapshot) {
-//               return Column(
-//                 children: snapshot.data
-//                     .map((e) => IssueCommentItem(
-//                           item: e,
-//                           owner: repo.owner.login,
-//                           openAuthor: data.author?.login,
-//                         ))
-//                     .toList(),
-//               );
-//             }),
-//       ],
-//     );
-//   }
-// }
+class _IssuesCommentsView extends StatelessWidget {
+  const _IssuesCommentsView(
+    this.item, {
+    required this.repo,
+  });
+
+  final QLIssueOrPullRequest item;
+  final QLRepository repo;
+
+  @override
+  Widget build(BuildContext context) {
+    return EasyListViewRefresher(
+      hideFooterWhenNotFull: true,
+      onLoading: (controller) async {
+        final model = context.read<_IssueOrPullRequestDetailsModel>();
+        if (model.pageInfo == null || !model.pageInfo!.hasNextPage) {
+          return controller.loadNoData();
+        }
+        try {
+          final list = await APIWrap.instance.repoIssueOrPullRequestComments(
+              repo,
+              number: item.number,
+              nextCursor: model.pageInfo!.endCursor);
+          if (list.isEmpty) {
+            return controller.loadNoData();
+          }
+          model.add(list);
+          controller.loadComplete();
+        } catch (e) {
+          controller.loadFailed();
+        }
+      },
+      // 不需要强制刷新吧？
+      // onRefresh: () async {
+      //   return APIWrap.instance
+      //       .repoIssueOrPullRequestComments(repo,
+      //           number: item.number, force: true);
+      // },
+      listview: ListView(
+        children: [
+          // 首条评论
+          IssueCommentItem(
+              item: item,
+              owner: repo.owner.login,
+              openAuthor: item.author?.login,
+              isFirst: true),
+          // 其余的项目
+          Consumer<_IssueOrPullRequestDetailsModel>(builder: (_, model, __) {
+            // TODO: 这里还要判断其它状态，如果加载完成就
+            if (model.loading) {
+              return const LoadingRing();
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: model.comments
+                  .map((e) => IssueCommentItem(
+                      item: e,
+                      owner: repo.owner.login,
+                      openAuthor: e.author?.login))
+                  .toList(),
+            );
+          }),
+          // 评论回复
+          Padding(
+            padding: const EdgeInsets.only(left: 70.0),
+            child: IssueCommentEditor(item, repo: repo),
+          )
+        ],
+      ),
+    );
+  }
+}
 
 class IssueOrPullRequestDetailsPage extends StatelessWidget {
   const IssueOrPullRequestDetailsPage(
@@ -90,24 +129,22 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
   }
 
   String get _tagTitle {
-    if (_isIssue && _issue.isOpen) {
-      return '打开';
-    }
     if (_isPull) {
-      if (_pull.isDraft) {
+      if (item.isOpen && _pull.isDraft) {
         return '草稿';
       } else if (_pull.isMerged) {
         return '已合并';
-      } else if (_pull.isOpen) {
-        return '打开';
       }
+    }
+    if (item.isOpen) {
+      return '打开';
     }
     return '关闭';
   }
 
   Color get _tagColor {
     if (_isPull) {
-      if (_pull.isDraft) {
+      if (item.isOpen && _pull.isDraft) {
         return Colors.orange.lighter;
       } else if (_pull.isMerged) {
         return Colors.purple;
@@ -141,23 +178,22 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
         ),
         Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4.0),
-              child: TagLabel(
-                  opacity: 1,
-                  radius: 15,
-                  text: IconText(
-                    icon: _tagIcon,
-                    iconColor: Colors.white,
-                    spacing: 4,
-                    text: Text(_tagTitle,
-                        style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500)),
-                  ),
-                  color: _tagColor),
-            ),
+            TagLabel(
+                opacity: 1,
+                radius: 15,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                text: IconText(
+                  icon: _tagIcon,
+                  iconColor: Colors.white,
+                  spacing: 4,
+                  text: Text(_tagTitle,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500)),
+                ),
+                color: _tagColor),
             if (_isIssue && _issue.issueType != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -252,14 +288,6 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDefaultItem() {
-    return IssueCommentItem(
-        item: item,
-        owner: repo.owner.login,
-        openAuthor: item.author?.login,
-        isFirst: true);
-  }
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -268,9 +296,9 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
         onInit: (context) {
           APIWrap.instance.repoIssueOrPullRequestComments(repo,
               number: item.number, isIssues: _isIssue, onSecondUpdate: (value) {
-            context.read<_IssueOrPullRequestDetailsModel>().comments = value;
+            context.read<_IssueOrPullRequestDetailsModel>().add(value);
           }).then((data) {
-            context.read<_IssueOrPullRequestDetailsModel>().comments = data;
+            context.read<_IssueOrPullRequestDetailsModel>().add(data);
           });
         },
         child: Padding(
@@ -282,7 +310,6 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
           ),
           child: Card(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitle(),
@@ -292,56 +319,9 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
                 ),
                 Expanded(
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: SelectorQLList<_IssueOrPullRequestDetailsModel,
-                            QLComment>(
-                          selector: (_, model) => model.comments,
-                          builder: (_, comments, __) {
-                            return ListViewRefresher(
-                              initData: comments,
-                              itemBuilder: (context, item, index) {
-                                Widget itemChild = IssueCommentItem(
-                                    item: item,
-                                    owner: repo.owner.login,
-                                    openAuthor: item.author?.login);
-                                if (index == 0) {
-                                  itemChild = Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        _buildDefaultItem(),
-                                        itemChild
-                                      ]);
-                                }
-                                return itemChild;
-                              },
-                              onLoading: (QLPageInfo? pageInfo) async {
-                                if (pageInfo == null || !pageInfo.hasNextPage) {
-                                  return const QLList();
-                                }
-                                return APIWrap.instance
-                                    .repoIssueOrPullRequestComments(
-                                  repo,
-                                  number: item.number,
-                                  nextCursor: pageInfo.endCursor,
-                                );
-                              },
-                              // 不需要强制刷新吧？
-                              // onRefresh: () async {
-                              //   return APIWrap.instance
-                              //       .repoIssueOrPullRequestComments(repo,
-                              //           number: item.number, force: true);
-                              // },
-                            );
-                          },
-                          defaultChild: _buildDefaultItem(),
-                        ),
-                      ),
+                      Expanded(child: _IssuesCommentsView(item, repo: repo)),
                       const SizedBox(width: 15),
                       SizedBox(width: 200, child: _buildRight())
                     ],

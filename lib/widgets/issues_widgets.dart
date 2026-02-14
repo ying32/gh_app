@@ -6,6 +6,7 @@ import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/utils.dart';
+import 'package:gh_app/widgets/dialogs.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 
@@ -255,6 +256,105 @@ class IssueOrPullRequestListItem extends StatelessWidget {
               context, context.curRepo.repo, pull);
         }
       },
+    );
+  }
+}
+
+/// 评论编辑器
+class IssueCommentEditor extends StatefulWidget {
+  const IssueCommentEditor(this.item, {super.key, required this.repo});
+
+  final QLIssueOrPullRequest item;
+  final QLRepository repo;
+
+  @override
+  State<IssueCommentEditor> createState() => _IssueCommentEditorState();
+}
+
+class _IssueCommentEditorState extends State<IssueCommentEditor> {
+  int _currentIndex = 0;
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: double.infinity,
+          height: 200,
+          child: TabView(
+            shortcutsEnabled: true,
+            showScrollButtons: false,
+            currentIndex: _currentIndex,
+            closeButtonVisibility: CloseButtonVisibilityMode.never,
+            tabWidthBehavior: TabWidthBehavior.sizeToContent,
+            tabs: [
+              Tab(
+                text: const Text('评论'),
+                body: TextBox(maxLines: null, controller: _controller),
+              ),
+              Tab(
+                text: const Text('预览'),
+                body: Card(child: MarkdownBlockPlus(_controller.text)),
+              ),
+            ],
+            onChanged: (index) {
+              if (_currentIndex == index) return;
+              setState(() {
+                _currentIndex = index;
+              });
+            },
+          ),
+        ),
+        const SizedBox(height: 10.0),
+        Row(
+          children: [
+            const Spacer(),
+            Button(
+                child: const Text('发送'),
+                onPressed: () {
+                  showInfoDialog('没有写呢',
+                      context: context, severity: InfoBarSeverity.error);
+                })
+          ],
+        )
+      ],
+    );
+    //return TextBox(maxLines: null, controller: _controller);
+    // 一个tab，第一个tab是写的，第二个是预览的
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 200.0),
+      child: TabView(
+        currentIndex: _currentIndex,
+        tabs: [
+          Tab(
+            text: const Text('评论'),
+            body: TextBox(maxLines: null, controller: _controller),
+          ),
+          // Tab(
+          //   text: const Text('预览'),
+          //   body: const MarkdownBlockPlus(''),
+          // ),
+        ],
+        // onChanged: (index) {
+        //   if (_currentIndex == index) return;
+        //   setState(() {
+        //     _currentIndex = index;
+        //   });
+        // },
+      ),
     );
   }
 }

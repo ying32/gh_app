@@ -933,8 +933,9 @@ class SelectorQLList<A, S> extends Selector0<QLList<S>?> {
                     : const LoadingRing();
               }
               if (value.isEmpty) {
-                return SingleChildScrollView(
-                    child: defaultChild ?? const Center(child: Text('没有数据')));
+                return defaultChild != null
+                    ? SingleChildScrollView(child: defaultChild)
+                    : const Center(child: Text('没有数据'));
               }
               return builder(context, value, child);
             });

@@ -31,7 +31,9 @@ class UserHeadImage extends StatelessWidget {
     }
     Widget child = ClipOval(
       child: Container(
-        color: Colors.black.withOpacity(0.08),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.08),
+        ),
         child: CachedNetworkImageEx(
           avatarUrl!,
           fit: BoxFit.cover,

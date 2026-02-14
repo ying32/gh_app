@@ -56,7 +56,8 @@ class _MarkdownBlockPlusState extends State<MarkdownBlockPlus> {
   }
 
   void processText() {
-    _body = widget.body.replaceAll("\r", "");
+    //TODO: 这个换行符还是有问题，测试可以看govcl的#212，应该有换行才对
+    _body = widget.body.replaceAll("\r\n", "\n");
   }
 
   bool _doLink(String link) {
