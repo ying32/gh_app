@@ -519,6 +519,7 @@ class APIWrap {
   /// 尝试解析github链接，并返回相应的类
   dynamic tryParseGithubUrl(Uri? uri) {
     if (uri == null) return null;
+    if (uri.host != githubHost) return null;
     final segments = uri.pathSegments.where((e) => e.isNotEmpty).toList();
     if (segments.isEmpty) return null;
     // 只有一个的时候，是组织或者用户名
