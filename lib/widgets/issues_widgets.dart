@@ -293,7 +293,7 @@ class _IssueCommentEditorState extends State<IssueCommentEditor> {
       children: [
         SizedBox(
           width: double.infinity,
-          height: 200,
+          height: 240,
           child: TabView(
             shortcutsEnabled: true,
             showScrollButtons: false,
@@ -302,12 +302,15 @@ class _IssueCommentEditorState extends State<IssueCommentEditor> {
             tabWidthBehavior: TabWidthBehavior.sizeToContent,
             tabs: [
               Tab(
-                text: const Text('评论'),
+                text: const Text('内容'),
+                // icon: Icon(Remix.bod),
                 body: TextBox(maxLines: null, controller: _controller),
               ),
               Tab(
                 text: const Text('预览'),
-                body: Card(child: MarkdownBlockPlus(_controller.text)),
+                body: Card(
+                    child: SingleChildScrollView(
+                        child: MarkdownBlockPlus(_controller.text))),
               ),
             ],
             onChanged: (index) {
@@ -325,36 +328,13 @@ class _IssueCommentEditorState extends State<IssueCommentEditor> {
             Button(
                 child: const Text('发送'),
                 onPressed: () {
-                  showInfoDialog('没有写呢',
+                  showInfoDialog('功能没有写呢',
                       context: context, severity: InfoBarSeverity.error);
-                })
+                }),
+            const SizedBox(width: 15.0),
           ],
         )
       ],
-    );
-    //return TextBox(maxLines: null, controller: _controller);
-    // 一个tab，第一个tab是写的，第二个是预览的
-    return ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 200.0),
-      child: TabView(
-        currentIndex: _currentIndex,
-        tabs: [
-          Tab(
-            text: const Text('评论'),
-            body: TextBox(maxLines: null, controller: _controller),
-          ),
-          // Tab(
-          //   text: const Text('预览'),
-          //   body: const MarkdownBlockPlus(''),
-          // ),
-        ],
-        // onChanged: (index) {
-        //   if (_currentIndex == index) return;
-        //   setState(() {
-        //     _currentIndex = index;
-        //   });
-        // },
-      ),
     );
   }
 }

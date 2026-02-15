@@ -32,11 +32,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        bottom: kPageDefaultVerticalPadding,
-        // start: PageHeader.horizontalPadding(context),
-        end: PageHeader.horizontalPadding(context),
-      ),
+      padding: const EdgeInsetsDirectional.only(
+          bottom: kPageDefaultVerticalPadding / 2.0,
+          end: kPageDefaultVerticalPadding / 2.0),
       child: Card(
         child: UserSelector(
             builder: (_, user) => user == null

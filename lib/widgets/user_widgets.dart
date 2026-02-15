@@ -61,26 +61,22 @@ class UserHeadImage extends StatelessWidget {
 
 class ActorHeadImage extends UserHeadImage {
   ActorHeadImage(
-    this.user, {
+    QLActor? user, {
     super.key,
     super.imageSize,
     super.tooltip,
     super.onPressed,
   }) : super(user?.avatarUrl);
-
-  final QLActor? user;
 }
 
 class GitActorHeadImage extends UserHeadImage {
   GitActorHeadImage(
-    this.user, {
+    QLGitActor? user, {
     super.key,
     super.imageSize,
     super.tooltip,
     super.onPressed,
   }) : super(user?.avatarUrl);
-
-  final QLGitActor? user;
 }
 
 /// 用户名

@@ -16,10 +16,14 @@ class _IssueOrPullRequestDetailsModel extends ChangeNotifier {
   QLPageInfo? pageInfo;
   bool loading = true;
 
-  void add(QLList<QLComment> data) {
+  void add(QLList<QLComment> data, bool reAdd) {
+    if (reAdd) {
+      comments.clear();
+      pageInfo = null;
+    }
     loading = false;
     pageInfo = data.pageInfo;
-    if (data.isEmpty) {
+    if (data.isNotEmpty) {
       comments.addAll(data.data);
     }
     notifyListeners();
@@ -50,11 +54,12 @@ class _IssuesCommentsView extends StatelessWidget {
               repo,
               number: item.number,
               nextCursor: model.pageInfo!.endCursor);
+          model.add(list, false);
           if (list.isEmpty) {
-            return controller.loadNoData();
+            controller.loadNoData();
+          } else {
+            controller.loadComplete();
           }
-          model.add(list);
-          controller.loadComplete();
         } catch (e) {
           controller.loadFailed();
         }
@@ -90,10 +95,11 @@ class _IssuesCommentsView extends StatelessWidget {
             );
           }),
           // 评论回复
-          Padding(
-            padding: const EdgeInsets.only(left: 70.0),
-            child: IssueCommentEditor(item, repo: repo),
-          )
+          if (item is QLIssue)
+            Padding(
+              padding: const EdgeInsets.only(left: 70.0),
+              child: IssueCommentEditor(item, repo: repo),
+            )
         ],
       ),
     );
@@ -296,9 +302,9 @@ class IssueOrPullRequestDetailsPage extends StatelessWidget {
         onInit: (context) {
           APIWrap.instance.repoIssueOrPullRequestComments(repo,
               number: item.number, isIssues: _isIssue, onSecondUpdate: (value) {
-            context.read<_IssueOrPullRequestDetailsModel>().add(value);
+            context.read<_IssueOrPullRequestDetailsModel>().add(value, true);
           }).then((data) {
-            context.read<_IssueOrPullRequestDetailsModel>().add(data);
+            context.read<_IssueOrPullRequestDetailsModel>().add(data, true);
           });
         },
         child: Padding(
