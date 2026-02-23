@@ -34,7 +34,7 @@ void main() async {
   // https://github.com/flutter/flutter/issues/142916
   await WindowManager.instance.ensureInitialized();
   final wSize =
-      Platform.isWindows ? const Size(1280, 768) : const Size(1000, 720);
+      Platform.isWindows ? const Size(1280, 768) : const Size(1200, 720);
 
   /// 为解决启动时黑屏问题.还需要修改macos/Runner/MainFlutterWindow.swift里面的
   /// https://github.com/flutter/flutter/issues/142916
