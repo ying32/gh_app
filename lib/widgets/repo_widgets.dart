@@ -150,6 +150,7 @@ class RepoListItem extends StatelessWidget {
           //Text('${item.tagsUrl}'),
           //const Spacer(),
 
+          const SizedBox(height: 6.0),
           Row(
             children: [
               // 语言的一个圆，颜色还要待弄下哈
@@ -173,31 +174,44 @@ class RepoListItem extends StatelessWidget {
                       style: TextStyle(color: context.textColor200)),
                 ),
               ],
-              // fork数
-              HyperlinkButton(
-                onPressed: () {},
-                child: IconText(
-                    icon: DefaultIcons.fork,
-                    // padding: padding,
-                    text: Text(repo.forksCount.toKiloString())),
-              ),
+
               // 关注数
-              HyperlinkButton(
-                onPressed: () {},
+              // HyperlinkButton(
+              //   onPressed: () {},
+              //   child:
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
                 child: IconText(
                     icon: DefaultIcons.star,
                     // padding: padding,
                     text: Text(repo.stargazersCount.toKiloString())),
               ),
+              // ),
+              // fork数
+              // HyperlinkButton(
+              //   onPressed: () {},
+              //   child:
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                child: IconText(
+                    icon: DefaultIcons.fork,
+                    // padding: padding,
+                    text: Text(repo.forksCount.toKiloString())),
+              ),
+              // ),
               if (!isPinStyle && showOpenIssues)
                 // 当前打开的issue数，这里貌似包含pull requests的数量
-                HyperlinkButton(
-                  onPressed: () {},
+                // HyperlinkButton(
+                //   onPressed: () {},
+                //   child:
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
                   child: IconText(
                       icon: DefaultIcons.issues,
                       // padding: padding,
                       text: Text(repo.openIssuesCount.toKiloString())),
                 ),
+              // ),
               if (!isPinStyle)
                 // 最后更新时间
                 Padding(

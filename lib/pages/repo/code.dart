@@ -9,19 +9,27 @@ class _BranchAndTagsCount extends StatelessWidget {
     return RepoSelector(builder: (_, repo) {
       return Row(
         children: [
-          HyperlinkButton(
-            //style: TextStyle(color: context.textColor200),
-            onPressed: () {},
+          // HyperlinkButton(
+          //   //style: TextStyle(color: context.textColor200),
+          //   onPressed: () {},
+          //   child:
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: IconText(
                 icon: DefaultIcons.branch, text: Text("${repo.refsCount}")),
           ),
+          // ),
           const SizedBox(width: 10.0),
-          HyperlinkButton(
-            //style: TextStyle(color: context.textColor200),
-            onPressed: () {},
+          // HyperlinkButton(
+          //   //style: TextStyle(color: context.textColor200),
+          //   onPressed: () {},
+          //   child:
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: IconText(
                 icon: DefaultIcons.tags, text: Text("${repo.tagsCount}")),
           ),
+          // ),
         ],
       );
     });
