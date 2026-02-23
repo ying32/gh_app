@@ -62,7 +62,8 @@ class QLRepositoryWrap {
   final RepoSubPage? subPage;
 
   QLRepositoryWrap copyWith({QLRepository? repo}) =>
-      QLRepositoryWrap(repo ?? this.repo, ref: ref, path: path);
+      QLRepositoryWrap(repo ?? this.repo,
+          ref: ref, path: path, subPage: subPage);
 }
 
 class QLIssueWrap {

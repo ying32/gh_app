@@ -31,7 +31,7 @@ class RepoTopics extends StatelessWidget {
                 child: TagLabel.other(e.name,
                     color: Colors.blue, fontSize: 12, radius: 10.0),
                 onPressed: () {
-                  launchUrl(Uri.parse('$githubTopicsUrl/$e'));
+                  launchUrl(Uri.parse('$githubTopicsUrl/${e.name}'));
                 },
               ),
             )
