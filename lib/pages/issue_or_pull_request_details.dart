@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:fluent_ui/fluent_ui.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gh_app/utils/consts.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
@@ -39,6 +40,8 @@ class _IssuesCommentsView extends StatelessWidget {
 
   final QLIssueOrPullRequest item;
   final QLRepository repo;
+
+  bool get _isIssue => item is QLIssue;
 
   @override
   Widget build(BuildContext context) {
@@ -94,12 +97,13 @@ class _IssuesCommentsView extends StatelessWidget {
                   .toList(),
             );
           }),
-          // 评论回复
-          if (item is QLIssue)
-            Padding(
-              padding: const EdgeInsets.only(left: 70.0),
-              child: IssueCommentEditor(item, repo: repo),
-            )
+          // TODO: 评论回复，待完善
+          if (kDebugMode)
+            if (_isIssue && item.isOpen)
+              Padding(
+                padding: const EdgeInsets.only(left: 70.0),
+                child: IssueCommentEditor(item, repo: repo),
+              )
         ],
       ),
     );
