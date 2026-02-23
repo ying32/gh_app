@@ -219,39 +219,64 @@ class UserInfoPanel extends StatelessWidget {
           // 签名信息
           SelectableText(_user.bio,
               style: TextStyle(color: context.textColor200)),
-          const SizedBox(height: 8),
+
           // 心情
           if (_user.status != null &&
               (_user.status!.emojiHTML.isNotEmpty ||
                   _user.status!.message.isNotEmpty))
-            SelectableText.rich(
-                TextSpan(text: mk.emojis[_user.status!.emoji] ?? '', children: [
-                  const TextSpan(text: ' '),
-                  TextSpan(text: _user.status!.message),
-                ]),
-                style: TextStyle(color: context.textColor200)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: SelectableText.rich(
+                  TextSpan(
+                      text: mk.emojis[_user.status!.emoji] ?? '',
+                      children: [
+                        const TextSpan(text: ' '),
+                        TextSpan(text: _user.status!.message),
+                      ]),
+                  style: TextStyle(color: context.textColor200)),
+            ),
+
           // SelectionArea(
           //     child: HtmlWidget(
           //         "${_user.status!.emojiHTML}${_user.status!.message}")),
 
+          // 没啥用，所以不做跳转的了，知道多少就行了
+          // UserLineInfo(
+          //   icon: DefaultIcons.group,
+          //   value: Wrap(
+          //     children: [
+          //       HyperlinkButton(
+          //         onPressed: () {
+          //           // pushRoute(context, RouterTable.followers);
+          //         },
+          //         child: Text("${_user.followersCount}个关注者"),
+          //       ),
+          //       const Text(dotChar),
+          //       HyperlinkButton(
+          //         onPressed: () {
+          //           //pushRoute(context, RouterTable.following);
+          //         },
+          //         child: Text("${_user.followingCount}个关注"),
+          //       ),
+          //     ],
+          //   ),
+          // ),
+
           UserLineInfo(
             icon: DefaultIcons.group,
-            value: Wrap(
-              children: [
-                HyperlinkButton(
-                  onPressed: () {
-                    // pushRoute(context, RouterTable.followers);
-                  },
-                  child: Text("${_user.followersCount}个关注者"),
-                ),
-                const Text(dotChar),
-                HyperlinkButton(
-                  onPressed: () {
-                    //pushRoute(context, RouterTable.following);
-                  },
-                  child: Text("${_user.followingCount}个关注"),
-                ),
-              ],
+            value: Text.rich(
+              TextSpan(children: [
+                TextSpan(
+                    text: "${_user.followersCount}",
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                const TextSpan(text: " 个关注者"),
+                const TextSpan(text: " $dotChar "),
+                TextSpan(
+                    text: "${_user.followingCount}",
+                    style: const TextStyle(fontWeight: FontWeight.w600)),
+                const TextSpan(text: " 个关注"),
+              ]),
+              style: TextStyle(color: context.textColor200),
             ),
           ),
 
@@ -261,7 +286,7 @@ class UserInfoPanel extends StatelessWidget {
               value: _user.company,
               textColor: context.textColor200),
         ],
-        // twitter
+        // twitter(x)
         UserLineInfo(
             icon: DefaultIcons.twitter,
             value: user.twitterUsername,

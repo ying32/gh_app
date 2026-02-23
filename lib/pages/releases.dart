@@ -3,6 +3,7 @@ import 'package:gh_app/models/repo_model.dart';
 import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/config.dart';
 import 'package:gh_app/utils/consts.dart';
+import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
 import 'package:gh_app/utils/helpers.dart';
@@ -145,7 +146,12 @@ class _RepoReleaseItem extends StatelessWidget {
   final QLRelease item;
   final QLRepository repo;
 
-  Widget _buildLeftLabel(String? text, {IconData? icon, Widget? trailing}) =>
+  Widget _buildLeftLabel(
+    String? text, {
+    IconData? icon,
+    Widget? trailing,
+    bool expanded = true,
+  }) =>
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 8),
         child: (text?.isNotEmpty ?? false)
@@ -153,7 +159,7 @@ class _RepoReleaseItem extends StatelessWidget {
                 ? IconText(
                     iconSize: 18,
                     icon: icon,
-                    expanded: true,
+                    expanded: expanded,
                     text: Text(text ?? '', overflow: TextOverflow.ellipsis),
                     trailing: trailing)
                 : Text(text ?? '', overflow: TextOverflow.ellipsis)
@@ -175,7 +181,8 @@ class _RepoReleaseItem extends StatelessWidget {
               const SizedBox(height: 15.0),
               if (item.createdAt != null)
                 _buildLeftLabel(
-                    '${item.createdAt!.year}年${item.createdAt!.month}月${item.createdAt!.day}日'),
+                    '${item.createdAt!.year}年${item.createdAt!.month}月${item.createdAt!.day}日',
+                    icon: Remix.time_line),
               //TODO: 这里实际为发布者的头像，但这里懒得弄了
               if (item.author?.name.isNotEmpty ?? false)
                 _buildLeftLabel(item.author?.name, icon: DefaultIcons.github),
@@ -214,7 +221,7 @@ class _RepoReleaseItem extends StatelessWidget {
                   if (item.isLatest)
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5),
-                      child: TagLabel.other('Latest', color: Colors.green),
+                      child: TagLabel.other('最新的', color: Colors.green),
                     ),
                 ],
               ),

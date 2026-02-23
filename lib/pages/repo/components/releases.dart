@@ -14,7 +14,7 @@ class RepoReleases extends StatelessWidget {
           Row(
             children: [
               const Text(
-                'Releases',
+                '发行版',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Padding(
@@ -50,7 +50,7 @@ class RepoReleases extends StatelessWidget {
                       overflow: TextOverflow.ellipsis),
                 ),
                 trailing: TagLabel.other(
-                  "Latest",
+                  "最新的",
                   color: Colors.green,
                 ),
               ),
@@ -63,7 +63,7 @@ class RepoReleases extends StatelessWidget {
           ),
           if (repo.releasesCount > 1)
             LinkButton(
-              text: Text('+ ${repo.releasesCount - 1} releases'),
+              text: Text('+ ${repo.releasesCount - 1} 释出'),
               onPressed: () {
                 // 这里先不管哈
                 ReleasesPage.createNewTab(context, repo);
