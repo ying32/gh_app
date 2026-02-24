@@ -72,23 +72,15 @@ class RepoTreeEntriesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        // 监视文件对象改变
-        RepoModelSelector<QLGitObject?>(
-            selector: (model) => model.object,
-            builder: (_, object) {
-              if (object == null) {
-                return SizedBox(
-                    height: MediaQuery.of(context).size.height / 2,
-                    child: const LoadingRing());
-              }
-              return _buildContent(context, object, context.curRepo.repo);
-            }),
-      ],
-    );
+    return RepoModelSelector<QLGitObject?>(
+        selector: (model) => model.object,
+        builder: (_, object) {
+          if (object == null) {
+            return SizedBox(
+                height: MediaQuery.of(context).size.height / 2,
+                child: const LoadingRing());
+          }
+          return _buildContent(context, object, context.curRepo.repo);
+        });
   }
 }
