@@ -4,13 +4,14 @@ import 'package:gh_app/utils/defines.dart';
 import 'package:gh_app/utils/utils.dart';
 
 import 'graphql.dart';
-import 'graphql_querys.dart';
+import 'graphql_queries.dart';
 
 /// 默认的API
 var gitHubAPI = GitHubGraphQL();
 
 class AuthField {
   const AuthField(this.authType, this.token);
+
   final AuthType authType;
   final String token;
 
@@ -56,6 +57,7 @@ class QLRepositoryWrap {
     this.path,
     this.subPage,
   });
+
   final QLRepository repo;
   final String? ref;
   final String? path;
@@ -68,6 +70,7 @@ class QLRepositoryWrap {
 
 class QLIssueWrap {
   const QLIssueWrap(this.issue, this.repo);
+
   final QLIssue issue;
   final QLRepository repo;
 
@@ -77,6 +80,7 @@ class QLIssueWrap {
 
 class QLPullRequestWrap {
   const QLPullRequestWrap(this.pull, this.repo);
+
   final QLPullRequest pull;
   final QLRepository repo;
 
@@ -86,11 +90,13 @@ class QLPullRequestWrap {
 
 class QLReleaseWrap {
   const QLReleaseWrap(this.repo);
+
   final QLRepository repo;
 }
 
 class QLUserWrap {
   const QLUserWrap(this.user);
+
   final QLUserOrOrganizationCommon user;
 
   QLUserWrap copyWith({QLUserOrOrganizationCommon? user}) =>
@@ -102,6 +108,7 @@ class APIWrap {
   APIWrap._();
 
   static APIWrap? _instance;
+
   static APIWrap get instance => _instance ??= APIWrap._();
 
   ///================================== GRAPHQL API ===============================

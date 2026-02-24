@@ -5,7 +5,7 @@ import 'package:flutter/material.dart' as mat;
 import 'package:gh_app/utils/utils.dart';
 import 'package:http/http.dart' as http;
 
-import 'graphql_querys.dart';
+import 'graphql_queries.dart';
 import 'http_cache.dart';
 
 /// 分页信息，按规则传递。比如：
@@ -58,15 +58,25 @@ class QLList<T> {
 
   /// 内部数据
   List<T> get data => _data;
+
   T operator [](index) => _data[index];
+
   operator []=(index, T value) => data[index] = value;
+
   bool get isEmpty => _data.isEmpty;
+
   bool get isNotEmpty => _data.isNotEmpty;
+
   int get length => _data.length;
+
   T get first => _data.first;
+
   T? get firstOrNull => _data.firstOrNull;
+
   T get last => _data.last;
+
   T? get lastOrNull => _data.lastOrNull;
+
   Iterable<E> map<E>(E Function(T e) toElement) => _data.map(toElement);
 
   //void clear() => _data.clear();
@@ -96,11 +106,11 @@ class QLList<T> {
               fieldName: fieldName);
 
   /// 空数据
-  // const QLList.empty()
-  //     : _data = const [],
-  //       totalCount = 0,
-  //       pageSize = 0,
-  //       pageInfo = null;
+// const QLList.empty()
+//     : _data = const [],
+//       totalCount = 0,
+//       pageSize = 0,
+//       pageInfo = null;
 }
 
 /// 仓库的主语言
@@ -318,6 +328,7 @@ class QLRelease {
         publishedAt = _parseDateTime(input['updatedAt']),
         createdAt = _parseDateTime(input['createdAt']),
         assetsCount = _getTotalCount(input['releaseAssets']);
+
 // assets = input['releaseAssets']?['nodes'] == null
 //     ? null
 //     : List.from(input['releaseAssets']?['nodes'])
@@ -820,6 +831,7 @@ class QLOrganization extends QLUserOrOrganizationCommon {
 
   /// description (String)
   final String description;
+
   // isVerified (Boolean!)
   // organizationBillingEmail (String)
   // teams (TeamConnection!)
@@ -1267,6 +1279,7 @@ class QLSubmodule {
 
   /// `String!`
   final String path;
+
   QLSubmodule.fromJson(Map<String, dynamic> input)
       : branch = input['branch'] ?? '',
         name = input['name'] ?? '',
@@ -1324,10 +1337,12 @@ class QLCommit {
 // blame (Blame!)
   /// changedFiles (Int!)
   final int changedFiles;
+
 // changedFilesIfAvailable (Int)
 // comments (CommitCommentConnection!)
   /// committedDate (DateTime!)
   final DateTime? committedDate;
+
 // committer (GitActor)
 // deletions (Int!)
 // file (TreeEntry)
@@ -1340,6 +1355,7 @@ class QLCommit {
 //
   /// message (String!)
   final String message;
+
 //
 // The Git commit message.
 //
@@ -1353,6 +1369,7 @@ class QLCommit {
 //
   /// messageHeadline (String!)
   final String messageHeadline;
+
 //
 // The Git commit message headline.
 //
@@ -1492,6 +1509,7 @@ class QLTreeEntry {
 
   /// `Submodule`
   final QLSubmodule? submodule;
+
   //
   // If the TreeEntry is for a directory occupied by a submodule project, this returns the corresponding submodule.
 
@@ -1675,6 +1693,7 @@ class QLGitActor {
 /// https://docs.github.com/zh/graphql/reference/objects#topic
 class QLTopic {
   const QLTopic({required this.name});
+
   final String name;
 
   // int stargazerCount

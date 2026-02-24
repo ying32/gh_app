@@ -7,7 +7,7 @@ import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/utils/fonts/remix_icon.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
-import 'package:gh_app/utils/github/graphql_querys.dart';
+import 'package:gh_app/utils/github/graphql_queries.dart';
 import 'package:gh_app/utils/helpers.dart';
 import 'package:gh_app/utils/prism_themes/prism_coldark.dart';
 import 'package:gh_app/widgets/dialogs.dart';
