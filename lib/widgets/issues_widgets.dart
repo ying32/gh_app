@@ -85,6 +85,8 @@ class IssueCommentItem extends StatelessWidget {
   final String? openAuthor;
   final bool isFirst;
 
+  bool get _isIssue => item is QLIssue;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -110,7 +112,7 @@ class IssueCommentItem extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                          '${item?.author?.login} 打开于 ${item?.createdAt?.toLabel}'),
+                          '${item?.author?.login} ${_isIssue ? '打开' : '评论'}于 ${item?.createdAt?.toLabel}'),
                       const Spacer(),
                       if (!isFirst && (item?.author?.login.isNotEmpty ?? false))
                         //TODO: 这里显示还有点问题，不太对，应该还有啥字段要判断
@@ -133,8 +135,13 @@ class IssueCommentItem extends StatelessWidget {
                             verticalMargin: EdgeInsets.zero,
                             horizontalMargin: EdgeInsets.zero)),
                   ),
-                  if (item?.body.isNotEmpty ?? false)
-                    MarkdownBlockPlus(item!.body),
+                  if (item?.body != null)
+                    item!.body.isEmpty
+                        ? Text('未提供描述。',
+                            style: TextStyle(
+                                fontStyle: FontStyle.italic,
+                                color: context.textColor200))
+                        : MarkdownBlockPlus(item!.body),
                 ],
               )),
             ),
@@ -174,8 +181,11 @@ class IssueOrPullRequestListItem extends StatelessWidget {
   final QLIssueOrPullRequest item;
 
   bool get _isIssue => item is QLIssue;
+
   QLIssue get issue => item as QLIssue;
+
   bool get _isPull => item is QLPullRequest;
+
   QLPullRequest get pull => item as QLPullRequest;
 
   String get _openInfo {

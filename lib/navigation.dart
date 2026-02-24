@@ -6,9 +6,7 @@ import 'package:gh_app/models/tabview_model.dart';
 import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/graphql_test.dart';
 import 'package:gh_app/pages/home.dart';
-import 'package:gh_app/pages/issues.dart';
 import 'package:gh_app/pages/login.dart';
-import 'package:gh_app/pages/pulls.dart';
 import 'package:gh_app/pages/repos.dart';
 import 'package:gh_app/pages/search.dart';
 import 'package:gh_app/pages/settings.dart';
@@ -118,19 +116,20 @@ class _LeftNav extends StatelessWidget {
 
   /// 需要登录才能使用的
   final List<_NavItem> _currentUserItems = [
-    _NavItem(
-      key: const ValueKey("${RouterTable.issues}/viewer"),
-      icon: const DefaultIcon.issues(size: 18),
-      title: '问题',
-      body: const IssuesPage(),
-    ),
-    _NavItem(
-      key: const ValueKey("${RouterTable.pulls}/viewer"),
-      icon: const DefaultIcon.pullRequest(size: 18),
-      title: '合并请求',
-      // body: const PullRequestPage(),
-      body: const PullPage(),
-    ),
+    //TODO: 先隐藏，不知道啥时候会去做
+    // _NavItem(
+    //   key: const ValueKey("${RouterTable.issues}/viewer"),
+    //   icon: const DefaultIcon.issues(size: 18),
+    //   title: '问题',
+    //   body: const IssuesPage(),
+    // ),
+    // _NavItem(
+    //   key: const ValueKey("${RouterTable.pulls}/viewer"),
+    //   icon: const DefaultIcon.pullRequest(size: 18),
+    //   title: '合并请求',
+    //   // body: const PullRequestPage(),
+    //   body: const PullPage(),
+    // ),
     _NavItem(
       key: const ValueKey("${RouterTable.repos}/viewer"),
       icon: const DefaultIcon.repository(size: 18),
