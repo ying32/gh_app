@@ -35,6 +35,7 @@ class UserHeadImage extends StatelessWidget {
           color: Colors.black.withOpacity(0.08),
         ),
         child: CachedNetworkImageEx(
+          placeholder: DefaultIcon.github(size: imageSize),
           avatarUrl!,
           fit: BoxFit.cover,
           width: imageSize,
@@ -179,13 +180,23 @@ class UserLineDiskUseInfo extends StatelessWidget {
   }
 }
 
+class ShowUserInfoOptions {
+  const ShowUserInfoOptions({
+    this.showRepos = true,
+  });
+
+  final bool showRepos;
+}
+
 class UserInfoPanel extends StatelessWidget {
   const UserInfoPanel(
     this.user, {
     super.key,
+    this.options = const ShowUserInfoOptions(),
   });
 
   final QLUserOrOrganizationCommon user;
+  final ShowUserInfoOptions options;
 
   QLUser get _user => user as QLUser;
   QLOrganization get _org => user as QLOrganization;
@@ -308,7 +319,7 @@ class UserInfoPanel extends StatelessWidget {
         //UserLineDiskUseInfo(value: user?.diskUsage),
         const SizedBox(height: 8.0),
         const Divider(),
-        if (user.repositoryCount > 0)
+        if (options.showRepos && user.repositoryCount > 0)
           UserLineInfo(
               icon: DefaultIcons.repository,
               value: HyperlinkButton(

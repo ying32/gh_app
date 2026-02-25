@@ -6,9 +6,14 @@ import 'package:gh_app/widgets/default_icons.dart';
 import 'package:gh_app/widgets/user_widgets.dart';
 
 class UserInfoPage extends StatelessWidget {
-  const UserInfoPage(this.user, {super.key});
+  const UserInfoPage(
+    this.user, {
+    super.key,
+    this.options = const ShowUserInfoOptions(),
+  });
 
   final QLUserOrOrganizationCommon? user;
+  final ShowUserInfoOptions options;
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +23,12 @@ class UserInfoPage extends StatelessWidget {
       children: [
         SizedBox(
             width: 240,
-            child:
-                user == null ? const SizedBox.shrink() : UserInfoPanel(user!)),
+            child: user == null
+                ? const SizedBox.shrink()
+                : UserInfoPanel(
+                    user!,
+                    options: options,
+                  )),
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
           child: Divider(

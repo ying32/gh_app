@@ -824,6 +824,7 @@ class CachedNetworkImageEx extends StatelessWidget {
     this.fit,
     this.alignment = Alignment.center,
     this.alt,
+    this.placeholder,
   });
 
   final String imgUrl;
@@ -833,6 +834,7 @@ class CachedNetworkImageEx extends StatelessWidget {
   final Widget? errorWidget;
   final Alignment alignment;
   final String? alt;
+  final Widget? placeholder;
 
   @override
   Widget build(BuildContext context) {
@@ -851,6 +853,7 @@ class CachedNetworkImageEx extends StatelessWidget {
         height: height,
         fit: fit,
         alignment: alignment,
+        placeholder: placeholder != null ? (_, __) => placeholder! : null,
         errorWidget: (context, url, error) {
           return errorWidget ??
               Row(

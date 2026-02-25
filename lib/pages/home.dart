@@ -3,6 +3,7 @@ import 'package:gh_app/models/user_model.dart';
 import 'package:gh_app/pages/user_info.dart';
 import 'package:gh_app/utils/github/github.dart';
 import 'package:gh_app/utils/github/graphql.dart';
+import 'package:gh_app/widgets/user_widgets.dart';
 import 'package:gh_app/widgets/widgets.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -42,7 +43,12 @@ class HomePage extends StatelessWidget {
                 : EasyListViewRefresher(
                     onRefresh: (controller) => _onRefresh(context, controller),
                     listview: ListView(
-                      children: [UserInfoPage(user)],
+                      children: [
+                        UserInfoPage(
+                          user,
+                          options: const ShowUserInfoOptions(showRepos: false),
+                        )
+                      ],
                     ),
                   )),
       ),
