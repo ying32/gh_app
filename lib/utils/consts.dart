@@ -32,7 +32,7 @@ const githubTopicsUrl = '$githubUrl/topics';
 /// 不要修改或者移除这些定义
 const myGithubUrl = '$githubUrl/ying32';
 const appRepoUrl = '$myGithubUrl/gh_app';
-const appVersion = '1.0.1(5)';
+const appVersion = '1.0.2(6)';
 const applicationLegalese = 'Copyright (C) 2026 ying32. All rights reserved.';
 
 /// 一个点
